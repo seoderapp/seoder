@@ -21,14 +21,14 @@ use std::time::Instant;
 /// web json crawler.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // todo: get list with fs
     let performance = Instant::now();
-    let mut website: Website = Website::new("https://llvm.org");
+    let mut website: Website = Website::new("crawl-list.txt");
     website.configuration.respect_robots_txt = false;
     website.configuration.delay = 0;
     website.crawl().await;
-    println!("Time elasped: {:?} across {:?} pages", performance.elapsed(), website.get_links().len());
-    // store output or process amid crawl
+    println!("Time elasped: {:?}", performance.elapsed());
+    // todo: store output or process amid crawl
+    // if we got all the urls and wrote here 50,mill pages would be expensive
 
     Ok(())
 }

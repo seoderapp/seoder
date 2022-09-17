@@ -14,6 +14,9 @@ use tokio;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::task;
 use tokio::time::sleep;
+use tokio::io::{self, BufReader, AsyncBufReadExt, AsyncReadExt};
+use tokio::fs::File;
+use tokio_stream::{self as stream, StreamExt};
 
 /// Represents a website to crawl and gather all links.
 /// ```rust
@@ -37,6 +40,8 @@ pub struct Website {
     pages: Vec<Page>,
     /// Robot.txt parser holder.
     robot_file_parser: Option<RobotFileParser>,
+    /// Path to list of files.
+    path: Option<String>,
 }
 
 type Message = HashSet<String>;
@@ -50,6 +55,7 @@ impl Website {
             links: HashSet::from([format!("{}/", &domain)]),
             pages: Vec::new(),
             robot_file_parser: None,
+            path: Some(domain.to_string())
         }
     }
 
@@ -142,53 +148,93 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: &Client) {
-        // crawl delay between
-        let delay = self.configuration.delay;
-        let delay_enabled = delay > 0;
-        // crawl page walking
-        let subdomains = self.configuration.subdomains;
-        let tld = self.configuration.tld;
+        // let delay = self.configuration.delay;
+        // let delay_enabled = delay > 0;
+        // // crawl page walking
+        // let subdomains = self.configuration.subdomains;
+        // let tld = self.configuration.tld;
 
-        // crawl while links exists
-        while !self.links.is_empty() {
-            let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(100);
+        // let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(100);
 
-            for link in self.links.iter() {
-                if !self.is_allowed(link) {
-                    continue;
+        // file to run for page
+        let mut f = File::open(self.path.as_ref().unwrap()).await.unwrap();
+        let mut reader = BufReader::new(f);
+    
+        let mut lines = reader.lines();
+
+        // stream the files to next line and spawn read efficiently
+        while let Some(line) = lines.next_line().await.unwrap() {
+            let v: Vec<&str> = line.split(',').collect();
+            println!("row: {:?}", v);
+            let mut stream = stream::iter(v);
+    
+            while let Some(link) = stream.next().await {
+                // break on last line instead of filtering list or conditional run
+                if link == "" {
+                    break;
                 }
-                log("fetch", &link);
-                self.links_visited.insert(link.into());
+                println!("gathering json {}", &link);
+                 // self.links_visited.insert(l.into());
 
-                let tx = tx.clone();
-                let client = client.clone();
-                let link = link.clone();
+                // let tx = tx.clone();
+                // let client = client.clone();
 
-                task::spawn(async move {
-                    {
-                        if delay_enabled {
-                            sleep(Duration::from_millis(delay)).await;
-                        }
-                        let page = Page::new(&link, &client).await;
-                        let links = page.links(subdomains, tld);
+                // task::spawn(async move {
+                //     {
+                //         if delay_enabled {
+                //             sleep(Duration::from_millis(delay)).await;
+                //         }
+                //         let page = Page::new(&link, &client).await;
+                //         let links = page.links(subdomains, tld);
 
-                        if let Err(_) = tx.send(links).await {
-                            log("receiver dropped", "");
-                        }
-                    }
-                });
+                //         if let Err(_) = tx.send(links).await {
+                //             log("receiver dropped", "");
+                //         }
+                //     }
+                // });
             }
-
-            drop(tx);
-
-            let mut new_links: HashSet<String> = HashSet::new();
-
-            while let Some(msg) = rx.recv().await {
-                new_links.extend(msg);
-            }
-
-            self.links = &new_links - &self.links_visited;
+        
         }
+
+
+            // while let Some(l) = stream.next().await {
+            //     println!("Got {}", &l);
+            //     let link = l.clone();
+
+            //     if !self.is_allowed(&link.into()) {
+            //         continue;
+            //     }
+            //     log("fetch", &link);
+            //     // self.links_visited.insert(l.into());
+
+            //     // let tx = tx.clone();
+            //     // let client = client.clone();
+
+            //     // task::spawn(async move {
+            //     //     {
+            //     //         if delay_enabled {
+            //     //             sleep(Duration::from_millis(delay)).await;
+            //     //         }
+            //     //         let page = Page::new(&link, &client).await;
+            //     //         let links = page.links(subdomains, tld);
+
+            //     //         if let Err(_) = tx.send(links).await {
+            //     //             log("receiver dropped", "");
+            //     //         }
+            //     //     }
+            //     // });
+            // }
+        
+
+            // drop(tx);
+
+            // let mut new_links: HashSet<String> = HashSet::new();
+
+            // while let Some(msg) = rx.recv().await {
+            //     new_links.extend(msg);
+            // }
+
+            // self.links = &new_links - &self.links_visited;
     }
 
     /// return `true` if URL:
