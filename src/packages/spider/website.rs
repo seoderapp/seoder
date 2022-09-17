@@ -3,6 +3,7 @@ use super::configuration::Configuration;
 use super::page::Page;
 use super::robotparser::RobotFileParser;
 use super::utils::log;
+use super::utils::fetch_page_html;
 
 use hashbrown::HashSet;
 use rayon::prelude::*;
@@ -17,6 +18,7 @@ use tokio::time::sleep;
 use tokio::io::{self, BufReader, AsyncBufReadExt, AsyncReadExt};
 use tokio::fs::File;
 use tokio_stream::{self as stream, StreamExt};
+
 
 /// Represents a website to crawl and gather all links.
 /// ```rust
@@ -44,7 +46,7 @@ pub struct Website {
     path: Option<String>,
 }
 
-type Message = HashSet<String>;
+type Message = (String, String);
 
 impl Website {
     /// Initialize Website object with a start link to crawl.
@@ -148,14 +150,9 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: &Client) {
-        // let delay = self.configuration.delay;
-        // let delay_enabled = delay > 0;
-        // // crawl page walking
-        // let subdomains = self.configuration.subdomains;
-        // let tld = self.configuration.tld;
-
-        // let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(100);
-
+        let delay = self.configuration.delay;
+        let delay_enabled = delay > 0;
+        // crawl page walking
         // file to run for page
         let mut f = File::open(self.path.as_ref().unwrap()).await.unwrap();
         let mut reader = BufReader::new(f);
@@ -164,77 +161,43 @@ impl Website {
 
         // stream the files to next line and spawn read efficiently
         while let Some(line) = lines.next_line().await.unwrap() {
+            let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(25);
+
             let v: Vec<&str> = line.split(',').collect();
-            println!("row: {:?}", v);
             let mut stream = stream::iter(v);
-    
+
             while let Some(link) = stream.next().await {
                 // break on last line instead of filtering list or conditional run
                 if link == "" {
                     break;
                 }
-                println!("gathering json {}", &link);
-                 // self.links_visited.insert(l.into());
 
-                // let tx = tx.clone();
-                // let client = client.clone();
+                log("gathering json {}", &link);
 
-                // task::spawn(async move {
-                //     {
-                //         if delay_enabled {
-                //             sleep(Duration::from_millis(delay)).await;
-                //         }
-                //         let page = Page::new(&link, &client).await;
-                //         let links = page.links(subdomains, tld);
-
-                //         if let Err(_) = tx.send(links).await {
-                //             log("receiver dropped", "");
-                //         }
-                //     }
-                // });
+                let tx = tx.clone();
+                let client = client.clone();
+                let link = link.to_owned();
+                
+                task::spawn(async move {
+                    {
+                        // let json = fetch_page_html(&link, &client).await;                        
+                        if let Err(_) = tx.send((link, "".to_string())).await {
+                            log("receiver dropped", "");
+                        }
+                    }
+                });
             }
-        
+
+            drop(tx);
+
+            // write to standalone json file
+            while let Some(msg) = rx.recv().await {
+                let (link, _) = msg;
+                // store into json file next context
+                log("receiving channel store to disk! {:?}", link);
+            }
+
         }
-
-
-            // while let Some(l) = stream.next().await {
-            //     println!("Got {}", &l);
-            //     let link = l.clone();
-
-            //     if !self.is_allowed(&link.into()) {
-            //         continue;
-            //     }
-            //     log("fetch", &link);
-            //     // self.links_visited.insert(l.into());
-
-            //     // let tx = tx.clone();
-            //     // let client = client.clone();
-
-            //     // task::spawn(async move {
-            //     //     {
-            //     //         if delay_enabled {
-            //     //             sleep(Duration::from_millis(delay)).await;
-            //     //         }
-            //     //         let page = Page::new(&link, &client).await;
-            //     //         let links = page.links(subdomains, tld);
-
-            //     //         if let Err(_) = tx.send(links).await {
-            //     //             log("receiver dropped", "");
-            //     //         }
-            //     //     }
-            //     // });
-            // }
-        
-
-            // drop(tx);
-
-            // let mut new_links: HashSet<String> = HashSet::new();
-
-            // while let Some(msg) = rx.recv().await {
-            //     new_links.extend(msg);
-            // }
-
-            // self.links = &new_links - &self.links_visited;
     }
 
     /// return `true` if URL:
