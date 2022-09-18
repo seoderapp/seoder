@@ -12,7 +12,7 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 use std::time::Duration;
 use tokio;
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::oneshot::{channel, Receiver, Sender};
 use tokio::task;
 use tokio::time::sleep;
 use tokio::io::{self, BufReader, AsyncBufReadExt, AsyncReadExt};
@@ -160,43 +160,31 @@ impl Website {
         let mut lines = reader.lines();
 
         // stream the files to next line and spawn read efficiently
-        while let Some(line) = lines.next_line().await.unwrap() {
-            let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(25);
+        while let Some(link) = lines.next_line().await.unwrap() {
+            let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel();
 
-            let v: Vec<&str> = line.split(',').collect();
-            let mut stream = stream::iter(v);
+            log("gathering json {}", &link);
 
-            while let Some(link) = stream.next().await {
-                // break on last line instead of filtering list or conditional run
-                if link == "" {
-                    break;
-                }
-
-                log("gathering json {}", &link);
-
-                let tx = tx.clone();
-                let client = client.clone();
-                let link = link.to_owned();
-                
-                task::spawn(async move {
-                    {
-                        // let json = fetch_page_html(&link, &client).await;                        
-                        if let Err(_) = tx.send((link, "".to_string())).await {
-                            log("receiver dropped", "");
-                        }
+            let client = client.clone();
+            let link = link.to_owned();
+            
+            task::spawn(async move {
+                {
+                    // let json = fetch_page_html(&link, &client).await;                        
+                    if let Err(_) = tx.send((link, "".to_string())) {
+                        log("receiver dropped", "");
                     }
-                });
+                }
+            });
+
+            match rx.await {
+                Ok(v) => {
+                    let (link, _) = v;
+                    // store into json file next context
+                    log("receiving channel store to disk! {:?}", link);
+                },
+                Err(_) => log("the sender dropped", ""),
             }
-
-            drop(tx);
-
-            // write to standalone json file
-            while let Some(msg) = rx.recv().await {
-                let (link, _) = msg;
-                // store into json file next context
-                log("receiving channel store to disk! {:?}", link);
-            }
-
         }
     }
 
