@@ -10,15 +10,15 @@ use reqwest::Client;
 use serde_json::Value;
 use std::time::Duration;
 use tokio;
-use tokio::fs::{File};
+use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::task;
 
-/// Represents a website to crawl and gather all pages.
+/// Represents a a web crawler for gathering links.
 /// ```rust
 /// use website_crawler::spider::website::Website;
-/// let mut localhost = Website::new("http://example.com");
+/// let mut localhost = Website::new("urls-input.txt");
 /// localhost.crawl();
 /// ```
 #[derive(Debug)]
@@ -56,17 +56,37 @@ impl Website {
     }
 
     /// configure http client
-    fn configure_http_client(&mut self) -> Client {
-        lazy_static! {
-            static ref HEADERS: HeaderMap<HeaderValue> = {
-                let mut headers = HeaderMap::new();
-                headers.insert(CONNECTION, HeaderValue::from_static("keep-alive"));
+    async fn configure_http_client(&mut self) -> Client {
+        let mut headers = HeaderMap::new();
+        headers.insert(CONNECTION, HeaderValue::from_static("keep-alive"));
 
-                headers
-            };
-        }
+        match File::open("headers.txt").await {
+            Ok(file) => {
+                let reader = BufReader::new(file);
+                let mut lines = reader.lines();
+
+                while let Some(header) = lines.next_line().await.unwrap() {
+                    if !header.is_empty() {
+                        let hh = header.split(" ").collect::<Vec<&str>>();
+
+                        if hh.len() == 2 {
+                            let key =
+                                reqwest::header::HeaderName::from_bytes(hh[0].as_bytes()).unwrap();
+                            let val =
+                                reqwest::header::HeaderValue::from_bytes(hh[1].as_bytes()).unwrap();
+
+                            headers.insert(key, val);
+                        }
+                    }
+                }
+            }
+            Err(_) => {
+                log("headers.txt file does not exist {}", "");
+            }
+        };
+
         Client::builder()
-            .default_headers(HEADERS.clone())
+            .default_headers(headers)
             .user_agent(&self.configuration.user_agent)
             .brotli(true)
             .timeout(Duration::new(15, 0))
@@ -76,7 +96,7 @@ impl Website {
 
     /// setup config for crawl
     pub async fn setup(&mut self) -> Client {
-        let client = self.configure_http_client();
+        let client = self.configure_http_client().await;
 
         client
     }

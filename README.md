@@ -19,8 +19,9 @@ This is a fs crawler that handles a list of urls to store contents as json.
 The following auto-generated files are set inside the `.gitignore`.
 
 ```
-domains.txt
 output.jsonl
+domains.txt
+headers.txt
 all-others.txt
 connection_error.txt
 ok-not_valid_json.txt

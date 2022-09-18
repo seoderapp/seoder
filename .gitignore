@@ -1,7 +1,8 @@
 .DS_Store
 target
-domains.txt
 output.jsonl
+domains.txt
+headers.txt
 all-others.txt
 connection_error.txt
 ok-not_valid_json.txt

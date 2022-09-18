@@ -2,9 +2,6 @@
 
 pub mod packages;
 
-#[macro_use]
-extern crate lazy_static;
-
 extern crate jsonl;
 extern crate log;
 extern crate reqwest;
@@ -23,7 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let performance = Instant::now();
     let mut website: Website = Website::new("urls-input.txt");
     website.crawl().await;
-    packages::spider::utils::log("Time elasped: {}", format!("{:?}", performance.elapsed()));
+    println!("Time elasped: {:?}", performance.elapsed()); //always stdoout time
 
     Ok(())
 }

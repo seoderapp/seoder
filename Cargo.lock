@@ -570,7 +570,6 @@ version = "0.1.0"
 dependencies = [
  "env_logger",
  "jsonl",
- "lazy_static",
  "log",
  "percent-encoding",
  "reqwest",
