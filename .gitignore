@@ -1,7 +1,6 @@
 .DS_Store
 target
 output.jsonl
-domains.txt
 headers.txt
 all-others.txt
 connection_error.txt
