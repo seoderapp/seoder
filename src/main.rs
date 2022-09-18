@@ -23,8 +23,7 @@ use std::time::Instant;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
     let performance = Instant::now();
-    let mut website: Website = Website::new("5k.txt");
-    website.configuration.respect_robots_txt = false;
+    let mut website: Website = Website::new("urls-input.txt");
     website.configuration.delay = 0;
     website.crawl().await;
     println!("Time elasped: {:?}", performance.elapsed());

@@ -26,19 +26,7 @@
 
 /// Configuration structure for `Website`.
 pub mod configuration;
-/// A page scraped.
-pub mod page;
-/// Robot parser.
-pub mod robotparser;
 /// Application utils.
 pub mod utils;
 /// A website to crawl.
 pub mod website;
-
-/// Black list checking url exist.
-pub mod black_list {
-    /// check if link exist in blacklists.
-    pub fn contains(blacklist_url: &Vec<String>, link: &String) -> bool {
-        blacklist_url.contains(&link)
-    }
-}
