@@ -1,3 +1,5 @@
 .DS_Store
 target
 domains.txt
+mini.txt
+output.jsonl

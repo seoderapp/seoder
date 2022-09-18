@@ -17,7 +17,7 @@ impl Configuration {
     /// Represents crawl configuration for a website.
     pub fn new() -> Self {
         Self {
-            delay: 250,
+            delay: 0,
             ..Default::default()
         }
     }
