@@ -10,6 +10,14 @@ To run the program make sure to have [Rust](https://doc.rust-lang.org/book/ch01-
 
 If you need to enable logs add the flag `RUST_LOG=info` ex: `RUST_LOG=info cargo run -r`.
 
+## Installation
+
+On Ubuntu the following is required:
+
+1. build-tools
+1. libssl-dev
+1. pkg-config
+
 ## About
 
 This is a fs crawler that handles a list of urls to store contents as json.
