@@ -1,4 +1,3 @@
-
 #![forbid(unsafe_code)]
 
 pub mod packages;
@@ -6,13 +5,13 @@ pub mod packages;
 #[macro_use]
 extern crate lazy_static;
 
-extern crate tokio;
-extern crate ua_generator;
+extern crate jsonl;
 extern crate log;
 extern crate reqwest;
 extern crate scraper;
+extern crate tokio;
+extern crate ua_generator;
 extern crate url;
-extern crate jsonl;
 
 pub use packages::spider::website::Website;
 use std::time::Instant;

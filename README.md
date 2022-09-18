@@ -13,3 +13,16 @@ If you need to enable logs add the flag `RUST_LOG=info` ex: `RUST_LOG=info cargo
 ## About
 
 This is a fs crawler that handles a list of urls to store contents as json.
+
+## FS
+
+The following auto-generated files are set inside the `.gitignore`.
+
+```
+domains.txt
+output.jsonl
+all-others.txt
+connection_error.txt
+ok-not_valid_json.txt
+ok-valid_json.txt
+```

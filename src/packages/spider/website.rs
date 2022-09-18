@@ -1,18 +1,19 @@
 use super::configuration::Configuration;
-use super::utils::log;
 use super::utils::fetch_page_html;
+use super::utils::log;
+use super::JsonOutFileType;
 
+use jsonl::write;
 use reqwest::header::CONNECTION;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
+use serde_json::Value;
 use std::time::Duration;
 use tokio;
+use tokio::fs::{File};
+use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::task;
-use tokio::io::{BufReader, AsyncBufReadExt};
-use tokio::fs::File;
-use jsonl::write;
-use serde_json::Value;
 
 /// Represents a website to crawl and gather all pages.
 /// ```rust
@@ -28,9 +29,17 @@ pub struct Website {
     pub path: Option<String>,
     /// Path to jsonl output.
     pub jsonl_output_path: String,
+    /// Path to ok txt output.
+    pub ok_txt_output_path: String,
+    /// Path to ok txt invalid output.
+    pub okv_txt_output_path: String,
+    /// Path to connection error txt output.
+    pub cr_txt_output_path: String,
+    /// Path to all other outputs.
+    pub al_txt_output_path: String,
 }
 
-type Message = (String, String);
+type Message = (String, (String, JsonOutFileType));
 
 impl Website {
     /// Initialize Website object with a start link to crawl.
@@ -38,7 +47,11 @@ impl Website {
         Self {
             configuration: Configuration::new(),
             path: Some(domain.to_string()),
-            jsonl_output_path: "output.jsonl".to_string()
+            jsonl_output_path: "output.jsonl".to_string(),
+            ok_txt_output_path: "ok-valid_json.txt".to_string(),
+            okv_txt_output_path: "ok-not_valid_json.txt".to_string(),
+            cr_txt_output_path: "connection_error.txt".to_string(),
+            al_txt_output_path: "all-others.txt".to_string(),
         }
     }
 
@@ -68,6 +81,10 @@ impl Website {
         client
     }
 
+    async fn create_file(&self, path: &String) -> File {
+        File::create(&path).await.unwrap()
+    }
+
     /// Start to crawl website with async parallelization
     pub async fn crawl(&mut self) {
         let client = self.setup().await;
@@ -77,9 +94,15 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: &Client) {
-        // file to run for page
+        // file to get crawl list
         let f = File::open(self.path.as_ref().unwrap()).await.unwrap();
+        // json output file
         let mut o = File::create(&self.jsonl_output_path).await.unwrap();
+        // output txt files
+        let mut ok_t = self.create_file(&self.ok_txt_output_path).await;
+        let mut okv_t = self.create_file(&self.okv_txt_output_path).await;
+        let mut ce_t = self.create_file(&self.cr_txt_output_path).await;
+        let mut al_t = self.create_file(&self.al_txt_output_path).await;
 
         let reader = BufReader::new(f);
         let mut lines = reader.lines();
@@ -93,46 +116,53 @@ impl Website {
             let l = link.to_owned();
 
             task::spawn(async move {
-                let json = fetch_page_html(&l, &client).await;  
-                                      
+                let json = fetch_page_html(&l, &client).await;
+
                 if let Err(_) = tx.send((l, json)).await {
                     log("receiver dropped", "");
                 }
             });
         }
-        
+
         drop(tx);
 
         while let Some(i) = rx.recv().await {
-            let (link, json) = i;
-            
+            let (link, jor) = i;
+            let (json, oo) = jor;
+
+            let nl = format!("{}\n", &link);
+
+            if oo == JsonOutFileType::Error {
+                ce_t.write(&nl.as_bytes()).await.unwrap();
+            }
+
+            if oo == JsonOutFileType::Unknown {
+                al_t.write(&nl.as_bytes()).await.unwrap();
+            }
+
             if json == "" {
-                // write connection_error.txt
                 continue;
             }
 
-            // parse json todo: validate start json chars to prevent non json (perf)
             let j: Value = serde_json::from_str(&json).unwrap_or_default();
 
-            // if valid json write to file
             if !j.is_null() {
                 match write(&mut o, &j).await {
                     Ok(_) => {
-                        log("wrote jsonl = {}", link);
-                        // write into ok-valid_json.txt
-                    },
+                        log("wrote jsonl = {}", &link);
+                        ok_t.write(&nl.as_bytes()).await.unwrap();
+                    }
                     _ => {
-                        log("failed to write jsonl = {}", link);
-                        // write all-others.txt
-                    },
+                        log("failed to write jsonl = {}", &link);
+                        okv_t.write(&nl.as_bytes()).await.unwrap();
+                    }
                 }
             } else {
                 log("The file is not valid json = {}", &link);
-                // write ok-not_valid_json.txt 
+                okv_t.write(&nl.as_bytes()).await.unwrap();
             }
         }
     }
-
 }
 
 #[tokio::test]
@@ -141,8 +171,5 @@ async fn crawl() {
     website.crawl().await;
     let f = File::open(website.path.as_ref().unwrap()).await.unwrap();
 
-    assert_eq!(
-        f.metadata().await.unwrap().len() > 1,
-        true
-    );
+    assert_eq!(f.metadata().await.unwrap().len() > 1, true);
 }

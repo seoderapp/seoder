@@ -30,3 +30,16 @@ pub mod configuration;
 pub mod utils;
 /// A website to crawl.
 pub mod website;
+
+/// file output determination
+#[derive(PartialEq)]
+pub enum JsonOutFileType {
+    /// response is ok and valid - ok-valid_json.txt
+    Valid,
+    /// response is ok but not valid - ok-not_valid_json.txt
+    Invalid,
+    /// response connection error and not valid - connection_error.txt
+    Error,
+    /// response returned unknown status code - all-others.txt
+    Unknown,
+}

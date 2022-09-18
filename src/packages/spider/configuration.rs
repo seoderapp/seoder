@@ -8,7 +8,7 @@
 #[derive(Debug, Default)]
 pub struct Configuration {
     /// User-Agent
-    pub user_agent: String
+    pub user_agent: String,
 }
 
 // todo: extra headers
