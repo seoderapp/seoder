@@ -571,6 +571,7 @@ dependencies = [
  "env_logger",
  "jsonl",
  "log",
+ "num_cpus",
  "percent-encoding",
  "reqwest",
  "scraper",

@@ -126,7 +126,7 @@ impl Website {
 
         let reader = BufReader::new(f);
         let mut lines = reader.lines();
-        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(25);
+        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(num_cpus::get() * 2);
 
         // stream the files to next line and spawn read efficiently
         while let Some(link) = lines.next_line().await.unwrap() {
@@ -144,6 +144,7 @@ impl Website {
             });
         }
 
+        tokio::task::yield_now().await;
         drop(tx);
 
         while let Some(i) = rx.recv().await {
@@ -182,8 +183,6 @@ impl Website {
                 okv_t.write(&nl.as_bytes()).await.unwrap();
             }
         }
-
-        tokio::task::yield_now().await;
 
     }
 }
