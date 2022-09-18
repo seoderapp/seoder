@@ -3,6 +3,7 @@ name = "jsoncrawler"
 version = "0.1.0"
 edition = "2021"
 description = "fast json web crawler with storage abilities"
+publish = false
 
 [dependencies]
 tokio = { version = "^1.21.0", features = [ "rt-multi-thread", "net", "macros", "sync", "time", "fs" ] }

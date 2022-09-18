@@ -25,7 +25,7 @@ pub struct Website {
     /// configuration properties for website.
     pub configuration: Configuration,
     /// Path to list of files.
-    path: Option<String>,
+    pub path: Option<String>,
     /// Path to jsonl output.
     pub jsonl_output_path: String,
 }
@@ -139,4 +139,10 @@ impl Website {
 async fn crawl() {
     let mut website: Website = Website::new("urls-input.txt");
     website.crawl().await;
+    let f = File::open(website.path.as_ref().unwrap()).await.unwrap();
+
+    assert_eq!(
+        f.metadata().await.unwrap().len() > 1,
+        true
+    );
 }
