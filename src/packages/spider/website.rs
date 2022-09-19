@@ -209,7 +209,15 @@ impl Website {
 
         let reader = BufReader::new(f);
         let mut lines = reader.lines();
-        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(num_cpus::get() * 2);
+
+        let cpu_count = num_cpus::get();
+        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(if cpu_count >= 4 {
+            cpu_count * 2
+        } else if cpu_count > 8 {
+            cpu_count * 6
+        } else {
+            8
+        });
 
         // stream the files to next line and spawn read efficiently
         while let Some(link) = lines.next_line().await.unwrap() {
@@ -269,7 +277,6 @@ impl Website {
         }
 
         tokio::task::yield_now().await;
-
     }
 }
 
