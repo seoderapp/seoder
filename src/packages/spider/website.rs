@@ -4,7 +4,7 @@ use super::utils::log;
 use super::JsonOutFileType;
 
 use jsonl::write;
-use reqwest::header::HeaderMap;
+use reqwest::header::{HeaderMap};
 use reqwest::Client;
 use serde_json::Value;
 use std::time::Duration;
@@ -152,7 +152,8 @@ impl Website {
                 ua_generator::ua::spoof_ua()
             })
             .brotli(true)
-            .gzip(true);
+            .gzip(true)
+            .connect_timeout(Duration::new(15, 0));
 
         match File::open("proxies.txt").await {
             Ok(file) => {
