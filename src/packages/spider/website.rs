@@ -119,7 +119,7 @@ impl Website {
     /// configure http client
     async fn configure_http_client(&mut self) -> Client {
         let mut headers = HeaderMap::new();
-        headers.insert(CONNECTION, HeaderValue::from_static("keep-alive"));
+        headers.insert(CONNECTION, HeaderValue::from_static("transfer-encoding"));
 
         match File::open("headers.txt").await {
             Ok(file) => {
