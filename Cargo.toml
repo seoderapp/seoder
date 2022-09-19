@@ -7,7 +7,7 @@ publish = false
 
 [dependencies]
 tokio = { version = "^1.21.0", features = [ "rt-multi-thread", "net", "macros", "sync", "time", "fs" ] }
-reqwest = { version = "0.11.11", features = ["brotli", "gzip", "native-tls-alpn"] }
+reqwest = { version = "0.11.11", features = ["brotli", "gzip", "native-tls-vendored"] }
 scraper = "0.13"
 url = "2.2.2"
 log = "0.4.16"
