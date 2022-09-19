@@ -183,11 +183,12 @@ impl Website {
         client
     }
 
+    /// create a new file at path
     async fn create_file(&self, path: &String) -> File {
         File::create(&path).await.unwrap()
     }
 
-    /// Start to crawl website with async parallelization
+    /// Start to crawl website with async conccurency
     pub async fn crawl(&mut self) {
         let client = self.setup().await;
 
