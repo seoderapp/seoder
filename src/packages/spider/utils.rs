@@ -17,14 +17,14 @@ pub async fn fetch_page_html(url: &str, client: &Client) -> (String, JsonOutFile
         Ok(res) if res.status() == StatusCode::OK => match res.text().await {
             Ok(text) => (text, JsonOutFileType::Valid),
             Err(error) => {
-                log("- error fetching {}", &format!("{} - connect_error: {} - status_error: {}", &url, error.is_connect(), error.is_status()));
+                log("- error fetching {}", &format!("{} - code: {} - connect_error: {} - status_error: {}", &url, error.status().unwrap_or_default(), error.is_connect(), error.is_status()));
 
                 (String::new(), JsonOutFileType::Invalid)
             }
         },
         Ok(_) => (String::new(), JsonOutFileType::Unknown),
         Err(error) => {
-            log("- error parsing {}", &format!("{} - timeout_error: {} - request_error: {}", &url, error.is_timeout(), error.is_request()));
+            log("- error parsing {}", &format!("{} - code: {} - timeout_error: {} - request_error: {}", error.status().unwrap_or_default(), &url, error.is_timeout(), error.is_request()));
             (String::new(), JsonOutFileType::Error)
         }
     }
