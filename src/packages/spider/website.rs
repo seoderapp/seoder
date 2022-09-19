@@ -211,7 +211,7 @@ impl Website {
         let mut lines = reader.lines();
 
         let cpu_count = num_cpus::get();
-        let cpu_count = cpu_count * cpu_count;
+        let cpu_count = cpu_count * 2;
         let (tx, mut rx): (Sender<Message>, Receiver<Message>) =
             channel(if cpu_count > 10 { cpu_count } else { 10 });
         drop(cpu_count);
