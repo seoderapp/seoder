@@ -15,8 +15,8 @@ extern crate url;
 extern crate lazy_static;
 
 pub use packages::spider::website::Website;
-use std::time::Instant;
 use std::env;
+use std::time::Instant;
 
 /// web json crawler.
 #[tokio::main]
@@ -28,17 +28,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let performance = Instant::now();
 
     if args.len() > 2 {
-        let mut iter =  args.iter();
+        let mut iter = args.iter();
         iter.next(); // skip the cargo entry
 
         while let Some(input) = iter.next() {
-            let mut website: Website = Website::new(&input);
-    
-            website.crawl().await;
+            let input = input.clone();
+            tokio::join!(async move {
+                let mut website: Website = Website::new(&input);
+
+                website.crawl().await;
+            });
         }
     } else {
         let mut website: Website = Website::new("urls-input.txt");
-    
+
         website.crawl().await;
     }
 
