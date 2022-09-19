@@ -153,6 +153,9 @@ impl Website {
             })
             .brotli(true)
             .gzip(true)
+            .tcp_nodelay(false)
+            .danger_accept_invalid_hostnames(true)
+            .danger_accept_invalid_certs(true)
             .connect_timeout(Duration::new(15, 0));
 
         match File::open("proxies.txt").await {
