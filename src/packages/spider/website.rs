@@ -148,8 +148,13 @@ impl Website {
 
         let mut client = Client::builder()
             .default_headers(headers)
-            .user_agent(&self.configuration.user_agent)
+            .user_agent(if !&self.configuration.user_agent.is_empty() {
+                &self.configuration.user_agent
+            } else {
+                ua_generator::ua::spoof_ua()
+            })
             .brotli(true)
+            .gzip(true)
             .timeout(Duration::new(15, 0));
 
         match File::open("proxies.txt").await {
@@ -203,7 +208,7 @@ impl Website {
 
         let reader = BufReader::new(f);
         let mut lines = reader.lines();
-        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(num_cpus::get() * 2);
+        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(num_cpus::get() * 3);
 
         // stream the files to next line and spawn read efficiently
         while let Some(link) = lines.next_line().await.unwrap() {

@@ -39,6 +39,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "345fd392ab01f746c717b1357165b76f0b67a60192007b234058c9045fdcf695"
 dependencies = [
  "brotli",
+ "flate2",
  "futures-core",
  "memchr",
  "pin-project-lite",
@@ -1545,8 +1546,7 @@ checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
 [[package]]
 name = "ua_generator"
 version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d639d67beae1321d010fb79f40da8bf377a14d8aba5b929a615b0514f26ae3e"
+source = "git+https://github.com/a11ywatch/ua_generator.git#b2c2b975b7a081b092136891eabb8ae9c04b8301"
 dependencies = [
  "fastrand",
  "serde",
