@@ -155,7 +155,7 @@ impl Website {
             })
             .brotli(true)
             .gzip(true)
-            .timeout(Duration::new(30, 0));
+            .timeout(Duration::new(15, 0));
 
         match File::open("proxies.txt").await {
             Ok(file) => {
