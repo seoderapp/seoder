@@ -4,8 +4,7 @@ use super::utils::log;
 use super::JsonOutFileType;
 
 use jsonl::write;
-use reqwest::header::CONNECTION;
-use reqwest::header::{HeaderMap, HeaderValue};
+use reqwest::header::{HeaderMap};
 use reqwest::Client;
 use serde_json::Value;
 use std::time::Duration;
@@ -119,7 +118,6 @@ impl Website {
     /// configure http client
     async fn configure_http_client(&mut self) -> Client {
         let mut headers = HeaderMap::new();
-        headers.insert(CONNECTION, HeaderValue::from_static("transfer-encoding"));
 
         match File::open("headers.txt").await {
             Ok(file) => {
