@@ -214,7 +214,9 @@ impl Website {
         let cpu_count = num_cpus::get();
         let (tx, mut rx): (Sender<Message>, Receiver<Message>) =
             channel(if cpu_count > 10 { cpu_count } else { 10 });
-        drop(cpu_count);
+
+        let mut yield_counter = 0;
+        let yield_point = cpu_count * 2; // yield tasks at this point
 
         // stream the files to next line and spawn read efficiently
         while let Some(link) = lines.next_line().await.unwrap() {
@@ -231,7 +233,12 @@ impl Website {
                 }
             });
 
-            tokio::task::yield_now().await;
+            yield_counter += 1;
+
+            if yield_counter == yield_point {
+                tokio::task::yield_now().await;
+                yield_counter = 0;
+            }
         }
 
         drop(tx);
