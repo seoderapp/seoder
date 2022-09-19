@@ -267,8 +267,6 @@ impl Website {
                 okv_t.write(&nl.as_bytes()).await.unwrap();
             }
         }
-
-        tokio::task::yield_now().await;
     }
 }
 
