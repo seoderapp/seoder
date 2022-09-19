@@ -197,8 +197,9 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: &Client) {
-        // file to get crawl list
+        // file to get crawl list [todo] validate error
         let f = File::open(self.path.as_ref().unwrap()).await.unwrap();
+        
         // json output file
         let mut o = File::create(&self.jsonl_output_path).await.unwrap();
         // output txt files
