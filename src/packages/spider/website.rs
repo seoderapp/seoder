@@ -155,7 +155,7 @@ impl Website {
             })
             .brotli(true)
             .gzip(true)
-            .timeout(Duration::new(15, 0));
+            .timeout(Duration::new(30, 0));
 
         match File::open("proxies.txt").await {
             Ok(file) => {
@@ -198,7 +198,7 @@ impl Website {
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: &Client) {
         // json output file
-        let mut o = File::create(&self.jsonl_output_path).await.unwrap();
+        let mut o = self.create_file(&self.jsonl_output_path).await;
         // output txt files
         let mut ok_t = self.create_file(&self.ok_txt_output_path).await;
         let mut okv_t = self.create_file(&self.okv_txt_output_path).await;
@@ -235,7 +235,6 @@ impl Website {
 
             drop(tx);
         });
-
 
         while let Some(i) = rx.recv().await {
             let (link, jor) = i;
