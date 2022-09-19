@@ -4,12 +4,12 @@ pub mod packages;
 
 extern crate jsonl;
 extern crate log;
+extern crate num_cpus;
 extern crate reqwest;
 extern crate scraper;
 extern crate tokio;
 extern crate ua_generator;
 extern crate url;
-extern crate num_cpus;
 
 pub use packages::spider::website::Website;
 use std::time::Instant;

@@ -85,13 +85,40 @@ impl Website {
             }
         };
 
-        Client::builder()
+        let mut client = Client::builder()
             .default_headers(headers)
             .user_agent(&self.configuration.user_agent)
             .brotli(true)
-            .timeout(Duration::new(15, 0))
+            .timeout(Duration::new(15, 0));
+
+            let mut proxies: Vec<String> = vec![];
+
+            match File::open("proxies.txt").await {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let mut lines = reader.lines();
+    
+                    while let Some(proxy) = lines.next_line().await.unwrap() {
+                        if !proxy.is_empty() {
+                            proxies.push(proxy);
+                        }
+                    }
+                }
+                Err(_) => {
+                    log("proxies.txt file does not exist {}", "");
+                }
+            };
+
+            let mut iter = proxies.iter();
+
+            while let Some(proxy) = iter.next() {
+                client = client.proxy(reqwest::Proxy::http::<&str>(proxy).unwrap());
+            }
+
+            client
             .build()
             .unwrap_or_default()
+
     }
 
     /// setup config for crawl
@@ -183,7 +210,6 @@ impl Website {
                 okv_t.write(&nl.as_bytes()).await.unwrap();
             }
         }
-
     }
 }
 
