@@ -24,7 +24,7 @@ pub async fn fetch_page_html(url: &str, client: &Client) -> (String, JsonOutFile
         },
         Ok(_) => (String::new(), JsonOutFileType::Unknown),
         Err(error) => {
-            log("- error parsing {}", &format!("{} - code: {} - timeout_error: {} - request_error: {}", error.status().unwrap_or_default(), &url, error.is_timeout(), error.is_request()));
+            log("- error parsing {}", &format!("{} - code: {} - timeout_error: {} - request_error: {}", &url, error.status().unwrap_or_default(),error.is_timeout(), error.is_request()));
             (String::new(), JsonOutFileType::Error)
         }
     }
