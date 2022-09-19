@@ -573,7 +573,6 @@ dependencies = [
  "jsonl",
  "lazy_static",
  "log",
- "num_cpus",
  "percent-encoding",
  "reqwest",
  "scraper",
