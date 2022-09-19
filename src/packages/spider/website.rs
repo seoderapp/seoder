@@ -26,7 +26,7 @@ pub struct Website {
     /// configuration properties for website.
     pub configuration: Configuration,
     /// Path to list of files.
-    pub path: Option<String>,
+    pub path: String,
     /// Path to jsonl output.
     pub jsonl_output_path: String,
     /// Path to ok txt output.
@@ -107,7 +107,7 @@ impl Website {
     pub fn new(domain: &str) -> Self {
         Self {
             configuration: Configuration::new(),
-            path: Some(domain.to_string()),
+            path: domain.to_string(),
             jsonl_output_path: "output.jsonl".to_string(),
             ok_txt_output_path: "ok-valid_json.txt".to_string(),
             okv_txt_output_path: "ok-not_valid_json.txt".to_string(),
@@ -197,9 +197,6 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: &Client) {
-        // file to get crawl list [todo] validate error
-        let f = File::open(self.path.as_ref().unwrap()).await.unwrap();
-
         // json output file
         let mut o = File::create(&self.jsonl_output_path).await.unwrap();
         // output txt files
@@ -208,33 +205,43 @@ impl Website {
         let mut ce_t = self.create_file(&self.cr_txt_output_path).await;
         let mut al_t = self.create_file(&self.al_txt_output_path).await;
 
-        let reader = BufReader::new(f);
-        let mut lines = reader.lines();
-
         let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(25);
 
-        // stream the files to next line and spawn read efficiently
-        while let Some(link) = lines.next_line().await.unwrap() {
-            log("gathering json {}", &link);
+        let fpath = self.path.clone();
+        let client = client.clone();
+
+        task::spawn(async move {
+            // file to get crawl list [todo] validate error
+            let f = File::open(&fpath.to_string()).await.unwrap();
+            let reader = BufReader::new(f);
+            let mut lines = reader.lines();
             let tx = tx.clone();
-            let client = client.clone();
-            let l = link.to_owned();
 
-            task::spawn(async move {
-                let json = fetch_page_html(&l, &client).await;
+            // // stream the files to next line and spawn read efficiently
+            while let Some(link) = lines.next_line().await.unwrap() {
+                log("gathering json {}", &link);
+                let tx = tx.clone();
+                let client = client.clone();
+                let l = link.to_owned();
 
-                if let Err(_) = tx.send((l, json)).await {
-                    log("receiver dropped", "");
-                }
-            });
-        }
+                task::spawn(async move {
+                    let json = fetch_page_html(&l, &client).await;
 
-        drop(tx);
+                    if let Err(_) = tx.send((l, json)).await {
+                        log("receiver dropped", "");
+                    }
+                });
+            }
+
+            drop(tx);
+        });
+
 
         while let Some(i) = rx.recv().await {
             let (link, jor) = i;
             let (json, oo) = jor;
 
+            // the new line for the output
             let nl = format!("{}\n", &link);
 
             if oo == JsonOutFileType::Error {
@@ -274,7 +281,7 @@ impl Website {
 async fn crawl() {
     let mut website: Website = Website::new("urls-input.txt");
     website.crawl().await;
-    let f = File::open(website.path.as_ref().unwrap()).await.unwrap();
+    let f = File::open(website.path).await.unwrap();
 
     assert_eq!(f.metadata().await.unwrap().len() > 1, true);
 }
