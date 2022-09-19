@@ -27,12 +27,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // measure time for entire crawl
     let performance = Instant::now();
 
-    if args.len() > 2 {
+    if args.len() >= 2 {
         let mut iter = args.iter();
         iter.next(); // skip the cargo entry
 
         while let Some(input) = iter.next() {
             let input = input.clone();
+
             tokio::join!(async move {
                 let mut website: Website = Website::new(&input);
 
