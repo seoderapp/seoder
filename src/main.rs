@@ -11,6 +11,9 @@ extern crate tokio;
 extern crate ua_generator;
 extern crate url;
 
+#[macro_use]
+extern crate lazy_static;
+
 pub use packages::spider::website::Website;
 use std::time::Instant;
 
@@ -19,7 +22,7 @@ use std::time::Instant;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
     let performance = Instant::now();
-    let mut website: Website = Website::new("domains.txt");
+    let mut website: Website = Website::new("urls-input.txt");
     website.crawl().await;
     println!("Time elasped: {:?}", performance.elapsed()); //always stdoout time
 

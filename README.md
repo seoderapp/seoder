@@ -28,10 +28,25 @@ The following auto-generated files are set inside the `.gitignore`.
 
 ```
 output.jsonl
-domains.txt
 headers.txt
 all-others.txt
 connection_error.txt
 ok-not_valid_json.txt
 ok-valid_json.txt
+```
+
+The config file is also set to be untracked.
+
+```
+config.txt
+```
+
+## Config
+
+Example configuration file to adjust query type
+
+config.txt:
+
+```
+query users
 ```

@@ -41,6 +41,67 @@ pub struct Website {
 
 type Message = (String, (String, JsonOutFileType));
 
+lazy_static! {
+    /// slug path of query
+    pub static ref QUERY_PATH: &'static str = setup_query();
+}
+
+/// configure query base quickly
+fn setup_query() -> &'static str {
+    use std::fs::File;
+    use std::io::prelude::*;
+    use std::io::BufReader;
+
+    let mut query = 1;
+
+    // read through config file cpu bound quickly to avoid atomics and extra memory from clones
+    match File::open("config.txt") {
+        Ok(file) => {
+            let reader = BufReader::new(file);
+            let lines = reader.lines();
+
+            for line in lines {
+                let line = line.unwrap_or_default();
+                if !line.is_empty() {
+                    let hh = line.split(" ").collect::<Vec<&str>>();
+
+                    if hh.len() == 2 {
+                        let cf = hh[0];
+                        let v = hh[1];
+                        // query config
+                        if cf == "query" && !v.is_empty() {
+                            // validate acceptable queries
+                            match v {
+                                "posts" => query = 1,
+                                "pages" => query = 2,
+                                "users" => query = 3,
+                                "comments" => query = 4,
+                                "search" => query = 5,
+                                _ => {
+                                    log("not valid config file {}", "");
+                                }
+                            };
+                        }
+                    }
+                }
+            }
+        }
+        Err(_) => {
+            log("config.txt file does not exist {}", "");
+        }
+    };
+
+    // reverse query dip
+    match query {
+        1 => "posts",
+        2 => "pages",
+        3 => "users",
+        4 => "comments",
+        5 => "search",
+        _ => "posts",
+    }
+}
+
 impl Website {
     /// Initialize Website object with a start link to crawl.
     pub fn new(domain: &str) -> Self {
@@ -91,34 +152,23 @@ impl Website {
             .brotli(true)
             .timeout(Duration::new(15, 0));
 
-            let mut proxies: Vec<String> = vec![];
+        match File::open("proxies.txt").await {
+            Ok(file) => {
+                let reader = BufReader::new(file);
+                let mut lines = reader.lines();
 
-            match File::open("proxies.txt").await {
-                Ok(file) => {
-                    let reader = BufReader::new(file);
-                    let mut lines = reader.lines();
-    
-                    while let Some(proxy) = lines.next_line().await.unwrap() {
-                        if !proxy.is_empty() {
-                            proxies.push(proxy);
-                        }
+                while let Some(proxy) = lines.next_line().await.unwrap() {
+                    if !proxy.is_empty() {
+                        client = client.proxy(reqwest::Proxy::http::<&str>(&proxy).unwrap());
                     }
                 }
-                Err(_) => {
-                    log("proxies.txt file does not exist {}", "");
-                }
-            };
-
-            let mut iter = proxies.iter();
-
-            while let Some(proxy) = iter.next() {
-                client = client.proxy(reqwest::Proxy::http::<&str>(proxy).unwrap());
             }
+            Err(_) => {
+                log("proxies.txt file does not exist {}", "");
+            }
+        };
 
-            client
-            .build()
-            .unwrap_or_default()
-
+        client.build().unwrap_or_default()
     }
 
     /// setup config for crawl
