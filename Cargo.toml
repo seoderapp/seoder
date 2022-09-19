@@ -11,7 +11,7 @@ reqwest = { version = "0.11.11", features = ["brotli", "gzip", "native-tls-alpn"
 scraper = "0.13"
 url = "2.2.2"
 log = "0.4.16"
-ua_generator = { git = "https://github.com/a11ywatch/ua_generator.git", version = "0.3.1" }
+ua_generator = { git = "https://github.com/a11ywatch/ua_generator.git" }
 percent-encoding = "2.1.0"
 env_logger = "0.9.0"
 jsonl = { version = "4.0.1", features = ["tokio"] }
