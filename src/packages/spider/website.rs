@@ -211,13 +211,8 @@ impl Website {
         let mut lines = reader.lines();
 
         let cpu_count = num_cpus::get();
-        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(if cpu_count >= 4 {
-            cpu_count * 2
-        } else if cpu_count > 8 {
-            cpu_count * 6
-        } else {
-            8
-        });
+        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(cpu_count * cpu_count);
+        drop(cpu_count);
 
         // stream the files to next line and spawn read efficiently
         while let Some(link) = lines.next_line().await.unwrap() {
