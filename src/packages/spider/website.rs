@@ -203,7 +203,7 @@ impl Website {
         let mut ce_t = self.create_file(&self.cr_txt_output_path).await;
         let mut al_t = self.create_file(&self.al_txt_output_path).await;
 
-        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(25);
+        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(100);
 
         let fpath = self.path.clone();
         let client = client.clone();
