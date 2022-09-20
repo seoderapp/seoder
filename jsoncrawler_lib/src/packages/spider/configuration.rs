@@ -1,9 +1,9 @@
 /// Structure to configure `Website` crawler
 /// ```rust
-/// use website_crawler::spider::website::Website;
+/// use jsoncrawler_lib::spider::website::Website;
 /// let mut website: Website = Website::new("https://choosealicense.com");
 /// website.configuration.user_agent = "Android";
-/// website.crawl().await;
+/// website.crawl();
 /// ```
 #[derive(Debug, Default)]
 pub struct Configuration {

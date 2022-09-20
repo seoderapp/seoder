@@ -16,7 +16,7 @@ use tokio::task;
 
 /// Represents a a web crawler for gathering links.
 /// ```rust
-/// use website_crawler::spider::website::Website;
+/// use jsoncrawler_lib::spider::website::Website;
 /// let mut localhost = Website::new("urls-input.txt");
 /// localhost.crawl();
 /// ```
