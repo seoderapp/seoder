@@ -1,2 +1,3 @@
 query posts
 timeout 9
+buffer 100
