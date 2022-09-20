@@ -152,9 +152,8 @@ impl Website {
                 ua_generator::ua::spoof_ua()
             })
             .brotli(true)
-            .connection_verbose(true)
             .gzip(true)
-            .timeout(Duration::new(15, 0));
+            .connect_timeout(Duration::new(15, 0));
 
         match File::open("proxies.txt").await {
             Ok(file) => {
