@@ -7,10 +7,7 @@ use reqwest::StatusCode;
 /// Perform a network request to a resource extracting all content as text.
 pub async fn fetch_page_html(url: &str, client: &Client) -> (String, JsonOutFileType) {
     match client
-        .get(format!(
-            "http://{}/wp-json/wp/v2/{}?per_page=100",
-            url, *QUERY_PATH
-        ))
+        .get(string_concat::string_concat!("http://", url, QUERY_PATH))
         .send()
         .await
     {

@@ -92,12 +92,12 @@ fn setup_query() -> &'static str {
 
     // reverse query dip
     match query {
-        1 => "posts",
-        2 => "pages",
-        3 => "users",
-        4 => "comments",
-        5 => "search",
-        _ => "posts",
+        1 => "/wp-json/wp/v2/posts?per_page=100",
+        2 => "/wp-json/wp/v2/pages?per_page=100",
+        3 => "/wp-json/wp/v2/users?per_page=100",
+        4 => "/wp-json/wp/v2/comments?per_page=100",
+        5 => "/wp-json/wp/v2/search?per_page=100",
+        _ => "/wp-json/wp/v2/posts?per_page=100",
     }
 }
 
@@ -207,7 +207,7 @@ impl Website {
         let (tx, mut rx): (Sender<Message>, Receiver<Message>) =
             channel(if cpu_count > 8 { cpu_count } else { 8 });
 
-        let fpath = self.path.clone();
+        let fpath = self.path.to_owned();
         let client = client.clone();
 
         task::spawn(async move {

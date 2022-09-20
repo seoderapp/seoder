@@ -578,6 +578,7 @@ dependencies = [
  "reqwest",
  "scraper",
  "serde_json",
+ "string_concat",
  "tokio",
  "ua_generator",
  "url",
@@ -1369,6 +1370,12 @@ dependencies = [
  "proc-macro2",
  "quote",
 ]
+
+[[package]]
+name = "string_concat"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3c3ee6129eec20fed59acf2e9cfb3ffd20d0bbe39fe334c22af0edc56dfe752"
 
 [[package]]
 name = "syn"
