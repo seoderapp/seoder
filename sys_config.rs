@@ -1,13 +1,9 @@
 use std::process::Command;
 
-extern crate os_info;
-
 #[allow(missing_docs)]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let info = os_info::get();
-
-    // update system to unlimited for crawler [not meant for public libs!]
-    if info.os_type() == os_info::Type::Ubuntu {
+    // update system to unlimited for crawler
+    if cfg!(target_os = "linux") {
         // cpu time unlimited
         Command::new("ulimit")
             .args(["-t", "unlimited"])
@@ -50,11 +46,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .output()
             .expect("failed to execute ulimit unlimited files");
     }
-
-    // let npm = Command::new("npm")
-    //     .args(["-v"])
-    //     .output()
-    //     .unwrap();
 
     Ok(())
 }

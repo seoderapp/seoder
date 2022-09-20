@@ -574,7 +574,6 @@ dependencies = [
  "lazy_static",
  "log",
  "num_cpus",
- "os_info",
  "percent-encoding",
  "reqwest",
  "scraper",
@@ -776,17 +775,6 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
-]
-
-[[package]]
-name = "os_info"
-version = "3.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4750134fb6a5d49afc80777394ad5d95b04bc12068c6abb92fae8f43817270f"
-dependencies = [
- "log",
- "serde",
- "winapi",
 ]
 
 [[package]]

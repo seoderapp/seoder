@@ -23,7 +23,3 @@ string_concat = "0.0.1"
 [profile.release]
 codegen-units = 1
 lto = "fat"
-
-
-[build-dependencies]
-os_info = "3"
