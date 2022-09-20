@@ -18,7 +18,7 @@ use std::env;
 use std::time::Instant;
 
 /// web json crawler.
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread", worker_threads = 10)]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
     // list of file paths to run against
