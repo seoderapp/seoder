@@ -30,6 +30,10 @@ In order to run the app on debian the following deps are required:
 1. curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 1. rustup update
 
+For feature jemalloc:
+
+1. apt-get install cmake make
+
 #### System Reqs Ubuntu/Debian
 
 In order to perform high concurrency on ubuntu we need to increase some limits.
