@@ -8,6 +8,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = File::create("unlimit")?;
     file.write(b"#!/bin/sh\n")?;
     file.write(b"\n")?;
+    // max open files
+    file.write(b"ulimit -n 999999\n")?;
     // cpu time unlimited
     file.write(b"ulimit -t unlimited\n")?;
     // mem unlimited
@@ -18,10 +20,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     file.write(b"ulimit -s unlimited\n")?;
     // virtual mem
     file.write(b"ulimit -v unlimited\n")?;
-    // user process
-    file.write(b"ulimit -u unlimited\n")?;
-    // open files
-    file.write(b"ulimit -n unlimited\n")?;
+    // // user process
+    // file.write(b"ulimit -u unlimited\n")?;
+    // // open files
+    // file.write(b"ulimit -n unlimited\n")?;
 
     Ok(())
 }
