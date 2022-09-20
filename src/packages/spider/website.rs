@@ -236,16 +236,7 @@ impl Website {
             drop(tx);
         });
 
-        // let task yield to the runtime
-        let mut yield_counter = 0;
-
         while let Some(i) = rx.recv().await {
-            yield_counter += 1;
-
-            if yield_counter == cpu_count * 4 {
-                task::yield_now().await;
-            }
-
             let (mut link, jor) = i;
             let (json, oo) = jor;
 

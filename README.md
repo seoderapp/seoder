@@ -12,11 +12,28 @@ If you need to enable logs add the flag `RUST_LOG=info` ex: `RUST_LOG=info cargo
 
 ## Installation
 
+A valid C compiler is required to build the crate.
+
+### Ubunutu
+
 On Ubuntu the following is required:
 
 1. build-tools
 1. libssl-dev
 1. pkg-config
+
+## Building Ubuntu
+
+In order to perform high concurrency on ubuntu we need to increase some limits.
+
+Run the following command to generate a sh script to excute.
+
+```sh
+ rustc sys_config.rs && ./sys_config
+ chmod u+x ./unlimit
+ # unlimit the system without constraints
+ ./unlimit
+```
 
 ## About
 
@@ -49,17 +66,4 @@ config.txt:
 
 ```
 query users
-```
-
-## Building Ubuntu
-
-In order to perform high concurrency on ubuntu we need to increase some limits.
-
-Run the following command to generate a sh script to excute.
-
-```sh
- rustc sys_config.rs && ./sys_config
- chmod u+x ./unlimit
- # unlimit the system without constraints
- ./unlimit
 ```
