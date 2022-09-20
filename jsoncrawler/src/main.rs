@@ -1,5 +1,14 @@
 #![forbid(unsafe_code)]
 
+#[cfg(all(
+    not(windows),
+    not(target_os = "android"),
+    not(target_os = "freebsd"),
+    feature = "jemalloc"
+))]
+#[global_allocator]
+static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
+
 use jsoncrawler_lib::tokio;
 use std::env;
 use std::time::Instant;
