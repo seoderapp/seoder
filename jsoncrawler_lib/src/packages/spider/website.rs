@@ -41,17 +41,18 @@ pub struct Website {
 type Message = (String, (String, JsonOutFileType));
 
 lazy_static! {
-    /// slug path of query
-    pub static ref QUERY_PATH: &'static str = setup_query();
+    /// application global configurations
+    pub static ref CONFIG: (&'static str, Duration) = setup_query();
 }
 
 /// configure query base quickly
-fn setup_query() -> &'static str {
+fn setup_query() -> (&'static str, Duration) {
     use std::fs::File;
     use std::io::prelude::*;
     use std::io::BufReader;
 
     let mut query = 1;
+    let mut timeout: u64 = 15;
 
     // read through config file cpu bound quickly to avoid atomics and extra memory from clones
     match File::open("config.txt") {
@@ -81,6 +82,10 @@ fn setup_query() -> &'static str {
                                 }
                             };
                         }
+
+                        if cf == "timeout" && !v.is_empty() {
+                            timeout = v.parse::<u64>().unwrap_or(15);
+                        }
                     }
                 }
             }
@@ -91,14 +96,16 @@ fn setup_query() -> &'static str {
     };
 
     // reverse query dip
-    match query {
+    let query = match query {
         1 => "/wp-json/wp/v2/posts?per_page=100",
         2 => "/wp-json/wp/v2/pages?per_page=100",
         3 => "/wp-json/wp/v2/users?per_page=100",
         4 => "/wp-json/wp/v2/comments?per_page=100",
         5 => "/wp-json/wp/v2/search?per_page=100",
         _ => "/wp-json/wp/v2/posts?per_page=100",
-    }
+    };
+
+    (query, Duration::new(timeout, 0))
 }
 
 impl Website {
@@ -153,7 +160,7 @@ impl Website {
             })
             .brotli(true)
             .gzip(true)
-            .timeout(Duration::new(15, 0));
+            .timeout(CONFIG.1);
 
         match File::open("proxies.txt").await {
             Ok(file) => {

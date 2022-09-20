@@ -9,7 +9,7 @@ pub fn bench_speed(c: &mut Criterion) {
     let sample_title = format!("jsoncrawler {} samples", sample_count);
 
     group.sample_size(sample_count);
-    
+
     group.bench_function(sample_title, |b| {
         let runtime = Builder::new_multi_thread().enable_all().build().unwrap();
         b.to_async(runtime).iter(|| black_box(crawl(vec![])))

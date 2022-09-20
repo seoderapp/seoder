@@ -44,7 +44,7 @@ ulimit -v unlimited
 
 This is a fs crawler that handles a list of urls to store contents as json.
 
-## FS
+## Program Files
 
 The following auto-generated files are set inside the `.gitignore`.
 
@@ -65,12 +65,25 @@ config.txt
 
 ## Config
 
-Example configuration file to adjust query type
+Example configuration file to adjust query type with.
+The left hand of the text line between the space is the
+config `key` and the right is the `value`.
 
-config.txt:
+`config.txt`
 
 ```
 query users
+timeout 15
+```
+
+## Proxies
+
+You can add proxies to the client by using the following:
+
+`proxies.txt`
+
+```
+someproxy.com
 ```
 
 ## Benches

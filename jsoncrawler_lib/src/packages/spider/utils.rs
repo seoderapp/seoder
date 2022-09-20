@@ -1,4 +1,4 @@
-use super::website::QUERY_PATH;
+use super::website::CONFIG;
 use super::JsonOutFileType;
 use log::{info, log_enabled, Level};
 use reqwest::Client;
@@ -7,7 +7,7 @@ use reqwest::StatusCode;
 /// Perform a network request to a resource extracting all content as text.
 pub async fn fetch_page_html(url: &str, client: &Client) -> (String, JsonOutFileType) {
     match client
-        .get(string_concat::string_concat!("http://", url, QUERY_PATH))
+        .get(string_concat::string_concat!("http://", url, CONFIG.0))
         .send()
         .await
     {
