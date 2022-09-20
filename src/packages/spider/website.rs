@@ -152,6 +152,7 @@ impl Website {
                 ua_generator::ua::spoof_ua()
             })
             .brotli(true)
+            .connection_verbose(true)
             .gzip(true)
             .timeout(Duration::new(15, 0));
 
