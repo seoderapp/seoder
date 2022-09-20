@@ -67,3 +67,7 @@ config.txt:
 ```
 query users
 ```
+
+## Benches
+
+Run benchmarks by using `cargo bench`.

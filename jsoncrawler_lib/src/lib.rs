@@ -1,13 +1,13 @@
 #![forbid(unsafe_code)]
 
-pub mod packages;
+mod packages;
 
 extern crate jsonl;
 extern crate log;
 extern crate num_cpus;
 extern crate reqwest;
 extern crate scraper;
-extern crate tokio;
+pub extern crate tokio;
 extern crate ua_generator;
 extern crate url;
 
@@ -18,18 +18,9 @@ extern crate string_concat;
 extern crate lazy_static;
 
 pub use packages::spider::website::Website;
-use std::env;
-use std::time::Instant;
 
-/// web json crawler.
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    env_logger::init();
+pub async fn crawl(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     // list of file paths to run against
-    let args: Vec<String> = env::args().collect();
-    // measure time for entire crawl
-    let performance = Instant::now();
-
     if args.len() >= 2 {
         let mut iter = args.iter();
         iter.next(); // skip the cargo entry
@@ -48,8 +39,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         website.crawl().await;
     }
-
-    println!("Time elasped: {:?}", performance.elapsed()); //always stdoout time
 
     Ok(())
 }

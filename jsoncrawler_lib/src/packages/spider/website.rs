@@ -212,7 +212,8 @@ impl Website {
 
         task::spawn(async move {
             // file to get crawl list [todo] validate error
-            let f = File::open(&fpath.to_string()).await.unwrap();
+            let f = File::open(&fpath).await.unwrap();
+
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
             let tx = tx.clone();
