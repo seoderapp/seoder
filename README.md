@@ -26,13 +26,18 @@ On Ubuntu the following is required:
 
 In order to perform high concurrency on ubuntu we need to increase some limits.
 
-Run the following command to generate a sh script to excute.
+Run the following command to generate a sh script to excute. If limits are not increased
+the application may fail.
 
 ```sh
- cd jsoncrawler && rustc sys_config.rs && ./sys_config
- chmod u+x ./unlimit
- # unlimit the system without constraints
- ./unlimit
+# [required] increase u limits for crawl mode
+ulimit -n 999999
+# all other options not required but, may be adjusted
+ulimit -t unlimited
+ulimit -m unlimited
+ulimit -f unlimited
+ulimit -s unlimited
+ulimit -v unlimited
 ```
 
 ## About
