@@ -160,6 +160,7 @@ impl Website {
             })
             .brotli(true)
             .gzip(true)
+            .connect_timeout(CONFIG.1 / 2)
             .timeout(CONFIG.1);
 
         match File::open("proxies.txt").await {
