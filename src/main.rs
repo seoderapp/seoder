@@ -4,6 +4,7 @@ pub mod packages;
 
 extern crate jsonl;
 extern crate log;
+extern crate num_cpus;
 extern crate reqwest;
 extern crate scraper;
 extern crate tokio;

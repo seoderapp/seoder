@@ -4,7 +4,7 @@ use super::utils::log;
 use super::JsonOutFileType;
 
 use jsonl::write;
-use reqwest::header::{HeaderMap};
+use reqwest::header::HeaderMap;
 use reqwest::Client;
 use serde_json::Value;
 use std::time::Duration;
@@ -203,7 +203,10 @@ impl Website {
         let mut ce_t = self.create_file(&self.cr_txt_output_path).await;
         let mut al_t = self.create_file(&self.al_txt_output_path).await;
 
-        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(30);
+        let cpu_count = num_cpus::get();
+        let (tx, mut rx): (Sender<Message>, Receiver<Message>) =
+            channel(if cpu_count > 10 { cpu_count * 2 } else { 10 });
+        drop(cpu_count);
 
         let fpath = self.path.clone();
         let client = client.clone();
@@ -243,10 +246,12 @@ impl Website {
 
             if oo == JsonOutFileType::Error {
                 ce_t.write(&nl.as_bytes()).await.unwrap();
+                task::yield_now().await;
             }
 
             if oo == JsonOutFileType::Unknown {
                 al_t.write(&nl.as_bytes()).await.unwrap();
+                task::yield_now().await;
             }
 
             if json == "" {
