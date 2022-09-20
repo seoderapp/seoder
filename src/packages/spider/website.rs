@@ -222,12 +222,11 @@ impl Website {
                 log("gathering json {}", &link);
                 let tx = tx.clone();
                 let client = client.clone();
-                let l = link.to_owned();
 
                 task::spawn(async move {
-                    let json = fetch_page_html(&l, &client).await;
+                    let json = fetch_page_html(&link, &client).await;
 
-                    if let Err(_) = tx.send((l, json)).await {
+                    if let Err(_) = tx.send((link, json)).await {
                         log("receiver dropped", "");
                     }
                 });

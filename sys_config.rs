@@ -3,7 +3,6 @@ use std::io::prelude::*;
 
 #[allow(missing_docs)]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-
     // update system to unlimited for crawler
     let mut file = File::create("unlimit")?;
     file.write(b"#!/bin/sh\n")?;
