@@ -14,7 +14,7 @@ If you need to enable logs add the flag `RUST_LOG=info` ex: `RUST_LOG=info cargo
 
 A valid C compiler is required to build the crate.
 
-### Ubunutu
+### Ubuntu
 
 On Ubuntu the following is required:
 
@@ -22,7 +22,15 @@ On Ubuntu the following is required:
 1. libssl-dev
 1. pkg-config
 
-## Building Ubuntu
+### Debian
+
+In order to run the app on debian the following deps are required:
+
+1. apt-get update && apt-get install -y --no-install-recommends gcc cmake libc6 openssl libssl-dev npm pkg-config g++ ca-certificates
+1. curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+1. rustup update
+
+#### System Reqs Ubuntu/Debian
 
 In order to perform high concurrency on ubuntu we need to increase some limits.
 
