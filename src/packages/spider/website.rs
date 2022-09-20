@@ -205,8 +205,7 @@ impl Website {
 
         let cpu_count = num_cpus::get();
         let (tx, mut rx): (Sender<Message>, Receiver<Message>) =
-            channel(if cpu_count > 10 { cpu_count * 2 } else { 10 });
-        drop(cpu_count);
+            channel(if cpu_count > 8 { cpu_count * 2 } else { 8 });
 
         let fpath = self.path.clone();
         let client = client.clone();
@@ -237,21 +236,27 @@ impl Website {
             drop(tx);
         });
 
+        // let task yield to the runtime
+        let mut yield_counter = 0;
+
         while let Some(i) = rx.recv().await {
-            let (link, jor) = i;
-            let (json, oo) = jor;
+            yield_counter += 1;
 
-            // the new line for the output
-            let nl = format!("{}\n", &link);
-
-            if oo == JsonOutFileType::Error {
-                ce_t.write(&nl.as_bytes()).await.unwrap();
+            if yield_counter == cpu_count * 4 {
                 task::yield_now().await;
             }
 
+            let (mut link, jor) = i;
+            let (json, oo) = jor;
+
+            link.push_str("\n");
+
+            if oo == JsonOutFileType::Error {
+                ce_t.write(&link.as_bytes()).await.unwrap();
+            }
+
             if oo == JsonOutFileType::Unknown {
-                al_t.write(&nl.as_bytes()).await.unwrap();
-                task::yield_now().await;
+                al_t.write(&link.as_bytes()).await.unwrap();
             }
 
             if json == "" {
@@ -264,16 +269,16 @@ impl Website {
                 match write(&mut o, &j).await {
                     Ok(_) => {
                         log("wrote jsonl = {}", &link);
-                        ok_t.write(&nl.as_bytes()).await.unwrap();
+                        ok_t.write(&link.as_bytes()).await.unwrap();
                     }
                     _ => {
                         log("failed to write jsonl = {}", &link);
-                        okv_t.write(&nl.as_bytes()).await.unwrap();
+                        okv_t.write(&link.as_bytes()).await.unwrap();
                     }
                 }
             } else {
                 log("The file is not valid json = {}", &link);
-                okv_t.write(&nl.as_bytes()).await.unwrap();
+                okv_t.write(&link.as_bytes()).await.unwrap();
             }
         }
     }
