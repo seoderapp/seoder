@@ -11,7 +11,7 @@ use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::task;
 
 /// Represents a a web crawler for gathering links.
@@ -203,9 +203,8 @@ impl Website {
         let mut ce_t = self.create_file(&self.cr_txt_output_path).await;
         let mut al_t = self.create_file(&self.al_txt_output_path).await;
 
-        let cpu_count = num_cpus::get();
-        let (tx, mut rx): (Sender<Message>, Receiver<Message>) =
-            channel(if cpu_count > 8 { cpu_count } else { 8 });
+        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
+            unbounded_channel();
 
         let fpath = self.path.to_owned();
         let client = client.clone();
@@ -227,7 +226,7 @@ impl Website {
                 task::spawn(async move {
                     let json = fetch_page_html(&link, &client).await;
 
-                    if let Err(_) = tx.send((link, json)).await {
+                    if let Err(_) = tx.send((link, json)) {
                         log("receiver dropped", "");
                     }
                 });
