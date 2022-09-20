@@ -62,17 +62,10 @@ The following auto-generated files are set inside the `.gitignore`.
 
 ```
 output.jsonl
-headers.txt
 all-others.txt
 connection_error.txt
 ok-not_valid_json.txt
 ok-valid_json.txt
-```
-
-The config file is also set to be untracked.
-
-```
-config.txt
 ```
 
 ## Config
@@ -86,7 +79,12 @@ config `key` and the right is the `value`.
 ```
 query users
 timeout 15
+buffer 100
 ```
+
+1. query - the API path either like `posts` or `users`.
+1. timeout - the max time a req can take.
+1. buffer - the channel buffer limit to control memory crashes.
 
 ## Proxies
 

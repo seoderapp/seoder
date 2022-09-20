@@ -11,7 +11,7 @@ use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::task;
 
 /// Represents a a web crawler for gathering links.
@@ -42,17 +42,18 @@ type Message = (String, (String, JsonOutFileType));
 
 lazy_static! {
     /// application global configurations
-    pub static ref CONFIG: (&'static str, Duration) = setup_query();
+    pub static ref CONFIG: (&'static str, Duration, usize) = setup();
 }
 
-/// configure query base quickly
-fn setup_query() -> (&'static str, Duration) {
+/// configure application program api path, timeout, and channel buffer
+fn setup() -> (&'static str, Duration, usize) {
     use std::fs::File;
     use std::io::prelude::*;
     use std::io::BufReader;
 
     let mut query = 1;
     let mut timeout: u64 = 15;
+    let mut buffer: usize = 100;
 
     // read through config file cpu bound quickly to avoid atomics and extra memory from clones
     match File::open("config.txt") {
@@ -86,6 +87,10 @@ fn setup_query() -> (&'static str, Duration) {
                         if cf == "timeout" && !v.is_empty() {
                             timeout = v.parse::<u64>().unwrap_or(15);
                         }
+
+                        if cf == "buffer" && !v.is_empty() {
+                            buffer = v.parse::<usize>().unwrap_or(100);
+                        }
                     }
                 }
             }
@@ -105,7 +110,7 @@ fn setup_query() -> (&'static str, Duration) {
         _ => "/wp-json/wp/v2/posts?per_page=100",
     };
 
-    (query, Duration::new(timeout, 0))
+    (query, Duration::new(timeout, 0), buffer)
 }
 
 impl Website {
@@ -210,8 +215,7 @@ impl Website {
         let mut ce_t = self.create_file(&self.cr_txt_output_path).await;
         let mut al_t = self.create_file(&self.al_txt_output_path).await;
 
-        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
-            unbounded_channel();
+        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(CONFIG.2);
 
         let fpath = self.path.to_owned();
         let client = client.clone();
@@ -233,7 +237,7 @@ impl Website {
                 task::spawn(async move {
                     let json = fetch_page_html(&link, &client).await;
 
-                    if let Err(_) = tx.send((link, json)) {
+                    if let Err(_) = tx.send((link, json)).await {
                         log("receiver dropped", "");
                     }
                 });
@@ -279,7 +283,6 @@ impl Website {
             }
         }
     }
-
 }
 
 #[tokio::test]
