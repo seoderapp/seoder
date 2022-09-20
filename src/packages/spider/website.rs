@@ -205,7 +205,7 @@ impl Website {
 
         let cpu_count = num_cpus::get();
         let (tx, mut rx): (Sender<Message>, Receiver<Message>) =
-            channel(if cpu_count > 8 { cpu_count * 2 } else { 8 });
+            channel(if cpu_count > 8 { cpu_count } else { 8 });
 
         let fpath = self.path.clone();
         let client = client.clone();
