@@ -205,7 +205,7 @@ impl Website {
 
         let cpu_count = num_cpus::get();
         let (tx, mut rx): (Sender<Message>, Receiver<Message>) =
-            channel(if cpu_count > 8 { cpu_count } else { 8 });
+            channel(if cpu_count > 8 { cpu_count * 2 } else { 8 });
 
         let fpath = self.path.to_owned();
         let client = client.clone();
@@ -236,15 +236,8 @@ impl Website {
             drop(tx);
         });
 
-        // task yield to the runtime counter
-        let mut yield_counter = 0;
-
         while let Some(i) = rx.recv().await {
-            yield_counter += 1;
-
-            if yield_counter == cpu_count {
-                task::yield_now().await;
-            }
+            task::yield_now().await;
 
             let (mut link, jor) = i;
             let (json, oo) = jor;
