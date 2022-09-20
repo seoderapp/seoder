@@ -50,3 +50,15 @@ config.txt:
 ```
 query users
 ```
+
+## Building Ubuntu
+
+In order to perform high concurrency on ubuntu we need to increase some limits.
+
+Run the following command to generate a sh script to excute.
+
+```sh
+ rustc sys_config.rs && ./sys_config
+ # unlimit the system without constraints
+ ./unlimit
+```

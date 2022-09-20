@@ -1,51 +1,27 @@
-use std::process::Command;
+use std::fs::File;
+use std::io::prelude::*;
 
 #[allow(missing_docs)]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+
     // update system to unlimited for crawler
-    if cfg!(target_os = "linux") {
-        // cpu time unlimited
-        Command::new("ulimit")
-            .args(["-t", "unlimited"])
-            .output()
-            .expect("failed to execute ulimit unlimited cpu");
-
-        // mem unlimited
-        Command::new("ulimit")
-            .args(["-m", "unlimited"])
-            .output()
-            .expect("failed to execute ulimit unlimited mem");
-
-        // blocks unlimited
-        Command::new("ulimit")
-            .args(["-f", "unlimited"])
-            .output()
-            .expect("failed to execute ulimit unlimited blocks");
-
-        // stack process
-        Command::new("ulimit")
-            .args(["-s", "unlimited"])
-            .output()
-            .expect("failed to execute ulimit unlimited stacks");
-
-        // virtual mem
-        Command::new("ulimit")
-            .args(["-v", "unlimited"])
-            .output()
-            .expect("failed to execute ulimit unlimited virtual mem");
-
-        // user process
-        Command::new("ulimit")
-            .args(["-u", "unlimited"])
-            .output()
-            .expect("failed to execute ulimit unlimited process");
-
-        // open files
-        Command::new("ulimit")
-            .args(["-n", "unlimited"])
-            .output()
-            .expect("failed to execute ulimit unlimited files");
-    }
+    let mut file = File::create("unlimit")?;
+    file.write(b"#!/bin/sh\n")?;
+    file.write(b"\n")?;
+    // cpu time unlimited
+    file.write(b"ulimit -t unlimited\n")?;
+    // mem unlimited
+    file.write(b"ulimit -m unlimited\n")?;
+    // blocks unlimited
+    file.write(b"ulimit -f unlimited\n")?;
+    // stack process
+    file.write(b"ulimit -s unlimited\n")?;
+    // virtual mem
+    file.write(b"ulimit -v unlimited\n")?;
+    // user process
+    file.write(b"ulimit -u unlimited\n")?;
+    // open files
+    file.write(b"ulimit -n unlimited\n")?;
 
     Ok(())
 }
