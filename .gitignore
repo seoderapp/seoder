@@ -1,9 +1,8 @@
 .DS_Store
 target
 output.jsonl
-headers.txt
+
 all-others.txt
 connection_error.txt
 ok-not_valid_json.txt
 ok-valid_json.txt
-config.txt
