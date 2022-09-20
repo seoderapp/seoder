@@ -237,8 +237,6 @@ impl Website {
         });
 
         while let Some(i) = rx.recv().await {
-            task::yield_now().await;
-
             let (mut link, jor) = i;
             let (json, oo) = jor;
 
