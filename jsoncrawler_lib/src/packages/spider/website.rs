@@ -146,7 +146,7 @@ impl Website {
         let fpath = self.path.to_owned();
 
         // limit task spawn progresssive
-        let spawn_limit = CONFIG.2 * num_cpus::get() / 2;
+        let spawn_limit = CONFIG.2 * num_cpus::get();
 
         task::spawn(async move {
             // file to get crawl list [todo] validate error
