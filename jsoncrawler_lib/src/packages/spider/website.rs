@@ -7,14 +7,14 @@ use jsonl::write;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
 use serde_json::Value;
-use std::sync::{Arc};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::task;
-use tokio::sync::Semaphore;
+
 /// Represents a a web crawler for gathering links.
 /// ```rust
 /// use jsoncrawler_lib::packages::spider::website::Website;
@@ -40,7 +40,7 @@ pub struct Website {
 }
 
 // link, (res, code), spawned
-type Message = (String, (String, JsonOutFileType));
+type Message = (String, (String, JsonOutFileType), bool);
 
 lazy_static! {
     /// application global configurations
@@ -146,7 +146,10 @@ impl Website {
         let fpath = self.path.to_owned();
 
         // limit task spawn progresssive
-        let spawn_limit = CONFIG.2 * num_cpus::get();
+        let spawn_limit = CONFIG.2 * num_cpus::get_physical() * 8;
+
+        let global_thread_count = Arc::new(Mutex::new(0));
+        let cb_clone = global_thread_count.clone();
 
         task::spawn(async move {
             // file to get crawl list [todo] validate error
@@ -156,22 +159,28 @@ impl Website {
 
             let tx = tx.clone();
 
-            let sem = Arc::new(Semaphore::new(spawn_limit));
+            let c_clone = global_thread_count.clone();
 
             while let Some(link) = lines.next_line().await.unwrap() {
-                let tx = tx.clone();
-                let client = client.clone();
+                if *c_clone.lock().unwrap() < spawn_limit {
+                    *c_clone.lock().unwrap() += 1;
 
-                let permit = Arc::clone(&sem).acquire_owned().await;
+                    let tx = tx.clone();
+                    let client = client.clone();
 
-                task::spawn(async move {
+                    task::spawn(async move {
+                        let json = fetch_page_html(&link, &client).await;
+                        if let Err(_) = tx.send((link, json, true)) {
+                            log("receiver dropped", "");
+                        }
+                    });
+                } else {
                     let json = fetch_page_html(&link, &client).await;
-                    if let Err(_) = tx.send((link, json)) {
+
+                    if let Err(_) = tx.send((link, json, false)) {
                         log("receiver dropped", "");
                     }
-
-                    drop(permit);
-                });
+                }
             }
 
             drop(tx);
@@ -186,8 +195,12 @@ impl Website {
         );
 
         while let Some(i) = rx.recv().await {
-            let (link, jor) = i;
+            let (link, jor, spawned) = i;
             let (response, oo) = jor;
+
+            if spawned && *cb_clone.lock().unwrap() > 0 {
+                *cb_clone.lock().unwrap() -= 1;
+            }
 
             let error = response.starts_with("- error ") == true;
             // detailed json message
