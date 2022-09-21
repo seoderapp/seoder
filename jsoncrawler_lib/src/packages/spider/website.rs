@@ -136,6 +136,14 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
+        // output txt files
+        let (mut ok_t, mut okv_t, mut ce_t, mut al_t) = tokio::join!(
+            self.create_file(&self.ok_txt_output_path),
+            self.create_file(&self.okv_txt_output_path),
+            self.create_file(&self.cr_txt_output_path),
+            self.create_file(&self.al_txt_output_path)
+        );
+
         let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
             unbounded_channel();
 
@@ -166,14 +174,6 @@ impl Website {
         });
 
         task::yield_now().await;
-
-        // output txt files
-        let (mut ok_t, mut okv_t, mut ce_t, mut al_t) = tokio::join!(
-            self.create_file(&self.ok_txt_output_path),
-            self.create_file(&self.okv_txt_output_path),
-            self.create_file(&self.cr_txt_output_path),
-            self.create_file(&self.al_txt_output_path)
-        );
 
         while let Some(i) = rx.recv().await {
             let (link, jor) = i;
