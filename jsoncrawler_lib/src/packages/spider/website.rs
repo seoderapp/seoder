@@ -163,8 +163,6 @@ impl Website {
             } else {
                 ua_generator::ua::spoof_ua()
             })
-            .tcp_nodelay(std::env::var("TCP_NODELAY").unwrap_or(String::from("true")) == "true")
-            .pool_idle_timeout(Duration::new(0, 1))
             .timeout(CONFIG.1);
 
         match File::open("proxies.txt").await {
@@ -220,7 +218,7 @@ impl Website {
             let f = File::open(&fpath).await.unwrap();
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
-            
+
             let tx = tx.clone();
 
             // todo: use channel buffer to break loop and set while
