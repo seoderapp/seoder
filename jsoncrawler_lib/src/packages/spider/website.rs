@@ -144,7 +144,8 @@ impl Website {
 
         let fpath = self.path.to_owned();
 
-        let spawn_limit = CONFIG.2 * 5;
+        // limit task spawn progresssive
+        let spawn_limit = CONFIG.2 * num_cpus::get_physical();
 
         let global_thread_count = Arc::new(Mutex::new(0));
         let cb_clone = global_thread_count.clone();
@@ -167,10 +168,14 @@ impl Website {
                     let client = client.clone();
 
                     task::spawn(async move {
-                        let json = fetch_page_html(&link, &client).await;
-                        if let Err(_) = tx.send((link, json, true)).await {
-                            log("receiver dropped", "");
+                        {
+                            let json = fetch_page_html(&link, &client).await;
+                            if let Err(_) = tx.send((link, json, true)).await {
+                                log("receiver dropped", "");
+                            }
                         }
+
+                        task::yield_now().await;
                     });
                 } else {
                     let json = fetch_page_html(&link, &client).await;
