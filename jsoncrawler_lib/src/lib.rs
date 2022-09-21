@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-mod packages;
+pub mod packages;
 
 extern crate jsonl;
 extern crate log;

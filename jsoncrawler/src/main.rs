@@ -1,11 +1,6 @@
 #![forbid(unsafe_code)]
 
-#[cfg(all(
-    not(windows),
-    not(target_os = "android"),
-    not(target_os = "freebsd"),
-    feature = "jemalloc"
-))]
+#[cfg(all(not(windows), not(target_os = "android"), feature = "jemalloc"))]
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 

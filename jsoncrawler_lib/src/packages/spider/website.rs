@@ -4,6 +4,7 @@ use super::utils::log;
 use super::JsonOutFileType;
 
 use jsonl::write;
+use reqwest::header::CONNECTION;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
 use serde_json::Value;
@@ -11,7 +12,7 @@ use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::task;
 
 /// Represents a a web crawler for gathering links.
@@ -130,6 +131,7 @@ impl Website {
     /// configure http client
     async fn configure_http_client(&mut self) -> Client {
         let mut headers = HeaderMap::new();
+        headers.insert(CONNECTION, reqwest::header::HeaderValue::from_static("Transfer-Encoding"));
 
         match File::open("headers.txt").await {
             Ok(file) => {
@@ -209,13 +211,8 @@ impl Website {
     async fn crawl_concurrent(&mut self, client: &Client) {
         // json output file
         let mut o = self.create_file(&self.jsonl_output_path).await;
-        // output txt files
-        let mut ok_t = self.create_file(&self.ok_txt_output_path).await;
-        let mut okv_t = self.create_file(&self.okv_txt_output_path).await;
-        let mut ce_t = self.create_file(&self.cr_txt_output_path).await;
-        let mut al_t = self.create_file(&self.al_txt_output_path).await;
 
-        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(CONFIG.2);
+        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) = unbounded_channel();
 
         let fpath = self.path.to_owned();
         let client = client.clone();
@@ -228,6 +225,7 @@ impl Website {
             let mut lines = reader.lines();
             let tx = tx.clone();
 
+            // todo: use channel buffer to break loop and set while
             // // stream the files to next line and spawn read efficiently
             while let Some(link) = lines.next_line().await.unwrap() {
                 log("gathering json {}", &link);
@@ -237,7 +235,7 @@ impl Website {
                 task::spawn(async move {
                     let json = fetch_page_html(&link, &client).await;
 
-                    if let Err(_) = tx.send((link, json)).await {
+                    if let Err(_) = tx.send((link, json)) {
                         log("receiver dropped", "");
                     }
                 });
@@ -246,11 +244,19 @@ impl Website {
             drop(tx);
         });
 
+        // output txt files
+        let (mut ok_t, mut okv_t, mut ce_t, mut al_t) = tokio::join!(
+            self.create_file(&self.ok_txt_output_path),
+            self.create_file(&self.okv_txt_output_path),
+            self.create_file(&self.cr_txt_output_path),
+            self.create_file(&self.al_txt_output_path)
+        );
+
         while let Some(i) = rx.recv().await {
-            let (mut link, jor) = i;
+            let (link, jor) = i;
             let (json, oo) = jor;
 
-            link.push_str("\n");
+            let link = string_concat!(link, "\n");
 
             if oo == JsonOutFileType::Error {
                 ce_t.write(&link.as_bytes()).await.unwrap();
