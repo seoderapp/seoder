@@ -11,7 +11,7 @@ use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::task;
 
 /// Represents a a web crawler for gathering links.
@@ -135,8 +135,7 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
-        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
-            unbounded_channel();
+        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(CONFIG.2);
 
         // json output file
         let mut o = self.create_file(&self.jsonl_output_path).await;
@@ -151,8 +150,6 @@ impl Website {
 
             let tx = tx.clone();
 
-            // todo: use channel buffer to break loop and set while
-            // // stream the files to next line and spawn read efficiently
             while let Some(link) = lines.next_line().await.unwrap() {
                 log("gathering json {}", &link);
                 let tx = tx.clone();
@@ -162,7 +159,7 @@ impl Website {
                     {
                         let json = fetch_page_html(&link, &client).await;
 
-                        if let Err(_) = tx.send((link, json)) {
+                        if let Err(_) = tx.send((link, json)).await {
                             log("receiver dropped", "");
                         }
                     }
