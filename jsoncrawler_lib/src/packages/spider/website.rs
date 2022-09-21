@@ -146,7 +146,7 @@ impl Website {
         let fpath = self.path.to_owned();
 
         // limit task spawn progresssive
-        let sem = Arc::new(tokio::sync::Semaphore::new(CONFIG.2 * num_cpus::get() * 3));
+        let sem = Arc::new(tokio::sync::Semaphore::new(CONFIG.2 * num_cpus::get()));
 
         task::spawn(async move {
             // file to get crawl list [todo] validate error
