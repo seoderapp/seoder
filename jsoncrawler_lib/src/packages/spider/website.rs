@@ -12,7 +12,7 @@ use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::task;
 
 /// Represents a a web crawler for gathering links.
@@ -137,7 +137,8 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
-        let (tx, mut rx): (Sender<Message>, Receiver<Message>) = channel(CONFIG.2);
+        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
+            unbounded_channel();
 
         // json output file
         let mut o = self.create_file(&self.jsonl_output_path).await;
@@ -168,19 +169,15 @@ impl Website {
                     let client = client.clone();
 
                     task::spawn(async move {
-                        {
-                            let json = fetch_page_html(&link, &client).await;
-                            if let Err(_) = tx.send((link, json, true)).await {
-                                log("receiver dropped", "");
-                            }
+                        let json = fetch_page_html(&link, &client).await;
+                        if let Err(_) = tx.send((link, json, true)) {
+                            log("receiver dropped", "");
                         }
-
-                        task::yield_now().await;
                     });
                 } else {
                     let json = fetch_page_html(&link, &client).await;
 
-                    if let Err(_) = tx.send((link, json, false)).await {
+                    if let Err(_) = tx.send((link, json, false)) {
                         log("receiver dropped", "");
                     }
                 }

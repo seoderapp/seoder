@@ -2,14 +2,14 @@
 
 pub mod packages;
 
-pub extern crate tokio;
 extern crate jsonl;
 extern crate log;
+extern crate num_cpus;
 extern crate reqwest;
 extern crate scraper;
+pub extern crate tokio;
 extern crate ua_generator;
 extern crate url;
-extern crate num_cpus;
 
 #[macro_use]
 extern crate string_concat;
