@@ -131,10 +131,6 @@ impl Website {
     /// configure http client
     async fn configure_http_client(&mut self) -> Client {
         let mut headers = HeaderMap::new();
-        headers.insert(
-            CONNECTION,
-            reqwest::header::HeaderValue::from_static("Upgrade"),
-        );
 
         match File::open("headers.txt").await {
             Ok(file) => {
