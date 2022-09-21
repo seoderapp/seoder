@@ -25,13 +25,9 @@ pub async fn crawl(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> 
         iter.next(); // skip the cargo entry
 
         while let Some(input) = iter.next() {
-            let input = input.clone();
+            let mut website: Website = Website::new(&input);
 
-            tokio::join!(async move {
-                let mut website: Website = Website::new(&input);
-
-                website.crawl().await;
-            });
+            website.crawl().await;
         }
     } else {
         let mut website: Website = Website::new("urls-input.txt");
