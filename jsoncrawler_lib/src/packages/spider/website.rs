@@ -7,6 +7,7 @@ use jsonl::write;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
 use serde_json::Value;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio;
 use tokio::fs::File;
@@ -38,12 +39,17 @@ pub struct Website {
     pub al_txt_output_path: String,
 }
 
-// link, (res, code)
-type Message = (String, (String, JsonOutFileType));
+// link, (res, code), spawned
+type Message = (String, (String, JsonOutFileType), bool);
 
 lazy_static! {
     /// application global configurations
     pub static ref CONFIG: (&'static str, Duration, usize) = setup();
+}
+
+/// create a new file at path
+async fn create_file(path: &String) -> File {
+    File::create(&path).await.unwrap()
 }
 
 impl Website {
@@ -122,11 +128,6 @@ impl Website {
         self.configure_http_client().await
     }
 
-    /// create a new file at path
-    async fn create_file(&self, path: &String) -> File {
-        File::create(&path).await.unwrap()
-    }
-
     /// Start to crawl website with async conccurency
     pub async fn crawl(&mut self) {
         let client = self.setup().await;
@@ -136,21 +137,17 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
-        // output txt files
-        let (mut ok_t, mut okv_t, mut ce_t, mut al_t) = tokio::join!(
-            self.create_file(&self.ok_txt_output_path),
-            self.create_file(&self.okv_txt_output_path),
-            self.create_file(&self.cr_txt_output_path),
-            self.create_file(&self.al_txt_output_path)
-        );
-
         let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
             unbounded_channel();
 
-        // json output file
-        let mut o = self.create_file(&self.jsonl_output_path).await;
-
         let fpath = self.path.to_owned();
+
+        // limit task spawn progresssive
+        let spawn_limit = CONFIG.2 * num_cpus::get();
+
+        let global_thread_count = Arc::new(Mutex::new(0));
+
+        let c_clone = global_thread_count.clone();
 
         task::spawn(async move {
             // file to get crawl list [todo] validate error
@@ -158,26 +155,49 @@ impl Website {
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
 
-            while let Some(link) = lines.next_line().await.unwrap() {
-                let tx = tx.clone();
-                let client = client.clone();
+            let tx = tx.clone();
 
-                task::spawn(async move {
+            while let Some(link) = lines.next_line().await.unwrap() {
+                if *c_clone.lock().unwrap() < spawn_limit {
+                    *c_clone.lock().unwrap() += 1;
+
+                    let tx = tx.clone();
+                    let client = client.clone();
+
+                    task::spawn(async move {
+                        let json = fetch_page_html(&link, &client).await;
+                        if let Err(_) = tx.send((link, json, true)) {
+                            log("receiver dropped", "");
+                        }
+                    });
+                } else {
                     let json = fetch_page_html(&link, &client).await;
-                    if let Err(_) = tx.send((link, json)) {
+
+                    if let Err(_) = tx.send((link, json, false)) {
                         log("receiver dropped", "");
                     }
-                });
+                }
             }
 
             drop(tx);
         });
 
-        task::yield_now().await;
+        // output txt files
+        let (mut o, mut ok_t, mut okv_t, mut ce_t, mut al_t) = tokio::join!(
+            create_file(&self.jsonl_output_path),
+            create_file(&self.ok_txt_output_path),
+            create_file(&self.okv_txt_output_path),
+            create_file(&self.cr_txt_output_path),
+            create_file(&self.al_txt_output_path)
+        );
 
         while let Some(i) = rx.recv().await {
-            let (link, jor) = i;
+            let (link, jor, spawned) = i;
             let (response, oo) = jor;
+
+            if spawned && *global_thread_count.lock().unwrap() > 0 {
+                *global_thread_count.lock().unwrap() -= 1;
+            }
 
             let error = response.starts_with("- error ") == true;
             // detailed json message

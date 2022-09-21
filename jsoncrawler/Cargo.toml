@@ -13,9 +13,5 @@ jsoncrawler_lib = { path = "../jsoncrawler_lib" }
 jemallocator = { version = "0.5.0", optional = true }
 jemalloc-sys = { version = "0.5.0", optional = true }
 
-[profile.release]
-codegen-units = 1
-lto = "fat"
-
 [features]
 jemalloc = ["jemallocator", "jemalloc-sys"]
