@@ -146,7 +146,7 @@ impl Website {
         let fpath = self.path.to_owned();
 
         // limit task spawn progresssive
-        let spawn_limit = CONFIG.2 * num_cpus::get_physical() * 10;
+        let spawn_limit = CONFIG.2 * num_cpus::get_physical() * 8;
 
         let global_thread_count = Arc::new(Mutex::new(0));
         let cb_clone = global_thread_count.clone();
