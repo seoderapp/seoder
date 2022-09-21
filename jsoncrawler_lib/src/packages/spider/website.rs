@@ -1,4 +1,4 @@
-use super::configuration::Configuration;
+use super::configuration::{setup, Configuration};
 use super::utils::fetch_page_html;
 use super::utils::log;
 use super::JsonOutFileType;
@@ -43,74 +43,6 @@ type Message = (String, (String, JsonOutFileType));
 lazy_static! {
     /// application global configurations
     pub static ref CONFIG: (&'static str, Duration, usize) = setup();
-}
-
-/// configure application program api path, timeout, and channel buffer
-fn setup() -> (&'static str, Duration, usize) {
-    use std::fs::File;
-    use std::io::prelude::*;
-    use std::io::BufReader;
-
-    let mut query = 1;
-    let mut timeout: u64 = 15;
-    let mut buffer: usize = 100;
-
-    // read through config file cpu bound quickly to avoid atomics and extra memory from clones
-    match File::open("config.txt") {
-        Ok(file) => {
-            let reader = BufReader::new(file);
-            let lines = reader.lines();
-
-            for line in lines {
-                let line = line.unwrap_or_default();
-                if !line.is_empty() {
-                    let hh = line.split(" ").collect::<Vec<&str>>();
-
-                    if hh.len() == 2 {
-                        let cf = hh[0];
-                        let v = hh[1];
-                        // query config
-                        if cf == "query" && !v.is_empty() {
-                            // validate acceptable queries
-                            match v {
-                                "posts" => query = 1,
-                                "pages" => query = 2,
-                                "users" => query = 3,
-                                "comments" => query = 4,
-                                "search" => query = 5,
-                                _ => {
-                                    log("not valid config file {}", "");
-                                }
-                            };
-                        }
-
-                        if cf == "timeout" && !v.is_empty() {
-                            timeout = v.parse::<u64>().unwrap_or(15);
-                        }
-
-                        if cf == "buffer" && !v.is_empty() {
-                            buffer = v.parse::<usize>().unwrap_or(100);
-                        }
-                    }
-                }
-            }
-        }
-        Err(_) => {
-            log("config.txt file does not exist {}", "");
-        }
-    };
-
-    // reverse query dip
-    let query = match query {
-        1 => "/wp-json/wp/v2/posts?per_page=100",
-        2 => "/wp-json/wp/v2/pages?per_page=100",
-        3 => "/wp-json/wp/v2/users?per_page=100",
-        4 => "/wp-json/wp/v2/comments?per_page=100",
-        5 => "/wp-json/wp/v2/search?per_page=100",
-        _ => "/wp-json/wp/v2/posts?per_page=100",
-    };
-
-    (query, Duration::new(timeout, 0), buffer)
 }
 
 impl Website {
@@ -186,9 +118,7 @@ impl Website {
 
     /// setup config for crawl
     pub async fn setup(&mut self) -> Client {
-        let client = self.configure_http_client().await;
-
-        client
+        self.configure_http_client().await
     }
 
     /// create a new file at path
@@ -250,9 +180,15 @@ impl Website {
 
         while let Some(i) = rx.recv().await {
             let (link, jor) = i;
-            let (json, oo) = jor;
+            let (response, oo) = jor;
 
-            let link = string_concat!(link, "\n");
+            let error = response.starts_with("- error ") == true;
+            // detailed json message
+            let link = if error {
+                string_concat!(response.replacen("- error ", "", 1), "\n")
+            } else {
+                string_concat!(link, "\n")
+            };
 
             if oo == JsonOutFileType::Error {
                 ce_t.write(&link.as_bytes()).await.unwrap();
@@ -262,11 +198,11 @@ impl Website {
                 al_t.write(&link.as_bytes()).await.unwrap();
             }
 
-            if json == "" {
+            if response == "" || error {
                 continue;
             }
 
-            let j: Value = serde_json::from_str(&json).unwrap_or_default();
+            let j: Value = serde_json::from_str(&response).unwrap_or_default();
 
             if !j.is_null() {
                 match write(&mut o, &j).await {

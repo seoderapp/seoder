@@ -1817,6 +1817,7 @@ dependencies = [
  "mio",
  "num_cpus",
  "once_cell",
+ "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
  "socket2",
@@ -1894,7 +1895,7 @@ checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
 [[package]]
 name = "ua_generator"
 version = "0.3.2"
-source = "git+https://github.com/a11ywatch/ua_generator.git#4a6f4cbf260420f22cd53b266e3535b7ab22db96"
+source = "git+https://github.com/a11ywatch/ua_generator.git#59b40ba918fe0bc1cd3d218a88051e1a9d1cbd20"
 dependencies = [
  "fastrand",
  "serde",
