@@ -163,7 +163,7 @@ impl Website {
             } else {
                 ua_generator::ua::spoof_ua()
             })
-            .tcp_nodelay(std::env::var("TCP_NODELAY").unwrap_or(String::from("false")) == "false")
+            .tcp_nodelay(std::env::var("TCP_NODELAY").unwrap_or(String::from("true")) == "true")
             .pool_idle_timeout(Duration::new(0, 1))
             .timeout(CONFIG.1);
 
