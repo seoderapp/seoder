@@ -162,11 +162,11 @@ impl Website {
 
             while let Some(link) = lines.next_line().await.unwrap() {
                 let client = client.clone();
-                let permit = Arc::clone(&sem).acquire_owned().await;
+                let permit = Arc::clone(&sem);
                 let tx = tx.clone();
 
                 task::spawn(async move {
-                    let _permit = permit;
+                    let _permit = permit.acquire_owned().await;
                     let json = fetch_page_html(&link, &client).await;
                     if let Err(_) = tx.send((link, json)) {
                         log("receiver dropped", "");
