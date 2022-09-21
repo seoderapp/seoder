@@ -145,7 +145,7 @@ impl Website {
         let fpath = self.path.to_owned();
 
         // limit task spawn progresssive
-        let spawn_limit = CONFIG.2 * num_cpus::get() * 4;
+        let spawn_limit = CONFIG.2 * num_cpus::get() * 2;
 
         let mut multi_thread: bool = true;
 
