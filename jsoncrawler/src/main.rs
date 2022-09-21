@@ -16,8 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
-        .global_queue_interval(31)
-        .event_interval(31)
+        .worker_threads(4)
         .build()
         .unwrap();
 
