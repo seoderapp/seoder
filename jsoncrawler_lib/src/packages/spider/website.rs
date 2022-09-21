@@ -38,8 +38,8 @@ pub struct Website {
     pub al_txt_output_path: String,
 }
 
-// link, (res, code), spawned
-type Message = (String, (String, JsonOutFileType), bool);
+// link, (res, code)
+type Message = (String, (String, JsonOutFileType));
 
 lazy_static! {
     /// application global configurations
@@ -144,45 +144,22 @@ impl Website {
 
         let fpath = self.path.to_owned();
 
-        // limit task spawn progresssive
-        let spawn_limit = CONFIG.2 * num_cpus::get() * 2;
-
-        let mut multi_thread: bool = true;
-
         task::spawn(async move {
             // file to get crawl list [todo] validate error
             let f = File::open(&fpath).await.unwrap();
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
 
-            let tx = tx.clone();
-
-            let mut c_clone = 0;
-
             while let Some(link) = lines.next_line().await.unwrap() {
-                if c_clone < spawn_limit && multi_thread {
-                    c_clone += 1;
+                let tx = tx.clone();
+                let client = client.clone();
 
-                    let tx = tx.clone();
-                    let client = client.clone();
-
-                    task::spawn(async move {
-                        let json = fetch_page_html(&link, &client).await;
-                        if let Err(_) = tx.send((link, json, true)) {
-                            log("receiver dropped", "");
-                        }
-                    });
-                } else {
+                task::spawn(async move {
                     let json = fetch_page_html(&link, &client).await;
-
-                    if let Err(_) = tx.send((link, json, false)) {
+                    if let Err(_) = tx.send((link, json)) {
                         log("receiver dropped", "");
                     }
-
-                    if c_clone != 0 {
-                        c_clone = 0;
-                    }
-                }
+                });
             }
 
             drop(tx);
@@ -196,32 +173,9 @@ impl Website {
             self.create_file(&self.al_txt_output_path)
         );
 
-        let mut c_clone = 0;
-
         while let Some(i) = rx.recv().await {
-            let (link, jor, spawned) = i;
+            let (link, jor) = i;
             let (response, oo) = jor;
-
-            if spawned {
-                if c_clone < spawn_limit {
-                    if !multi_thread {
-                        multi_thread = true;
-                    }
-                    c_clone += 1;
-                } else {
-                    if multi_thread {
-                        multi_thread = false;
-                    }
-                    c_clone -= 1;
-                }
-            } else {
-                if c_clone < spawn_limit {
-                    if !multi_thread {
-                        multi_thread = true;
-                    }
-                }
-                c_clone -= 1;
-            }
 
             let error = response.starts_with("- error ") == true;
             // detailed json message
