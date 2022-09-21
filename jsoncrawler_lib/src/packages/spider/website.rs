@@ -159,11 +159,15 @@ impl Website {
                 let client = client.clone();
 
                 task::spawn(async move {
-                    let json = fetch_page_html(&link, &client).await;
+                    {
+                        let json = fetch_page_html(&link, &client).await;
 
-                    if let Err(_) = tx.send((link, json)) {
-                        log("receiver dropped", "");
+                        if let Err(_) = tx.send((link, json)) {
+                            log("receiver dropped", "");
+                        }
                     }
+
+                    task::yield_now().await;
                 });
             }
 
