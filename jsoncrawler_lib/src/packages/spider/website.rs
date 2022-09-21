@@ -7,7 +7,6 @@ use jsonl::write;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
 use serde_json::Value;
-use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio;
 use tokio::fs::File;
@@ -146,10 +145,9 @@ impl Website {
         let fpath = self.path.to_owned();
 
         // limit task spawn progresssive
-        let spawn_limit = CONFIG.2 * num_cpus::get_physical() * 8;
+        let spawn_limit = CONFIG.2 * num_cpus::get() * 4;
 
-        let global_thread_count = Arc::new(Mutex::new(0));
-        let cb_clone = global_thread_count.clone();
+        let mut multi_thread: bool = true;
 
         task::spawn(async move {
             // file to get crawl list [todo] validate error
@@ -159,11 +157,11 @@ impl Website {
 
             let tx = tx.clone();
 
-            let c_clone = global_thread_count.clone();
+            let mut c_clone = 0;
 
             while let Some(link) = lines.next_line().await.unwrap() {
-                if *c_clone.lock().unwrap() < spawn_limit {
-                    *c_clone.lock().unwrap() += 1;
+                if c_clone < spawn_limit && multi_thread {
+                    c_clone += 1;
 
                     let tx = tx.clone();
                     let client = client.clone();
@@ -180,6 +178,10 @@ impl Website {
                     if let Err(_) = tx.send((link, json, false)) {
                         log("receiver dropped", "");
                     }
+
+                    if c_clone != 0 {
+                        c_clone = 0;
+                    }
                 }
             }
 
@@ -194,12 +196,31 @@ impl Website {
             self.create_file(&self.al_txt_output_path)
         );
 
+        let mut c_clone = 0;
+
         while let Some(i) = rx.recv().await {
             let (link, jor, spawned) = i;
             let (response, oo) = jor;
 
-            if spawned && *cb_clone.lock().unwrap() > 0 {
-                *cb_clone.lock().unwrap() -= 1;
+            if spawned {
+                if c_clone < spawn_limit {
+                    if !multi_thread {
+                        multi_thread = true;
+                    }
+                    c_clone += 1;
+                } else {
+                    if multi_thread {
+                        multi_thread = false;
+                    }
+                    c_clone -= 1;
+                }
+            } else {
+                if c_clone < spawn_limit {
+                    if !multi_thread {
+                        multi_thread = true;
+                    }
+                }
+                c_clone -= 1;
             }
 
             let error = response.starts_with("- error ") == true;
