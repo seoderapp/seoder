@@ -2,7 +2,7 @@
 /// ```rust
 /// use jsoncrawler_lib::packages::spider::website::Website;
 /// let mut website: Website = Website::new("https://choosealicense.com");
-/// website.configuration.user_agent = "Android";
+/// website.configuration.user_agent = "Android".to_string();
 /// website.crawl();
 /// ```
 #[derive(Debug, Default)]

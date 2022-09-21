@@ -4,8 +4,8 @@ use super::utils::log;
 use super::JsonOutFileType;
 
 use jsonl::write;
-use reqwest::header::CONNECTION;
 use reqwest::header::HeaderMap;
+use reqwest::header::CONNECTION;
 use reqwest::Client;
 use serde_json::Value;
 use std::time::Duration;
@@ -131,7 +131,10 @@ impl Website {
     /// configure http client
     async fn configure_http_client(&mut self) -> Client {
         let mut headers = HeaderMap::new();
-        headers.insert(CONNECTION, reqwest::header::HeaderValue::from_static("Transfer-Encoding"));
+        headers.insert(
+            CONNECTION,
+            reqwest::header::HeaderValue::from_static("Upgrade"),
+        );
 
         match File::open("headers.txt").await {
             Ok(file) => {
@@ -167,6 +170,7 @@ impl Website {
             })
             .brotli(true)
             .gzip(true)
+            .deflate(true)
             .timeout(CONFIG.1);
 
         match File::open("proxies.txt").await {
@@ -209,36 +213,57 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
-        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) = unbounded_channel();
+        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
+            unbounded_channel();
 
         // json output file
         let mut o = self.create_file(&self.jsonl_output_path).await;
-
 
         let fpath = self.path.to_owned();
 
         task::spawn(async move {
             // file to get crawl list [todo] validate error
             let f = File::open(&fpath).await.unwrap();
-
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
-            let tx = tx.clone();
 
-            // todo: use channel buffer to break loop and set while
-            // // stream the files to next line and spawn read efficiently
-            while let Some(link) = lines.next_line().await.unwrap() {
-                log("gathering json {}", &link);
+            let mut crawling = true;
+
+            while crawling == true {
+                let mut crawl_counter = 0;
                 let tx = tx.clone();
-                let client = client.clone();
 
-                task::spawn(async move {
-                    let json = fetch_page_html(&link, &client).await;
+                // stream the files to next line and spawn read efficiently
+                while let Ok(link) = lines.next_line().await {
+                    match link {
+                        Some(link) => {
+                            crawl_counter += 1; // bump counter
+                            log("gathering json {}", &link);
+                            let tx = tx.clone();
+                            let client = client.clone();
 
-                    if let Err(_) = tx.send((link, json)) {
-                        log("receiver dropped", "");
+                            task::spawn(async move {
+                                let json = fetch_page_html(&link, &client).await;
+
+                                if let Err(_) = tx.send((link, json)) {
+                                    log("receiver dropped", "");
+                                }
+                            });
+                            // break the while loop
+                            if crawl_counter == CONFIG.2 {
+                                tokio::task::yield_now().await;
+                                break;
+                            }
+                        }
+                        None => {
+                            // break loop crawl finished
+                            crawling = false;
+                            break;
+                        }
                     }
-                });
+                }
+
+                drop(tx);
             }
 
             drop(tx);
