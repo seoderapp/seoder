@@ -5,7 +5,6 @@ use super::JsonOutFileType;
 
 use jsonl::write;
 use reqwest::header::HeaderMap;
-use reqwest::header::CONNECTION;
 use reqwest::Client;
 use serde_json::Value;
 use std::time::Duration;
@@ -166,7 +165,6 @@ impl Website {
             })
             .brotli(true)
             .gzip(true)
-            .deflate(true)
             .timeout(CONFIG.1);
 
         match File::open("proxies.txt").await {
@@ -222,44 +220,23 @@ impl Website {
             let f = File::open(&fpath).await.unwrap();
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
+            
+            let tx = tx.clone();
 
-            let mut crawling = true;
-
-            while crawling == true {
-                let mut crawl_counter = 0;
+            // todo: use channel buffer to break loop and set while
+            // // stream the files to next line and spawn read efficiently
+            while let Some(link) = lines.next_line().await.unwrap() {
+                log("gathering json {}", &link);
                 let tx = tx.clone();
+                let client = client.clone();
 
-                // stream the files to next line and spawn read efficiently
-                while let Ok(link) = lines.next_line().await {
-                    match link {
-                        Some(link) => {
-                            crawl_counter += 1; // bump counter
-                            log("gathering json {}", &link);
-                            let tx = tx.clone();
-                            let client = client.clone();
+                task::spawn(async move {
+                    let json = fetch_page_html(&link, &client).await;
 
-                            task::spawn(async move {
-                                let json = fetch_page_html(&link, &client).await;
-
-                                if let Err(_) = tx.send((link, json)) {
-                                    log("receiver dropped", "");
-                                }
-                            });
-                            // break the while loop
-                            if crawl_counter == CONFIG.2 {
-                                tokio::task::yield_now().await;
-                                break;
-                            }
-                        }
-                        None => {
-                            // break loop crawl finished
-                            crawling = false;
-                            break;
-                        }
+                    if let Err(_) = tx.send((link, json)) {
+                        log("receiver dropped", "");
                     }
-                }
-
-                drop(tx);
+                });
             }
 
             drop(tx);
