@@ -204,18 +204,18 @@ impl Website {
     pub async fn crawl(&mut self) {
         let client = self.setup().await;
 
-        self.crawl_concurrent(&client).await;
+        self.crawl_concurrent(client).await;
     }
 
     /// Start to crawl website concurrently using gRPC callback
-    async fn crawl_concurrent(&mut self, client: &Client) {
+    async fn crawl_concurrent(&mut self, client: Client) {
+        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) = unbounded_channel();
+
         // json output file
         let mut o = self.create_file(&self.jsonl_output_path).await;
 
-        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) = unbounded_channel();
 
         let fpath = self.path.to_owned();
-        let client = client.clone();
 
         task::spawn(async move {
             // file to get crawl list [todo] validate error
