@@ -33,6 +33,7 @@ In order to run the app on debian the following deps are required:
 For feature jemalloc:
 
 1. apt-get install cmake make
+1. `export JEMALLOC_SYS_WITH_MALLOC_CONF="background_thread:true,narenas:1,tcache:false,dirty_decay_ms:0,muzzy_decay_ms:0,abort_conf:true"`
 
 #### System Reqs Ubuntu/Debian
 
