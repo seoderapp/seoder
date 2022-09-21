@@ -150,16 +150,16 @@ impl Website {
 
         log("spawn_limit - ", spawn_limit.to_string());
 
-        let sem = Arc::new(tokio::sync::Semaphore::new(spawn_limit));
-
+        
         task::spawn(async move {
             // file to get crawl list [todo] validate error
             let f = File::open(&fpath).await.unwrap();
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
-
+            
             let tx = tx.clone();
-
+            let sem = Arc::new(tokio::sync::Semaphore::new(spawn_limit));
+            
             while let Some(link) = lines.next_line().await.unwrap() {
                 let client = client.clone();
                 let permit = sem.clone().acquire_owned().await.unwrap();
