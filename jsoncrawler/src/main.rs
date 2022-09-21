@@ -15,8 +15,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
 
     let rt = tokio::runtime::Builder::new_multi_thread()
-        .disable_lifo_slot()
         .enable_all()
+        .global_queue_interval(31)
         .build()
         .unwrap();
 
