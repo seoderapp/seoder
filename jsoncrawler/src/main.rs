@@ -4,20 +4,30 @@
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
-use jsoncrawler_lib::tokio;
+use jsoncrawler_lib::{crawl, tokio};
 use std::env;
 use std::time::Instant;
 
 /// web json crawler.
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
     // list of file paths to run against
     let args: Vec<String> = env::args().collect();
+
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .disable_lifo_slot()
+        .enable_all()
+        .build()
+        .unwrap();
+
+    let _guard = rt.enter();
+
     // measure time for entire crawl
     let performance = Instant::now();
 
-    jsoncrawler_lib::crawl(args).await.unwrap();
+    rt.block_on(async {
+        crawl(args).await.unwrap();
+    });
 
     println!("Time elasped: {:?}", performance.elapsed()); //always stdoout time
 
