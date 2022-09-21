@@ -163,8 +163,8 @@ impl Website {
             } else {
                 ua_generator::ua::spoof_ua()
             })
-            .brotli(true)
-            .gzip(true)
+            .tcp_nodelay(std::env::var("TCP_NODELAY").unwrap_or(String::from("false")) == "false")
+            .pool_idle_timeout(Duration::new(0, 1))
             .timeout(CONFIG.1);
 
         match File::open("proxies.txt").await {

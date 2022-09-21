@@ -24,6 +24,7 @@ pub async fn crawl(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> 
         let mut iter = args.iter();
         iter.next(); // skip the cargo entry
 
+        // todo: prevent file deleting if multiple files and append to list
         while let Some(input) = iter.next() {
             let mut website: Website = Website::new(&input);
 
