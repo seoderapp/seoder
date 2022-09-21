@@ -20,8 +20,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .unwrap();
 
-    let _guard = rt.enter();
-
     // measure time for entire crawl
     let performance = Instant::now();
 
