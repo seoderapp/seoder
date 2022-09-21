@@ -165,6 +165,8 @@ impl Website {
             drop(tx);
         });
 
+        task::yield_now().await;
+
         // output txt files
         let (mut ok_t, mut okv_t, mut ce_t, mut al_t) = tokio::join!(
             self.create_file(&self.ok_txt_output_path),
