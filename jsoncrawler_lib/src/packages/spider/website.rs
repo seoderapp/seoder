@@ -196,16 +196,17 @@ impl Website {
             drop(txx);
         });
 
-        let semaphore = Arc::new(Semaphore::new(spawn_limit / 2)); // 2x less than spawns
+        let semaphore = Arc::new(Semaphore::new(spawn_limit / 4)); // 4x less than spawns
         let mut join_handles = Vec::new();
 
         let soft_spawn = task::spawn(async move {
             while let Some(i) = rxx.recv().await {
-                let permit = semaphore.clone().acquire_owned().await.unwrap();
                 let (link, _, __) = i;
 
                 let txxx = txxx.clone();
                 let client = client_sem.clone();
+
+                let permit = semaphore.clone().acquire_owned().await.unwrap();
 
                 join_handles.push(tokio::spawn(async move {
                     let json = fetch_page_html(&link, &client).await;
@@ -215,7 +216,6 @@ impl Website {
                     drop(permit);
                 }));
 
-                task::yield_now().await;
             }
 
             for handle in join_handles {
@@ -263,6 +263,7 @@ impl Website {
             }
 
             let j: Value = serde_json::from_str(&response).unwrap_or_default();
+            task::yield_now().await;
 
             if !j.is_null() {
                 match write(&mut o, &j).await {
