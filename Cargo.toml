@@ -2,6 +2,10 @@
 members = [
     "jsoncrawler",
     "jsoncrawler_lib",
+    "jsoncrawler_web",
+    "jsoncrawler_client",
     # internal
     "benches"
 ]
+default-members = [ "jsoncrawler", "jsoncrawler_lib", "benches" ]
+

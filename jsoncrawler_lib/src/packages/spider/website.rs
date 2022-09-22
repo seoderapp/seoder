@@ -170,8 +170,10 @@ impl Website {
         task::spawn(async move {
             // todo: check if file exist in multi paths
             let f = File::open(&p).await.unwrap();
+
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
+
             while let Some(link) = lines.next_line().await.unwrap() {
                 if *thread_count.lock().unwrap() < spawn_limit {
                     *thread_count.lock().unwrap() += 1;
@@ -192,6 +194,7 @@ impl Website {
                 }
             }
 
+            // end channels
             drop(tx);
             drop(txx);
         });
@@ -215,7 +218,6 @@ impl Website {
                     }
                     drop(permit);
                 }));
-
             }
 
             for handle in join_handles {

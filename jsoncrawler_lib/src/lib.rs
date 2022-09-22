@@ -12,7 +12,7 @@ extern crate ua_generator;
 extern crate url;
 
 #[macro_use]
-extern crate string_concat;
+pub extern crate string_concat;
 
 #[macro_use]
 extern crate lazy_static;
