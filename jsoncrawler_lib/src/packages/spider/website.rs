@@ -192,7 +192,7 @@ impl Website {
             drop(txx);
         });
 
-        let semaphore = Arc::new(Semaphore::new(spawn_limit));
+        let semaphore = Arc::new(Semaphore::new(spawn_limit / 2)); // 2x less than spawns
         let mut join_handles = Vec::new();
 
         let soft_spawn = task::spawn(async move {
