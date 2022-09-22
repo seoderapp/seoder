@@ -108,7 +108,7 @@ impl Website {
             .brotli(true)
             .gzip(true)
             .use_native_tls()
-            .tcp_nodelay(true)
+            .tcp_nodelay(false)
             .connect_timeout(CONFIG.1.div_f32(1.8))
             .timeout(CONFIG.1);
 
