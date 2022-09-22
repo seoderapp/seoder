@@ -12,7 +12,7 @@ use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::sync::mpsc::{channel, Receiver, Sender, unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::sync::Semaphore;
 use tokio::task;
 
@@ -45,7 +45,7 @@ type Message = (String, (String, JsonOutFileType), bool);
 
 lazy_static! {
     /// application global configurations
-    pub static ref CONFIG: (&'static str, Duration, usize) = setup();
+    pub static ref CONFIG: (&'static str, Duration, usize, bool) = setup();
 }
 
 /// create a new file at path
@@ -112,21 +112,24 @@ impl Website {
             .connect_timeout(CONFIG.1.div_f32(1.8))
             .timeout(CONFIG.1);
 
-        match File::open("proxies.txt").await {
-            Ok(file) => {
-                let reader = BufReader::new(file);
-                let mut lines = reader.lines();
+        // if proxy enabled build proxies
+        if CONFIG.3 {
+            match File::open("proxies.txt").await {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let mut lines = reader.lines();
 
-                while let Some(proxy) = lines.next_line().await.unwrap() {
-                    if !proxy.is_empty() {
-                        client = client.proxy(reqwest::Proxy::http::<&str>(&proxy).unwrap());
+                    while let Some(proxy) = lines.next_line().await.unwrap() {
+                        if !proxy.is_empty() {
+                            client = client.proxy(reqwest::Proxy::http::<&str>(&proxy).unwrap());
+                        }
                     }
                 }
-            }
-            Err(_) => {
-                log("proxies.txt file does not exist {}", "");
-            }
-        };
+                Err(_) => {
+                    log("proxies.txt file does not exist {}", "");
+                }
+            };
+        }
 
         client.build().unwrap_or_default()
     }
@@ -147,9 +150,11 @@ impl Website {
     async fn crawl_concurrent(&mut self, client: Client) {
         let spawn_limit = CONFIG.2 * num_cpus::get();
 
-        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) = unbounded_channel();
+        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
+            unbounded_channel();
 
-        let (txx, mut rxx): (Sender<Message>, Receiver<Message>) = channel(spawn_limit * 2);
+        let (txx, mut rxx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
+            unbounded_channel();
 
         let txxx = tx.clone();
 
@@ -161,7 +166,7 @@ impl Website {
         let client_sem = client.clone();
 
         let p = self.path.to_owned();
- 
+
         task::spawn(async move {
             // todo: check if file exist in multi paths
             let f = File::open(&p).await.unwrap();
@@ -181,10 +186,7 @@ impl Website {
                         }
                     });
                 } else {
-                    if let Err(_) = txx
-                        .send((link, ("".into(), JsonOutFileType::Unknown), false))
-                        .await
-                    {
+                    if let Err(_) = txx.send((link, ("".into(), JsonOutFileType::Unknown), false)) {
                         log("receiver dropped", "");
                     }
                 }
@@ -199,7 +201,7 @@ impl Website {
 
         let soft_spawn = task::spawn(async move {
             while let Some(i) = rxx.recv().await {
-                let permit = semaphore.clone().acquire_owned().await.unwrap();                
+                let permit = semaphore.clone().acquire_owned().await.unwrap();
                 let (link, _, __) = i;
 
                 let txxx = txxx.clone();
@@ -207,12 +209,13 @@ impl Website {
 
                 join_handles.push(tokio::spawn(async move {
                     let json = fetch_page_html(&link, &client).await;
-
                     if let Err(_) = txxx.send((link, json, false)) {
                         log("receiver dropped", "");
                     }
                     drop(permit);
                 }));
+
+                task::yield_now().await;
             }
 
             for handle in join_handles {
@@ -229,6 +232,8 @@ impl Website {
             create_file(&self.al_txt_output_path)
         );
 
+        task::yield_now().await;
+
         while let Some(i) = rx.recv().await {
             let (link, jor, spawned) = i;
             let (response, oo) = jor;
@@ -237,7 +242,7 @@ impl Website {
                 *global_thread_count.lock().unwrap() -= 1;
             }
 
-            let error = response.starts_with("- error ") == true;
+            let error = response.starts_with("- error ");
             // detailed json message
             let link = if error {
                 string_concat!(response.replacen("- error ", "", 1), "\n")

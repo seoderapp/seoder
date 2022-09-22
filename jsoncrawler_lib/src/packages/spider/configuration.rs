@@ -13,8 +13,8 @@ pub struct Configuration {
     pub user_agent: String,
 }
 
-/// configure application program api path, timeout, and channel buffer
-pub fn setup() -> (&'static str, std::time::Duration, usize) {
+/// configure application program api path, timeout, channel buffer, and proxy
+pub fn setup() -> (&'static str, std::time::Duration, usize, bool) {
     use std::fs::File;
     use std::io::prelude::*;
     use std::io::BufReader;
@@ -22,6 +22,7 @@ pub fn setup() -> (&'static str, std::time::Duration, usize) {
     let mut query = 1;
     let mut timeout: u64 = 15;
     let mut buffer: usize = 100;
+    let mut proxy = false;
 
     // read through config file cpu bound quickly to avoid atomics and extra memory from clones
     match File::open("config.txt") {
@@ -59,6 +60,10 @@ pub fn setup() -> (&'static str, std::time::Duration, usize) {
                         if cf == "buffer" && !v.is_empty() {
                             buffer = v.parse::<usize>().unwrap_or(100);
                         }
+
+                        if cf == "proxy" && !v.is_empty() {
+                            proxy = v.parse::<bool>().unwrap_or(false);
+                        }
                     }
                 }
             }
@@ -78,7 +83,7 @@ pub fn setup() -> (&'static str, std::time::Duration, usize) {
         _ => "/wp-json/wp/v2/posts?per_page=100",
     };
 
-    (query, std::time::Duration::new(timeout, 0), buffer)
+    (query, std::time::Duration::new(timeout, 0), buffer, proxy)
 }
 
 impl Configuration {
