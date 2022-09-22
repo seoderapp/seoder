@@ -103,6 +103,7 @@ impl Website {
             } else {
                 ua_generator::ua::spoof_ua()
             })
+            .connect_timeout(CONFIG.1 / 2)
             .timeout(CONFIG.1);
 
         match File::open("proxies.txt").await {
