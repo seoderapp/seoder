@@ -18,17 +18,20 @@ A valid C compiler is required to build the crate.
 
 On Ubuntu the following is required:
 
-1. build-tools
-1. libssl-dev
-1. pkg-config
+1. `sudo apt update`
+1. `apt-get install build-essential libssl-dev pkg-config`
+1. `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+1. `source ~/.bashrc`
+1. `rustup update`
 
 ### Debian
 
 In order to run the app on debian the following deps are required:
 
-1. apt-get update && apt-get install -y --no-install-recommends gcc cmake libc6 openssl libssl-dev npm pkg-config g++ ca-certificates
-1. curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-1. rustup update
+1. `apt-get update && apt-get install -y --no-install-recommends gcc cmake libc6 openssl libssl-dev npm pkg-config g++ ca-certificates`
+1. `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+1. `source ~/.bashrc`
+1. `rustup update`
 
 For feature jemalloc:
 
