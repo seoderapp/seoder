@@ -12,7 +12,7 @@ use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{channel, Receiver, Sender, unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::sync::Semaphore;
 use tokio::task;
 
@@ -103,6 +103,13 @@ impl Website {
             } else {
                 ua_generator::ua::spoof_ua()
             })
+            .tcp_keepalive(None)
+            .pool_max_idle_per_host(0)
+            .brotli(true)
+            .gzip(true)
+            .use_native_tls()
+            .tcp_nodelay(true)
+            .connect_timeout(CONFIG.1.div_f32(1.8))
             .timeout(CONFIG.1);
 
         match File::open("proxies.txt").await {
@@ -138,37 +145,31 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
-        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
-            unbounded_channel();
+        let spawn_limit = CONFIG.2 * num_cpus::get();
 
-        let (txx, mut rxx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
-            unbounded_channel();
+        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) = unbounded_channel();
+
+        let (txx, mut rxx): (Sender<Message>, Receiver<Message>) = channel(spawn_limit * 2);
 
         let txxx = tx.clone();
-
-        let fpath = self.path.to_owned();
-
-        // limit task spawn progresssive
-        let spawn_limit = CONFIG.2 * num_cpus::get();
 
         // hard main spawn limit
         let global_thread_count = Arc::new(Mutex::new(0));
         // global counter clone
-        let c_clone = global_thread_count.clone();
+        let thread_count = global_thread_count.clone();
 
         let client_sem = client.clone();
 
+        let p = self.path.to_owned();
+ 
         task::spawn(async move {
-            // file to get crawl list [todo] validate error
-            let f = File::open(&fpath).await.unwrap();
+            // todo: check if file exist in multi paths
+            let f = File::open(&p).await.unwrap();
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
-
-            let tx = tx.clone(); // main
-
             while let Some(link) = lines.next_line().await.unwrap() {
-                if *c_clone.lock().unwrap() < spawn_limit {
-                    *c_clone.lock().unwrap() += 1;
+                if *thread_count.lock().unwrap() < spawn_limit {
+                    *thread_count.lock().unwrap() += 1;
 
                     let tx = tx.clone();
                     let client = client.clone();
@@ -180,9 +181,10 @@ impl Website {
                         }
                     });
                 } else {
-                    task::yield_now().await;
-
-                    if let Err(_) = txx.send((link, ("".into(), JsonOutFileType::Unknown), false)) {
+                    if let Err(_) = txx
+                        .send((link, ("".into(), JsonOutFileType::Unknown), false))
+                        .await
+                    {
                         log("receiver dropped", "");
                     }
                 }
@@ -196,18 +198,17 @@ impl Website {
         let mut join_handles = Vec::new();
 
         let soft_spawn = task::spawn(async move {
-            let txxx = txxx.clone();
-            let client = client_sem.clone();
-
             while let Some(i) = rxx.recv().await {
+                let permit = semaphore.clone().acquire_owned().await.unwrap();                
                 let (link, _, __) = i;
+
                 let txxx = txxx.clone();
-                let client = client.clone();
-                let permit = semaphore.clone().acquire_owned().await.unwrap();
+                let client = client_sem.clone();
 
                 join_handles.push(tokio::spawn(async move {
                     let json = fetch_page_html(&link, &client).await;
-                    if let Err(_) = txxx.send((link, json, true)) {
+
+                    if let Err(_) = txxx.send((link, json, false)) {
                         log("receiver dropped", "");
                     }
                     drop(permit);
