@@ -103,7 +103,6 @@ impl Website {
             } else {
                 ua_generator::ua::spoof_ua()
             })
-            .connect_timeout(CONFIG.1 / 2)
             .timeout(CONFIG.1);
 
         match File::open("proxies.txt").await {
@@ -153,7 +152,7 @@ impl Website {
         let spawn_limit = CONFIG.2 * num_cpus::get();
 
         // hard main spawn limit
-        let global_thread_count = Arc::new(Mutex::new(0)); 
+        let global_thread_count = Arc::new(Mutex::new(0));
         // global counter clone
         let c_clone = global_thread_count.clone();
 
@@ -166,7 +165,6 @@ impl Website {
             let mut lines = reader.lines();
 
             let tx = tx.clone(); // main
-            let txx = txx.clone(); // soft
 
             while let Some(link) = lines.next_line().await.unwrap() {
                 if *c_clone.lock().unwrap() < spawn_limit {
@@ -182,7 +180,7 @@ impl Website {
                         }
                     });
                 } else {
-                    let txx = txx.clone();
+                    task::yield_now().await;
 
                     if let Err(_) = txx.send((link, ("".into(), JsonOutFileType::Unknown), false)) {
                         log("receiver dropped", "");
