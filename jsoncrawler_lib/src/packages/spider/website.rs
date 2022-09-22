@@ -13,6 +13,7 @@ use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::Semaphore;
 use tokio::task;
 
 /// Represents a a web crawler for gathering links.
@@ -140,14 +141,22 @@ impl Website {
         let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
             unbounded_channel();
 
+        let (txx, mut rxx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
+            unbounded_channel();
+
+        let txxx = tx.clone();
+
         let fpath = self.path.to_owned();
 
         // limit task spawn progresssive
         let spawn_limit = CONFIG.2 * num_cpus::get();
 
-        let global_thread_count = Arc::new(Mutex::new(0));
-
+        // hard main spawn limit
+        let global_thread_count = Arc::new(Mutex::new(0)); 
+        // global counter clone
         let c_clone = global_thread_count.clone();
+
+        let client_sem = client.clone();
 
         task::spawn(async move {
             // file to get crawl list [todo] validate error
@@ -155,7 +164,8 @@ impl Website {
             let reader = BufReader::new(f);
             let mut lines = reader.lines();
 
-            let tx = tx.clone();
+            let tx = tx.clone(); // main
+            let txx = txx.clone(); // soft
 
             while let Some(link) = lines.next_line().await.unwrap() {
                 if *c_clone.lock().unwrap() < spawn_limit {
@@ -171,15 +181,43 @@ impl Website {
                         }
                     });
                 } else {
-                    let json = fetch_page_html(&link, &client).await;
+                    let txx = txx.clone();
 
-                    if let Err(_) = tx.send((link, json, false)) {
+                    if let Err(_) = txx.send((link, ("".into(), JsonOutFileType::Unknown), false)) {
                         log("receiver dropped", "");
                     }
                 }
             }
 
             drop(tx);
+            drop(txx);
+        });
+
+        let semaphore = Arc::new(Semaphore::new(spawn_limit));
+        let mut join_handles = Vec::new();
+
+        let soft_spawn = task::spawn(async move {
+            let txxx = txxx.clone();
+            let client = client_sem.clone();
+
+            while let Some(i) = rxx.recv().await {
+                let (link, _, __) = i;
+                let txxx = txxx.clone();
+                let client = client.clone();
+                let permit = semaphore.clone().acquire_owned().await.unwrap();
+
+                join_handles.push(tokio::spawn(async move {
+                    let json = fetch_page_html(&link, &client).await;
+                    if let Err(_) = txxx.send((link, json, true)) {
+                        log("receiver dropped", "");
+                    }
+                    drop(permit);
+                }));
+            }
+
+            for handle in join_handles {
+                handle.await.unwrap();
+            }
         });
 
         // output txt files
@@ -237,6 +275,8 @@ impl Website {
                 okv_t.write(&link.as_bytes()).await.unwrap();
             }
         }
+
+        soft_spawn.await.unwrap();
     }
 }
 
