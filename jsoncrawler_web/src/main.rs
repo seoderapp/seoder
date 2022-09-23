@@ -19,7 +19,7 @@ use std::{
     net::SocketAddr,
     sync::{Arc, Mutex},
 };
-pub extern crate psutil;
+pub use psutil;
 
 use futures_channel::mpsc::{unbounded, UnboundedSender};
 use futures_util::SinkExt;
@@ -28,7 +28,6 @@ use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 use tokio::net::{TcpListener, TcpStream};
 
 use crate::serde_json::json;
-use jsoncrawler_lib::serde_json::Value;
 
 type Tx = UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
@@ -63,13 +62,14 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
             Some(_) => {
                 loop {
                     interval.tick().await;
-
                     // total cpu
-                    // let percent = psutil::cpu::cpu_times().unwrap().total();
+                    let mut cpu_percent_collector = psutil::cpu::CpuPercentCollector::new().unwrap();
+                    let cpu_percent = cpu_percent_collector.cpu_percent().unwrap();
                     let memory = psutil::memory::virtual_memory().unwrap();
 
                     let v = json!({
-                        // "cpu_percent": percent,
+                        // cpu
+                        "cpu_percent": cpu_percent,
                         // "bandwidth": 1,
                         // memory
                         "memory_total": memory.total(),
