@@ -5,6 +5,8 @@
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 use jsoncrawler_lib::tokio::sync::mpsc::unbounded_channel;
+use sysinfo::{ System, SystemExt};
+
 use tungstenite::{Message, Result};
 
 use crate::string_concat::string_concat_impl;
@@ -19,7 +21,6 @@ use std::{
     net::SocketAddr,
     sync::{Arc, Mutex},
 };
-pub use psutil;
 
 use futures_channel::mpsc::{unbounded, UnboundedSender};
 use futures_util::SinkExt;
@@ -59,24 +60,23 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
     let handle = tokio::spawn(async move {
         let mut interval = tokio::time::interval(Duration::from_millis(1000));
         match receiver.recv().await {
-            Some(_) => {
+            Some(_) => {                
                 loop {
                     interval.tick().await;
-                    // total cpu
-                    let mut cpu_percent_collector = psutil::cpu::CpuPercentCollector::new().unwrap();
-                    let cpu_percent = cpu_percent_collector.cpu_percent().unwrap();
-                    let memory = psutil::memory::virtual_memory().unwrap();
+                    let s = System::new_all();
+                    use sysinfo::CpuExt;
 
                     let v = json!({
+                        // network
+                        "network_uptime": s.uptime(),
                         // cpu
-                        "cpu_percent": cpu_percent,
-                        // "bandwidth": 1,
+                        "cpu_usage": s.global_cpu_info().cpu_usage(),
                         // memory
-                        "memory_total": memory.total(),
-                        "memory_used": memory.used(),
-                        "memory_used_percent": memory.percent(),
-                        "memory_available": memory.available(),
-                        "memory_free": memory.free()
+                        "memory_total": s.total_memory(),
+                        "memory_used": s.used_memory(),
+                        "memory_available": s.available_memory(),
+                        "memory_free": s.free_memory()
+                        // todo: percent
                     });
                     tokio::task::yield_now().await;
                     println!("feed in progress {:?}", &v);
