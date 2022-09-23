@@ -59,11 +59,11 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
 
     let handle = tokio::spawn(async move {
         let mut interval = tokio::time::interval(Duration::from_millis(1000));
+        let s = System::new_all();
         match receiver.recv().await {
             Some(_) => {                
                 loop {
                     interval.tick().await;
-                    let s = System::new_all();
                     use sysinfo::CpuExt;
 
                     let v = json!({
