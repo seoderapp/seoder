@@ -9,7 +9,7 @@ use tungstenite::{Message, Result};
 
 use crate::string_concat::string_concat_impl;
 use jsoncrawler_lib::packages::spider::utils::logd;
-use jsoncrawler_lib::{string_concat, tokio};
+use jsoncrawler_lib::{serde_json, string_concat, tokio};
 
 use std::io::{Error as IoError, Write};
 use std::time::Duration;
@@ -19,12 +19,16 @@ use std::{
     net::SocketAddr,
     sync::{Arc, Mutex},
 };
+pub extern crate psutil;
 
 use futures_channel::mpsc::{unbounded, UnboundedSender};
 use futures_util::SinkExt;
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 
 use tokio::net::{TcpListener, TcpStream};
+
+use crate::serde_json::json;
+use jsoncrawler_lib::serde_json::Value;
 
 type Tx = UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
@@ -56,17 +60,31 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
     let handle = tokio::spawn(async move {
         let mut interval = tokio::time::interval(Duration::from_millis(1000));
         match receiver.recv().await {
-            Some(v) => {
+            Some(_) => {
                 loop {
                     interval.tick().await;
 
-                    // send feed stream
+                    // total cpu
+                    // let percent = psutil::cpu::cpu_times().unwrap().total();
+                    let memory = psutil::memory::virtual_memory().unwrap();
+
+                    let v = json!({
+                        // "cpu_percent": percent,
+                        // "bandwidth": 1,
+                        // memory
+                        "memory_total": memory.total(),
+                        "memory_used": memory.used(),
+                        "memory_used_percent": memory.percent(),
+                        "memory_available": memory.available(),
+                        "memory_free": memory.free()
+                    });
+                    tokio::task::yield_now().await;
+                    println!("feed in progress {:?}", &v);
+
                     outgoing
-                        .send(Message::Text("tick".to_owned()))
+                        .send(Message::Text(v.to_string().into()))
                         .await
                         .unwrap_or_default();
-
-                    println!("feed in progress {:?}", v);
 
                     if !p.lock().unwrap().contains_key(&addr) {
                         break;
