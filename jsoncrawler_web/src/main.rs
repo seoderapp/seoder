@@ -4,11 +4,15 @@
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
+use jsoncrawler_lib::tokio::sync::mpsc::unbounded_channel;
+use tungstenite::{Message, Result};
+
 use crate::string_concat::string_concat_impl;
 use jsoncrawler_lib::packages::spider::utils::logd;
 use jsoncrawler_lib::{string_concat, tokio};
 
 use std::io::{Error as IoError, Write};
+use std::time::Duration;
 use std::{
     collections::HashMap,
     env,
@@ -17,10 +21,10 @@ use std::{
 };
 
 use futures_channel::mpsc::{unbounded, UnboundedSender};
+use futures_util::SinkExt;
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 
 use tokio::net::{TcpListener, TcpStream};
-use tungstenite::protocol::Message;
 
 type Tx = UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
@@ -40,45 +44,72 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
         &addr.to_string()
     ));
 
-    let (tx, rx) = unbounded();
+    let (mut outgoing, incoming) = ws_stream.split();
+
+    let (sender, mut receiver) = unbounded_channel();
+
+    let (tx, _) = unbounded();
     peer_map.lock().unwrap().insert(addr, tx);
 
-    let (outgoing, incoming) = ws_stream.split();
+    let p = peer_map.clone();
+
+    let handle = tokio::spawn(async move {
+        let mut interval = tokio::time::interval(Duration::from_millis(1000));
+        match receiver.recv().await {
+            Some(v) => {
+                loop {
+                    interval.tick().await;
+
+                    // send feed stream
+                    outgoing
+                        .send(Message::Text("tick".to_owned()))
+                        .await
+                        .unwrap_or_default();
+
+                    println!("feed in progress {:?}", v);
+
+                    if !p.lock().unwrap().contains_key(&addr) {
+                        break;
+                    }
+                }
+            }
+            _ => println!("the sender dropped"),
+        };
+    });
 
     let broadcast_incoming = incoming.try_for_each(|msg| {
         let mut lock = std::io::stdout().lock();
-        writeln!(
-            lock,
-            "Received a message from {}: {}",
-            &addr,
-            &msg.to_text().unwrap()
-        )
-        .unwrap();
+        let m = msg.clone();
+        let txt = m.to_text().unwrap();
 
-        let peers = peer_map.lock().unwrap();
+        let sender = sender.clone();
 
-        let broadcast_recipients = peers
-            .iter()
-            .filter(|(peer_addr, _)| peer_addr != &&addr)
-            .map(|(_, ws_sink)| ws_sink);
+        writeln!(lock, "Received a message from {}: {}", &addr, &txt).unwrap();
 
-        for recp in broadcast_recipients {
-            recp.unbounded_send(msg.clone()).unwrap();
+        // start the feed
+        if txt.trim() == "feed".to_string() {
+            tokio::spawn(async move {
+                if let Err(_) = sender.send(1) {
+                    println!("the receiver dropped");
+                }
+            });
         }
 
         future::ok(())
     });
 
-    let receive_from_others = rx.map(Ok).forward(outgoing);
-
-    pin_mut!(broadcast_incoming, receive_from_others);
-    future::select(broadcast_incoming, receive_from_others).await;
+    // inputs received to the reqwest
+    pin_mut!(broadcast_incoming);
+    broadcast_incoming.await.unwrap_or_default();
 
     logd(string_concat::string_concat!(
         &addr.to_string(),
         " disconnected"
     ));
+
     peer_map.lock().unwrap().remove(&addr);
+
+    handle.await.unwrap();
 }
 
 #[tokio::main]
