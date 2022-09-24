@@ -115,17 +115,31 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
         let mut lock = std::io::stdout().lock();
         let m = msg.clone();
         let txt = m.to_text().unwrap();
-
         let sender = sender.clone();
 
         writeln!(lock, "Received a message from {}: {}", &addr, &txt).unwrap();
 
+        let ms = txt.trim();
+
         // start the feed
-        if txt.trim() == "feed".to_string() {
+        if ms == "feed" {
             tokio::spawn(async move {
                 if let Err(_) = sender.send(1) {
                     println!("the receiver dropped");
                 }
+            });
+        }
+
+        // create new campaign to store crawl results
+        if ms == "create-campaign" {
+            tokio::spawn(async move {
+                println!("WIP todo");
+            });
+        }
+
+        if ms == "run-campaign" {
+            tokio::spawn(async move {
+                println!("WIP todo");
             });
         }
 
