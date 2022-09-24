@@ -149,10 +149,10 @@ impl Website {
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
         let spawn_limit = CONFIG.2 * num_cpus::get();
-
+        // full
         let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
             unbounded_channel();
-
+        // soft
         let (txx, mut rxx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
             unbounded_channel();
 
@@ -236,6 +236,8 @@ impl Website {
 
         task::yield_now().await;
 
+        let engine_find = std::env::var("ENGINE").is_ok();
+
         while let Some(i) = rx.recv().await {
             let (link, jor, spawned) = i;
             let (response, oo) = jor;
@@ -263,6 +265,11 @@ impl Website {
             if response == "" || error {
                 continue;
             }
+
+            // // parse and find
+            // if engine_find {
+
+            // }
 
             let j: Value = serde_json::from_str(&response).unwrap_or_default();
             task::yield_now().await;
