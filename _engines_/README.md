@@ -30,6 +30,18 @@ Create a new campaign folder to measure stats performed.
 
 #### run-campaign
 
-Run a new campaign based on the central configs.
+Run a campaign based on the central configs.
+
+`run-campaign $mycampaign`
+
+#### stop-campaign
+
+Stop a mid flight campaign crawl [todo]
+
+`run-campaign $mycampaign`
+
+#### delete-campaign
+
+Delete a campaign from tracking [todo]
 
 `run-campaign $mycampaign`
