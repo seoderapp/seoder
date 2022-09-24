@@ -119,9 +119,10 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
 
         writeln!(lock, "Received a message from {}: {}", &addr, &txt).unwrap();
 
+        // remove newline
         let ms = txt.trim();
 
-        // start the feed
+        // start the feed stats
         if ms == "feed" {
             tokio::spawn(async move {
                 if let Err(_) = sender.send(1) {
@@ -130,14 +131,34 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
             });
         }
 
+        let hh = ms.split(" ").collect::<Vec<&str>>();
+
+        // validate crud messages
+        let (c, cc) = if hh.len() == 2 {
+            (hh[0], hh[1])
+        } else {
+            ("", "")
+        };
+
         // create new campaign to store crawl results
-        if ms == "create-campaign" {
+        if c == "create-campaign" {
+            let cf = cc.to_owned();
             tokio::spawn(async move {
-                println!("WIP todo");
+                // use crate::tokio::fs::File;
+                use crate::string_concat::string_concat;
+                let campaign_dir = string_concat!("_engines_/campaign/", cf);
+
+                tokio::fs::create_dir(&campaign_dir).await.unwrap();
+                tokio::fs::create_dir(&string_concat!(campaign_dir, "/valid"))
+                    .await
+                    .unwrap();
+                tokio::fs::create_dir(&string_concat!(campaign_dir, "/invalid"))
+                    .await
+                    .unwrap();
             });
         }
 
-        if ms == "run-campaign" {
+        if c == "run-campaign" {
             tokio::spawn(async move {
                 println!("WIP todo");
             });

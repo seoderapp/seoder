@@ -32,10 +32,7 @@ async fn main() {
     let ws_to_stdout = {
         read.for_each(|message| async {
             let ms = message.unwrap();
-            let mt = ms.clone();
-
             let data = &ms.into_data(); // raw data to handle
-            println!("{:?}", &mt.into_text()); // raw message
 
             tokio::io::stdout().write_all(&data).await.unwrap();
         })
