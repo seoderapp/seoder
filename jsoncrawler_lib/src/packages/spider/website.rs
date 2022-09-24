@@ -236,8 +236,19 @@ impl Website {
 
         task::yield_now().await;
 
-        let engine_find = std::env::var("ENGINE").is_ok();
-
+        // todo: config setup builder
+        let engine_find = std::env::var("ENGINE_FD").is_ok();
+        let engine_find_patterns = match std::env::var("ENGINE_FD_PATH") {
+            Ok(pat) => pat,
+            _ => "".to_string(),
+        };
+        // todo: find campaign running and get file
+        let mut en_c: Option<File> = if engine_find {
+            // todo: validate directory or auto generate new
+            Some(create_file(&"_engines_/campaign/_c2/valid/list.txt".to_string()).await)
+        } else {
+            None
+        };
         while let Some(i) = rx.recv().await {
             let (link, jor, spawned) = i;
             let (response, oo) = jor;
@@ -266,10 +277,22 @@ impl Website {
                 continue;
             }
 
-            // // parse and find
-            // if engine_find {
+            // parse and find
+            if engine_find {
+                let f = &response.clone();
 
-            // }
+                if f.contains(&engine_find_patterns) {
+                    en_c.as_mut()
+                        .unwrap()
+                        .write(&link.as_bytes())
+                        .await
+                        .unwrap();
+                }
+
+                continue;
+            }
+
+            // json program continue
 
             let j: Value = serde_json::from_str(&response).unwrap_or_default();
             task::yield_now().await;
