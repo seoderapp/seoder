@@ -5,7 +5,7 @@
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 use jsoncrawler_lib::tokio::sync::mpsc::unbounded_channel;
-use sysinfo::{ System, SystemExt};
+use sysinfo::{System, SystemExt};
 
 use tungstenite::{Message, Result};
 
@@ -58,28 +58,44 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
     let p = peer_map.clone();
 
     let handle = tokio::spawn(async move {
+        use sysinfo::CpuExt;
+        use sysinfo::NetworkExt;
         let mut interval = tokio::time::interval(Duration::from_millis(1000));
-        let s = System::new_all();
+        let mut s = System::new_all();
+
         match receiver.recv().await {
-            Some(_) => {                
+            Some(_) => {
                 loop {
                     interval.tick().await;
-                    use sysinfo::CpuExt;
+
+                    s.refresh_all();
+
+                    let mut net_total_received = 0;
+                    let mut net_total_transmited = 0;
+
+                    let networks = s.networks();
+
+                    for (_, data) in networks {
+                        net_total_received += data.received();
+                        net_total_transmited += data.transmitted();
+                    }
 
                     let v = json!({
                         // network
-                        "network_uptime": s.uptime(),
+                        "network_received": net_total_received,
+                        "network_transmited": net_total_transmited,
+                        "network_total_transmitted": net_total_received + net_total_transmited,
                         // cpu
+                        "load_avg_min": s.load_average().one,
                         "cpu_usage": s.global_cpu_info().cpu_usage(),
                         // memory
                         "memory_total": s.total_memory(),
                         "memory_used": s.used_memory(),
                         "memory_available": s.available_memory(),
                         "memory_free": s.free_memory()
-                        // todo: percent
                     });
                     tokio::task::yield_now().await;
-                    println!("feed in progress {:?}", &v);
+                    // println!("feed in progress {:?}", &v);
 
                     outgoing
                         .send(Message::Text(v.to_string().into()))
