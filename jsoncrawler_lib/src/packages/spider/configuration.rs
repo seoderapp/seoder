@@ -14,7 +14,7 @@ pub struct Configuration {
 }
 
 /// configure application program api path, timeout, channel buffer, and proxy
-pub fn setup() -> (&'static str, std::time::Duration, usize, bool) {
+pub fn setup() -> (String, std::time::Duration, usize, bool) {
     use std::fs::File;
     use std::io::prelude::*;
     use std::io::BufReader;
@@ -23,6 +23,7 @@ pub fn setup() -> (&'static str, std::time::Duration, usize, bool) {
     let mut timeout: u64 = 15;
     let mut buffer: usize = 100;
     let mut proxy = false;
+    let mut page_limit = 100;
 
     // read through config file cpu bound quickly to avoid atomics and extra memory from clones
     match File::open("config.txt") {
@@ -64,6 +65,10 @@ pub fn setup() -> (&'static str, std::time::Duration, usize, bool) {
                         if cf == "proxy" && !v.is_empty() {
                             proxy = v.parse::<bool>().unwrap_or(false);
                         }
+
+                        if cf == "page_limit" && !v.is_empty() {
+                            page_limit = v.parse::<usize>().unwrap_or(100);
+                        }
                     }
                 }
             }
@@ -73,14 +78,17 @@ pub fn setup() -> (&'static str, std::time::Duration, usize, bool) {
         }
     };
 
+    let page_limit = string_concat!("?per_page=", page_limit.to_string());
+    let query_base = "/wp-json/wp/v2/";
+
     // reverse query dip
     let query = match query {
-        1 => "/wp-json/wp/v2/posts?per_page=100",
-        2 => "/wp-json/wp/v2/pages?per_page=100",
-        3 => "/wp-json/wp/v2/users?per_page=100",
-        4 => "/wp-json/wp/v2/comments?per_page=100",
-        5 => "/wp-json/wp/v2/search?per_page=100",
-        _ => "/wp-json/wp/v2/posts?per_page=100",
+        1 => string_concat!(query_base, "posts", page_limit),
+        2 => string_concat!(query_base, "pages", page_limit),
+        3 => string_concat!(query_base, "users", page_limit),
+        4 => string_concat!(query_base, "comments", page_limit),
+        5 => string_concat!(query_base, "search", page_limit),
+        _ => string_concat!(query_base, "posts", page_limit),
     };
 
     (query, std::time::Duration::new(timeout, 0), buffer, proxy)

@@ -2,3 +2,4 @@ query posts
 timeout 15
 buffer 50
 proxy false
+page_limit 1

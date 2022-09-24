@@ -45,7 +45,7 @@ type Message = (String, (String, JsonOutFileType), bool);
 
 lazy_static! {
     /// application global configurations
-    pub static ref CONFIG: (&'static str, Duration, usize, bool) = setup();
+    pub static ref CONFIG: (String, Duration, usize, bool) = setup();
 }
 
 /// create a new file at path
