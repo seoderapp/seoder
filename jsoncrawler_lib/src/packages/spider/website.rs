@@ -46,10 +46,10 @@ pub type Message = (String, (String, JsonOutFileType), bool);
 
 lazy_static! {
     /// application global configurations
-    pub static ref CONFIG: (String, Duration, usize, bool) = setup();
+    pub static ref CONFIG: (String, Duration, usize, bool, Engine) = setup();
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 /// a boxed metric run, enabled if name found  is set
 pub struct Campaign {
     /// campaign name
@@ -60,7 +60,7 @@ pub struct Campaign {
     pub patterns: Vec<String>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 /// custom application engine
 pub struct Engine {
     /// campaign engine conf
@@ -151,9 +151,6 @@ impl Website {
 
     /// setup config for crawl
     pub async fn setup(&mut self) -> Client {
-        if !self.engine.campaign.name.is_empty() {
-            // setup custom campaign configurations
-        }
         self.configure_http_client().await
     }
 
@@ -229,6 +226,7 @@ impl Website {
                 let permit = semaphore.clone().acquire_owned().await.unwrap();
 
                 join_handles.push(tokio::spawn(async move {
+                    // todo: spawn / slow loop off paths
                     let json = fetch_page_html(&link, &client).await;
                     if let Err(_) = txxx.send((link, json, false)) {
                         log("receiver dropped", "");
@@ -247,7 +245,7 @@ impl Website {
         if std::env::var("ENGINE_FD").is_ok() {
             store_fs_io_matching(
                 &self.engine.campaign.name.to_string(),
-                vec![],
+                self.engine.campaign.patterns.to_owned(),
                 rx,
                 global_thread_count,
             )

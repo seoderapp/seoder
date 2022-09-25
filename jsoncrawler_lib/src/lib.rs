@@ -33,7 +33,11 @@ pub async fn crawl(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> 
             website.crawl().await;
         }
     } else {
-        let mut website: Website = Website::new("urls-input.txt");
+        let mut website: Website = Website::new(if std::env::var("ENGINE_FD").is_ok() {
+            "_engines_/campaigns/list.txt"
+        } else {
+            "urls-input.txt"
+        });
 
         website.crawl().await;
     }

@@ -90,6 +90,12 @@ buffer 100
 1. timeout - the max time a req can take.
 1. buffer - the channel buffer limit to control memory crashes.
 
+### Env
+
+The `ENGINE_FD` env variable enables the custom engine outside the base json crawler:
+
+example `ENGINE_FD=true cargo run -r`
+
 ## Proxies
 
 You can add proxies to the client by using the following:
