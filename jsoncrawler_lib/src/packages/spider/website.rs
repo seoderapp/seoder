@@ -53,10 +53,11 @@ lazy_static! {
 /// a boxed metric run, enabled if name found  is set
 pub struct Campaign {
     /// campaign name
-    pub name: String, // custom target paths
-                      // paths: Vec<String>
-                      // custom target patterns
-                      // patterns: Vec<String>
+    pub name: String,
+    /// custom target paths
+    pub paths: Vec<String>,
+    /// custom target patterns
+    pub patterns: Vec<String>,
 }
 
 #[derive(Debug, Default)]
@@ -245,7 +246,7 @@ impl Website {
 
         if std::env::var("ENGINE_FD").is_ok() {
             store_fs_io_matching(
-                &"_engines_/campaign/_c2/valid/list.txt".to_string(),
+                &self.engine.campaign.name.to_string(),
                 vec![],
                 rx,
                 global_thread_count,

@@ -98,7 +98,12 @@ pub async fn store_fs_io_matching(
 
     // outdirectory
     // output txt files
-    let mut o = create_file(&path).await;
+    let cmp_base = string_concat!("_engines_/campaign/", path);
+    tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
+    let cmp_base = string_concat!(&cmp_base, "/valid");
+    tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
+
+    let mut o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
 
     while let Some(i) = rx.recv().await {
         let (link, jor, spawned) = i;
