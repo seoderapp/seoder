@@ -96,6 +96,9 @@ pub async fn store_fs_io_matching(
     global_thread_count: Arc<Mutex<usize>>,
 ) {
     use regex::RegexSet;
+    use scraper::Html;
+    use scraper::Selector;
+
     let rgx = RegexSet::new(if !&patterns.is_empty() {
         &patterns
     } else {
@@ -109,6 +112,12 @@ pub async fn store_fs_io_matching(
 
     if tokio::fs::metadata(eg_c).await.is_ok() == false {
         tokio::fs::create_dir(&eg_c).await.unwrap_or_default();
+    }
+
+    lazy_static! {
+        static ref SELECTOR: Selector =
+            Selector::parse("body > *:not(script):not(noscript):not(css):not(style):not(link)")
+                .unwrap();
     }
 
     // if campaign is empty loop through all folders and spawn custom threads
@@ -151,11 +160,14 @@ pub async fn store_fs_io_matching(
                     continue;
                 }
 
-                let fdr = rgx.is_match(&response);
-                task::yield_now().await;
+                for element in Html::parse_document(&response).select(&SELECTOR) {
+                    let text = element.text().collect::<Vec<_>>();
+                    task::yield_now().await;
 
-                if fdr {
-                    o.write(&link.as_bytes()).await.unwrap();
+                    if rgx.is_match(&text.join("")) {
+                        o.write(&link.as_bytes()).await.unwrap();
+                        break;
+                    }
                 }
             }
         }
