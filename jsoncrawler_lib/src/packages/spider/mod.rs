@@ -26,6 +26,8 @@
 
 /// Configuration structure for `Website`.
 pub mod configuration;
+/// File system managers
+pub mod fs;
 /// Application utils.
 pub mod utils;
 /// A website to crawl.

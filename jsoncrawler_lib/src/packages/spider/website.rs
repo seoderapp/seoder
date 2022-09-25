@@ -1,17 +1,16 @@
 use super::configuration::{setup, Configuration};
+use super::fs::{store_fs_io, store_fs_io_matching};
 use super::utils::fetch_page_html;
 use super::utils::log;
 use super::JsonOutFileType;
 
-use jsonl::write;
 use reqwest::header::HeaderMap;
 use reqwest::Client;
-use serde_json::Value;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio;
 use tokio::fs::File;
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::sync::Semaphore;
 use tokio::task;
@@ -38,19 +37,33 @@ pub struct Website {
     pub cr_txt_output_path: String,
     /// Path to all other outputs.
     pub al_txt_output_path: String,
+    /// custom engine to run
+    pub engine: Engine,
 }
 
-// link, (res, code), spawned
-type Message = (String, (String, JsonOutFileType), bool);
+/// link, (res, code), spawned
+pub type Message = (String, (String, JsonOutFileType), bool);
 
 lazy_static! {
     /// application global configurations
     pub static ref CONFIG: (String, Duration, usize, bool) = setup();
 }
 
-/// create a new file at path
-async fn create_file(path: &String) -> File {
-    File::create(&path).await.unwrap()
+#[derive(Debug, Default)]
+/// a boxed metric run, enabled if name found  is set
+pub struct Campaign {
+    /// campaign name
+    pub name: String, // custom target paths
+                      // paths: Vec<String>
+                      // custom target patterns
+                      // patterns: Vec<String>
+}
+
+#[derive(Debug, Default)]
+/// custom application engine
+pub struct Engine {
+    /// campaign engine conf
+    pub campaign: Campaign,
 }
 
 impl Website {
@@ -64,6 +77,7 @@ impl Website {
             okv_txt_output_path: "ok-not_valid_json.txt".to_string(),
             cr_txt_output_path: "connection_error.txt".to_string(),
             al_txt_output_path: "all-others.txt".to_string(),
+            engine: Engine::default(),
         }
     }
 
@@ -136,6 +150,9 @@ impl Website {
 
     /// setup config for crawl
     pub async fn setup(&mut self) -> Client {
+        if !self.engine.campaign.name.is_empty() {
+            // setup custom campaign configurations
+        }
         self.configure_http_client().await
     }
 
@@ -150,8 +167,7 @@ impl Website {
     async fn crawl_concurrent(&mut self, client: Client) {
         let spawn_limit = CONFIG.2 * num_cpus::get();
         // full
-        let (tx, mut rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
-            unbounded_channel();
+        let (tx, rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) = unbounded_channel();
         // soft
         let (txx, mut rxx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
             unbounded_channel();
@@ -225,93 +241,29 @@ impl Website {
             }
         });
 
-        // output txt files
-        let (mut o, mut ok_t, mut okv_t, mut ce_t, mut al_t) = tokio::join!(
-            create_file(&self.jsonl_output_path),
-            create_file(&self.ok_txt_output_path),
-            create_file(&self.okv_txt_output_path),
-            create_file(&self.cr_txt_output_path),
-            create_file(&self.al_txt_output_path)
-        );
-
         task::yield_now().await;
 
-        // todo: config setup builder
-        let engine_find = std::env::var("ENGINE_FD").is_ok();
-        let engine_find_patterns = match std::env::var("ENGINE_FD_PATH") {
-            Ok(pat) => pat,
-            _ => "".to_string(),
-        };
-        // todo: find campaign running and get file
-        let mut en_c: Option<File> = if engine_find {
-            // todo: validate directory or auto generate new
-            Some(create_file(&"_engines_/campaign/_c2/valid/list.txt".to_string()).await)
+        if std::env::var("ENGINE_FD").is_ok() {
+            store_fs_io_matching(
+                &"_engines_/campaign/_c2/valid/list.txt".to_string(),
+                vec![],
+                rx,
+                global_thread_count,
+            )
+            .await;
         } else {
-            None
-        };
-        while let Some(i) = rx.recv().await {
-            let (link, jor, spawned) = i;
-            let (response, oo) = jor;
-
-            if spawned && *global_thread_count.lock().unwrap() > 0 {
-                *global_thread_count.lock().unwrap() -= 1;
-            }
-
-            let error = response.starts_with("- error ");
-            // detailed json message
-            let link = if error {
-                string_concat!(response.replacen("- error ", "", 1), "\n")
-            } else {
-                string_concat!(link, "\n")
-            };
-
-            if oo == JsonOutFileType::Error {
-                ce_t.write(&link.as_bytes()).await.unwrap();
-            }
-
-            if oo == JsonOutFileType::Unknown {
-                al_t.write(&link.as_bytes()).await.unwrap();
-            }
-
-            if response == "" || error {
-                continue;
-            }
-
-            // parse and find
-            if engine_find {
-                let f = &response.clone();
-
-                if f.contains(&engine_find_patterns) {
-                    en_c.as_mut()
-                        .unwrap()
-                        .write(&link.as_bytes())
-                        .await
-                        .unwrap();
-                }
-
-                continue;
-            }
-
-            // json program continue
-
-            let j: Value = serde_json::from_str(&response).unwrap_or_default();
-            task::yield_now().await;
-
-            if !j.is_null() {
-                match write(&mut o, &j).await {
-                    Ok(_) => {
-                        log("wrote jsonl = {}", &link);
-                        ok_t.write(&link.as_bytes()).await.unwrap();
-                    }
-                    _ => {
-                        log("failed to write jsonl = {}", &link);
-                        okv_t.write(&link.as_bytes()).await.unwrap();
-                    }
-                }
-            } else {
-                log("The file is not valid json = {}", &link);
-                okv_t.write(&link.as_bytes()).await.unwrap();
-            }
+            store_fs_io(
+                (
+                    &self.jsonl_output_path,
+                    &self.ok_txt_output_path,
+                    &self.okv_txt_output_path,
+                    &self.cr_txt_output_path,
+                    &self.al_txt_output_path,
+                ),
+                rx,
+                global_thread_count,
+            )
+            .await;
         }
 
         soft_spawn.await.unwrap();

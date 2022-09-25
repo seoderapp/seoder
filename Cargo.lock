@@ -861,6 +861,7 @@ dependencies = [
  "log",
  "num_cpus",
  "percent-encoding",
+ "regex",
  "reqwest",
  "scraper",
  "serde_json",
