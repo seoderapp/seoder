@@ -5,12 +5,12 @@
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 use jsoncrawler_lib::tokio::sync::mpsc::unbounded_channel;
+use jsoncrawler_lib::Website;
 use sysinfo::{System, SystemExt};
-
 use tungstenite::{Message, Result};
 
 use crate::string_concat::string_concat_impl;
-use jsoncrawler_lib::packages::spider::utils::logd;
+use jsoncrawler_lib::packages::spider::utils::{log, logd};
 use jsoncrawler_lib::{serde_json, string_concat, tokio};
 
 use std::io::{Error as IoError, Write};
@@ -54,6 +54,11 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
 
     let (tx, _) = unbounded();
     peer_map.lock().unwrap().insert(addr, tx);
+
+    let (txx, mut rxx): (
+        tokio::sync::mpsc::UnboundedSender<String>,
+        tokio::sync::mpsc::UnboundedReceiver<String>,
+    ) = unbounded_channel();
 
     let p = peer_map.clone();
 
@@ -122,15 +127,6 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
         // remove newline
         let ms = txt.trim();
 
-        // start the feed stats
-        if ms == "feed" {
-            tokio::spawn(async move {
-                if let Err(_) = sender.send(1) {
-                    println!("the receiver dropped");
-                }
-            });
-        }
-
         let hh = ms.split(" ").collect::<Vec<&str>>();
 
         // validate crud messages
@@ -140,11 +136,18 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
             ("", "")
         };
 
+        // start the feed stats
+        if ms == "feed" {
+            tokio::spawn(async move {
+                if let Err(_) = sender.send(1) {
+                    logd("the receiver dropped");
+                }
+            });
+        }
         // create new campaign to store crawl results
-        if c == "create-campaign" {
+        else if c == "create-campaign" {
             let cf = cc.to_owned();
             tokio::spawn(async move {
-                // use crate::tokio::fs::File;
                 use crate::string_concat::string_concat;
                 let campaign_dir = string_concat!("_engines_/campaign/", cf);
 
@@ -156,18 +159,28 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
                     .await
                     .unwrap();
             });
-        }
-
-        if c == "run-campaign" {
-            tokio::spawn(async move {
-                println!("WIP todo");
-            });
+        } else if c == "run-campaign" {
+            let txx = txx.clone();
+            let cc = cc.to_owned();
+            if let Err(_) = txx.send(cc) {
+                logd("receiver dropped");
+            }
         }
 
         future::ok(())
     });
 
-    // inputs received to the reqwest
+    while let Some(input) = rxx.recv().await {
+        let input = input.clone();
+        let mut website: Website = Website::new(&input);
+
+        tokio::spawn(async move {
+            website.crawl().await;
+            log("crawl finished - ", &input)
+        });
+    }
+
+    // inputs received to the request possible to broadcast all
     pin_mut!(broadcast_incoming);
     broadcast_incoming.await.unwrap_or_default();
 

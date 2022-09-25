@@ -226,7 +226,6 @@ impl Website {
                 let permit = semaphore.clone().acquire_owned().await.unwrap();
 
                 join_handles.push(tokio::spawn(async move {
-                    // todo: spawn / slow loop off paths
                     let json = fetch_page_html(&link, &client).await;
                     if let Err(_) = txxx.send((link, json, false)) {
                         log("receiver dropped", "");
