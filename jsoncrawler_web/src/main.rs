@@ -174,6 +174,11 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
         future::ok(())
     });
 
+    // inputs received to the request possible to broadcast all
+    pin_mut!(broadcast_incoming);
+
+    broadcast_incoming.await.unwrap_or_default();
+
     while let Some(input) = rxx.recv().await {
         let input = input.clone();
         let mut website: Website = Website::new(&input);
@@ -183,10 +188,6 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
             log("crawl finished - ", &input)
         });
     }
-
-    // inputs received to the request possible to broadcast all
-    pin_mut!(broadcast_incoming);
-    broadcast_incoming.await.unwrap_or_default();
 
     logd(string_concat::string_concat!(
         &addr.to_string(),
