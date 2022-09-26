@@ -133,13 +133,19 @@ pub const RAW_JS: &'static str = r#"
   });
   
   eform.addEventListener("submit", (event) => {
-    const engine = cform.querySelector('input[name="ename"]');
+    const engine = eform.querySelector('input[name="ename"]');
+    const epaths = eform.querySelector('input[name="epaths"]');
+    const epatterns = eform.querySelector('input[name="epatterns"]');
+
     if (engine && engine.value) {
-      socket.send("create-engine " + campaign.value);
-      // socket.send("list-engines");
+      const m = JSON.stringify({ name: engine.value, paths: epaths.value, patterns: epatterns.value });
+      socket.send("create-engine " + m);
+      socket.send("list-engines");
     } else {
       window.alert("Please enter a engine name");
     }
+    event.preventDefault();
+
   });
 
 </script>

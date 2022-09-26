@@ -4,6 +4,7 @@
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
+use crate::string_concat::string_concat;
 use jsoncrawler_lib::packages::spider::configuration::setup;
 use jsoncrawler_lib::tokio::sync::mpsc::unbounded_channel;
 use jsoncrawler_lib::Website;
@@ -12,12 +13,14 @@ use sysinfo::{System, SystemExt};
 use tokio::fs::OpenOptions;
 use tungstenite::{Message, Result};
 
+use crate::serde_json::Value;
 use crate::string_concat::string_concat_impl;
-use jsoncrawler_lib::packages::spider::utils::{log, logd};
-use jsoncrawler_lib::{serde_json, string_concat, tokio};
-
+use crate::tokio::fs::File;
 use futures_util::SinkExt;
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
+use jsoncrawler_lib::packages::spider::utils::{log, logd};
+use jsoncrawler_lib::tokio::io::AsyncWriteExt;
+use jsoncrawler_lib::{serde_json, string_concat, tokio};
 use std::io::Error as IoError;
 use std::{
     collections::HashMap,
@@ -163,7 +166,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         let dpt = child.path().to_str().unwrap().to_owned();
 
                         if !dpt.ends_with("/valid") {
-                            use crate::string_concat::string_concat;
                             use crate::tokio::io::BufReader;
                             use jsoncrawler_lib::tokio::io::AsyncBufReadExt;
                             let file = OpenOptions::new()
@@ -246,7 +248,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         else if c == "create-campaign" {
             let cf = cc.to_owned();
             tokio::spawn(async move {
-                use crate::string_concat::string_concat;
                 let campaign_dir = string_concat!("_db/campaigns/", cf);
 
                 tokio::fs::create_dir(&campaign_dir).await.unwrap();
@@ -283,6 +284,49 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     logd("the receiver dropped");
                 }
             });
+        } else if c == "create-engine" {
+            let v: Value = serde_json::from_str(cc).unwrap_or_default();
+
+            let n = v["name"].as_str().unwrap_or_default();
+
+            if n.is_empty() == false {
+                let db_dir = string_concat!("_engines_/", n);
+                let pt = v["paths"].as_str().unwrap_or_default();
+                let pat = v["patterns"].as_str().unwrap_or_default();
+
+                let mut v: Vec<u8> = vec![];
+                let mut vv: Vec<u8> = vec![];
+
+                pt.split(',').for_each(|x| {
+                    let x = string_concat!(x, "\n");
+
+                    v.push(x.as_bytes()[0]);
+                });
+
+                pat.split(',').for_each(|x| {
+                    let x = string_concat!(x, "\n");
+
+                    vv.push(x.as_bytes()[0]);
+                });
+
+                tokio::task::spawn(async move {
+                    tokio::fs::create_dir(&db_dir).await.unwrap();
+
+                    let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
+                        .await
+                        .unwrap();
+
+                    file.write_all(&v).await.unwrap();
+
+                    let mut file = File::create(string_concat!(db_dir, "/patterns.txt"))
+                        .await
+                        .unwrap();
+                    file.write_all(&vv).await.unwrap();
+                });
+                if let Err(_) = sender.send(2) {
+                    logd("the receiver dropped");
+                }
+            }
         }
 
         future::ok(())
