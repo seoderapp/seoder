@@ -109,3 +109,17 @@ someproxy.com
 ## Benches
 
 Run benchmarks by using `cargo bench`.
+
+## Web
+
+To run the web server use the command `RUST_LOG=info cargo run --package jsoncrawler_web`.
+
+### Browser
+
+Navigate to `127.0.0.1:3000` to view the UI panel for the project.
+
+### Client
+
+The native client can be used to interact with the web server by running `RUST_LOG=info cargo run --package jsoncrawler_client`.
+
+The RUST_LOG env variable is optional.
