@@ -45,12 +45,9 @@ pub fn raw_html() -> &'static str {
             <input name="cname" placeholder="Big event" type="text" class="form-control" />
           </div>
 
-          <div>
-            <h4>(WIP) Engines</h4>
-            <div class="form-control">
-              <label for="eselect">_1</label>
-              <input name="eselect" value="_1" type="radio" />
-            </div>
+          <div class="box">
+            <h4 class="gutter">Engines</h4>
+            <div class="form-control" id="engine-select"></div>
           </div>
 
           <div class="seperator"></div>
@@ -67,7 +64,6 @@ pub fn raw_html() -> &'static str {
     <div class="card">
       <div class="card-body">
         <h3>Create Engine</h3>
-        <h4>WIP</h4>
         <form id="eform">
           <label for="ename">Name</label>
           <input name="ename" placeholder="Vanalla, starship, and etc" type="text" class="form-control" />

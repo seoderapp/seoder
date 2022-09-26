@@ -7,8 +7,8 @@ pub const RAW_CSS: &'static str = r#"
     font-family: system-ui, Helvetica;
   }
 
-  h4,h5,h6 {
-    padding: 0;
+  h3,h4,h5,h6 {
+    padding: 0 0 0.4rem 0;
     margin: 0;
   }
 
@@ -162,6 +162,10 @@ pub const RAW_CSS: &'static str = r#"
   .stats-box {
     border: 1px solid #ccc;
     padding: 0.5rem;
+  }
+
+  .box {
+    padding: 0.3rem;
   }
 
 </style>

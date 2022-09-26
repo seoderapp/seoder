@@ -93,6 +93,36 @@ pub const RAW_JS: &'static str = r#"
           cellTitle.textContent = path;          
           cell.appendChild(cellTitle);
           list.appendChild(cell);
+
+          const engineSelect = document.getElementById("engine-select");
+
+          const eKeys = Object.keys(engineMap);
+
+          eKeys.forEach((key) => {
+            const inputName = "eselect" + key;
+            
+            const item = document.getElementById("ekeys_" + key);
+
+            if (!item) {
+              const cellContainer = document.createElement("div");
+              const cellLabel = document.createElement("label");
+              const cellSelect = document.createElement("input");
+              cellContainer.id = "ekeys_" + key;
+  
+              cellLabel.htmlFor = inputName;          
+              cellSelect.name = inputName;
+              cellSelect.value = key;
+              cellSelect.type = "radio";
+  
+              cellLabel.innerText = key;
+              cellContainer.appendChild(cellLabel);
+              cellContainer.appendChild(cellSelect);
+              engineSelect.appendChild(cellContainer);
+            }
+          });
+
+
+     
       }
       return;
     }
