@@ -14,12 +14,12 @@ pub struct Configuration {
 }
 
 /// configure application program api path, timeout, channel buffer, and proxy
-pub fn setup() -> (String, std::time::Duration, usize, bool, Engine) {
+pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
     use std::fs::File;
     use std::io::prelude::*;
     use std::io::BufReader;
 
-    let eg_enabled = std::env::var("ENGINE_FD").is_ok();
+    let eg_enabled = std::env::var("ENGINE_FD").is_ok() || eg;
 
     let mut query = if !eg_enabled { 1 } else { 6 };
     let mut timeout: u64 = 15;

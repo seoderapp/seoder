@@ -18,8 +18,21 @@ use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::task;
 
 /// create a new file at path
-pub async fn create_file(path: &String) -> File {
+pub async fn create_file(path: &str) -> File {
     File::create(&path).await.unwrap()
+}
+
+/// replace extra base adding
+fn repb(a: &str) -> String {
+    if a.starts_with("_engines_/campaigns/_engines_/campaigns/") {
+        a.replace(
+            "_engines_/campaigns/_engines_/campaigns/",
+            "_engines_/campaigns/",
+        )
+        .to_string()
+    } else {
+        a.to_string()
+    }
 }
 
 /// store the content to file system
@@ -110,7 +123,7 @@ pub async fn store_fs_io_matching(
     let eg_c = "_engines_/campaigns/";
 
     if tokio::fs::metadata(eg_c).await.is_ok() == false {
-        tokio::fs::create_dir(&eg_c).await.unwrap_or_default();
+        tokio::fs::create_dir(&repb(eg_c)).await.unwrap_or_default();
     }
 
     lazy_static! {
@@ -135,7 +148,9 @@ pub async fn store_fs_io_matching(
                 continue;
             }
 
-            tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
+            tokio::fs::create_dir(&repb(&cmp_base))
+                .await
+                .unwrap_or_default();
 
             let mut o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
 
@@ -196,11 +211,18 @@ pub async fn store_fs_io_matching(
         }
     } else {
         let cmp_base = string_concat!("_engines_/campaigns/", path);
-        tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
-        let cmp_base = string_concat!(&cmp_base, "/valid");
-        tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
 
-        let mut o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
+        tokio::fs::create_dir(&repb(&cmp_base))
+            .await
+            .unwrap_or_default();
+        let cmp_base = string_concat!(&cmp_base, "/valid");
+        tokio::fs::create_dir(&repb(&cmp_base))
+            .await
+            .unwrap_or_default();
+
+        let od = string_concat!(&cmp_base, "/links.txt");
+
+        let mut o = create_file(&repb(&od)).await;
 
         while let Some(i) = rx.recv().await {
             let (link, jor, spawned) = i;

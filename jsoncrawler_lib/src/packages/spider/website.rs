@@ -46,7 +46,7 @@ pub type Message = (String, (String, JsonOutFileType), bool);
 
 lazy_static! {
     /// application global configurations
-    pub static ref CONFIG: (String, Duration, usize, bool, Engine) = setup();
+    pub static ref CONFIG: (String, Duration, usize, bool, Engine) = setup(false);
 }
 
 #[derive(Debug, Default, Clone)]
@@ -72,7 +72,11 @@ impl Website {
     pub fn new(domain: &str) -> Self {
         Self {
             configuration: Configuration::new(),
-            path: domain.to_string(),
+            path: if !domain.is_empty() {
+                domain.to_string()
+            } else {
+                "urls-input.txt".to_string()
+            },
             jsonl_output_path: "output.jsonl".to_string(),
             ok_txt_output_path: "ok-valid_json.txt".to_string(),
             okv_txt_output_path: "ok-not_valid_json.txt".to_string(),
@@ -241,9 +245,11 @@ impl Website {
 
         task::yield_now().await;
 
-        if std::env::var("ENGINE_FD").is_ok() {
+        let cpnm = &self.engine.campaign.name.to_string();
+
+        if std::env::var("ENGINE_FD").is_ok() || cpnm.is_empty() == false {
             store_fs_io_matching(
-                &self.engine.campaign.name.to_string(),
+                cpnm,
                 self.engine.campaign.patterns.to_owned(),
                 rx,
                 global_thread_count,

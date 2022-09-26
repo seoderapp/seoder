@@ -1,2 +1,2 @@
-/// web panel interface
-pub mod panel_handle;
+/// web panel static html
+pub mod panel;

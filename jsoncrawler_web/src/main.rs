@@ -4,20 +4,21 @@
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
+use jsoncrawler_lib::packages::spider::configuration::setup;
 use jsoncrawler_lib::tokio::sync::mpsc::unbounded_channel;
 use jsoncrawler_lib::Website;
+
 use sysinfo::{System, SystemExt};
+use tokio::fs::OpenOptions;
 use tungstenite::{Message, Result};
 
 use crate::string_concat::string_concat_impl;
 use jsoncrawler_lib::packages::spider::utils::{log, logd};
 use jsoncrawler_lib::{serde_json, string_concat, tokio};
 
-use futures_channel::mpsc::{unbounded, UnboundedSender};
 use futures_util::SinkExt;
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 use std::io::{Error as IoError, Write};
-use std::time::Duration;
 use std::{
     collections::HashMap,
     convert::Infallible,
@@ -32,12 +33,12 @@ use tokio::net::{TcpListener, TcpStream};
 
 use crate::serde_json::json;
 
-mod panel_html;
+mod panel;
 
-type Tx = UnboundedSender<Message>;
+type Tx = futures_channel::mpsc::UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
 
-async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
+async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
     logd(string_concat::string_concat!(
         "TCP connection from: ",
         &addr.to_string()
@@ -56,40 +57,33 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
 
     let (sender, mut receiver) = unbounded_channel();
 
-    let (tx, _) = unbounded();
-    peer_map.lock().unwrap().insert(addr, tx);
-
     let (txx, mut rxx): (
         tokio::sync::mpsc::UnboundedSender<String>,
         tokio::sync::mpsc::UnboundedReceiver<String>,
     ) = unbounded_channel();
 
-    let p = peer_map.clone();
-
     let handle = tokio::spawn(async move {
         use sysinfo::CpuExt;
         use sysinfo::NetworkExt;
-        let mut interval = tokio::time::interval(Duration::from_millis(1000));
         let mut s = System::new_all();
+        // let mut interval = tokio::time::interval(Duration::from_millis(1000));
 
-        match receiver.recv().await {
-            Some(1) => {
-                loop {
-                    interval.tick().await;
+        while let Some(st) = receiver.recv().await {
+            if st == 1 {
+                s.refresh_all();
 
-                    s.refresh_all();
+                let mut net_total_received = 0;
+                let mut net_total_transmited = 0;
 
-                    let mut net_total_received = 0;
-                    let mut net_total_transmited = 0;
+                let networks = s.networks();
 
-                    let networks = s.networks();
+                for (_, data) in networks {
+                    net_total_received += data.received();
+                    net_total_transmited += data.transmitted();
+                }
 
-                    for (_, data) in networks {
-                        net_total_received += data.received();
-                        net_total_transmited += data.transmitted();
-                    }
-
-                    let v = json!({
+                let v = json!({
+                    "stats": {
                         // network
                         "network_received": net_total_received,
                         "network_transmited": net_total_transmited,
@@ -102,38 +96,112 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
                         "memory_used": s.used_memory(),
                         "memory_available": s.available_memory(),
                         "memory_free": s.free_memory()
-                    });
-                    tokio::task::yield_now().await;
-                    // println!("feed in progress {:?}", &v);
-
-                    outgoing
-                        .send(Message::Text(v.to_string().into()))
-                        .await
-                        .unwrap_or_default();
-
-                    if !p.lock().unwrap().contains_key(&addr) {
-                        break;
                     }
-                }
-            }
-            Some(2) => {
-                // stream iterate list campaigns to client
+                });
+
+                tokio::task::yield_now().await;
+
                 outgoing
-                    .send(Message::Text("campaigns list todo!".to_string().into()))
+                    .send(Message::Text(v.to_string()))
                     .await
                     .unwrap_or_default();
             }
-            _ => println!("the sender dropped"),
-        };
+
+            // list all websites
+            if st == 2 {
+                let mut dir = tokio::fs::read_dir("_engines_/campaigns").await.unwrap();
+
+                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
+                    if child.metadata().await.unwrap().is_dir() {
+                        let dpt = child.path().to_str().unwrap().to_owned();
+                        if !dpt.ends_with("/valid") {
+                            let v = json!({ "path": dpt });
+                            outgoing
+                                .send(Message::Text(v.to_string()))
+                                .await
+                                .unwrap_or_default();
+                        }
+                    }
+                }
+            }
+
+            // run campaigns
+            if st == 3 {
+                let mut dir = tokio::fs::read_dir("_engines_/campaigns").await.unwrap();
+
+                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
+                    if child.metadata().await.unwrap().is_dir() {
+                        let dpt = child.path().to_str().unwrap().to_owned();
+                        if !dpt.ends_with("/valid") {
+                            let (_, __, ___, ____, engine) = setup(true);
+                            tokio::task::yield_now().await;
+                            let mut website: Website = Website::new(&"urls-input.txt");
+                            website.engine.campaign.name = dpt;
+                            website.engine.campaign.paths = engine.campaign.paths;
+                            website.engine.campaign.patterns = engine.campaign.patterns;
+
+                            tokio::spawn(async move {
+                                website.crawl().await;
+                                log("crawl finished - ", &website.engine.campaign.name)
+                            });
+                            // let v = json!({ "path": dpt });
+                            // outgoing
+                            //     .send(Message::Text(v.to_string()))
+                            //     .await
+                            //     .unwrap_or_default();
+                        }
+                    }
+                }
+            }
+
+            if st == 4 {
+                let mut dir = tokio::fs::read_dir("_engines_/campaigns").await.unwrap();
+
+                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
+                    if child.metadata().await.unwrap().is_dir() {
+                        let dpt = child.path().to_str().unwrap().to_owned();
+
+                        if !dpt.ends_with("/valid") {
+                            use crate::string_concat::string_concat;
+                            use crate::tokio::io::BufReader;
+                            use jsoncrawler_lib::tokio::io::AsyncBufReadExt;
+                            let file = OpenOptions::new()
+                                .read(true)
+                                .open(string_concat!(dpt, "/valid/links.txt"))
+                                .await
+                                .expect("Failed to open file");
+                            let reader = BufReader::new(file);
+
+                            let mut lines = reader.lines();
+
+                            let mut lns = 0;
+
+                            while let Some(_) = lines.next_line().await.unwrap() {
+                                lns += 1;
+                            }
+
+                            let v = json!({ "count": lns, "path": dpt.replacen("_engines_/campaigns/", "", 1) });
+
+                            outgoing
+                                .send(Message::Text(v.to_string()))
+                                .await
+                                .unwrap_or_default();
+                        }
+                    }
+                }
+            }
+        }
     });
 
+    tokio::task::yield_now().await;
+
     let broadcast_incoming = incoming.try_for_each(|msg| {
-        let mut lock = std::io::stdout().lock();
         let m = msg.clone();
         let txt = m.to_text().unwrap();
         let sender = sender.clone();
 
-        writeln!(lock, "Received a message from {}: {}", &addr, &txt).unwrap();
+        // let mut lock = std::io::stdout().lock();
+        // writeln!(lock, "Received a message from {}: {}", &addr, &txt).unwrap();
 
         // remove newline
         let ms = txt.trim();
@@ -144,16 +212,14 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
         let (c, cc) = if hh.len() == 2 {
             (hh[0], hh[1])
         } else {
-            ("", "")
+            (ms, "")
         };
 
         // start the feed stats
-        if ms == "feed" {
-            tokio::spawn(async move {
-                if let Err(_) = sender.send(1) {
-                    logd("the receiver dropped");
-                }
-            });
+        if c == "feed" {
+            if let Err(_) = sender.send(1) {
+                logd("the receiver dropped");
+            }
         }
         // create new campaign to store crawl results
         else if c == "create-campaign" {
@@ -166,6 +232,9 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
                 tokio::fs::create_dir(&string_concat!(campaign_dir, "/valid"))
                     .await
                     .unwrap();
+                if let Err(_) = sender.send(2) {
+                    logd("the receiver dropped");
+                }
             });
         } else if c == "run-campaign" {
             let txx = txx.clone();
@@ -174,17 +243,19 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
                 logd("receiver dropped");
             }
         } else if c == "list-campaigns" {
-            tokio::spawn(async move {
-                if let Err(_) = sender.send(2) {
+            if let Err(_) = sender.send(2) {
+                logd("the receiver dropped");
+            }
+        } else if ms == "run-all-campaigns" {
+            if let Err(_) = sender.send(3) {
+                logd("the receiver dropped");
+            }
+        } else if c == "list-campaign-stats" {
+            tokio::task::spawn(async move {
+                if let Err(_) = sender.send(4) {
                     logd("the receiver dropped");
                 }
             });
-        } else if c == "run-all-campaigns" {
-            // tokio::spawn(async move {
-            //     if let Err(_) = sender.send(3) {
-            //         logd("the receiver dropped");
-            //     }
-            // });
         }
 
         future::ok(())
@@ -195,13 +266,19 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
 
     broadcast_incoming.await.unwrap_or_default();
 
+    // run direct campaign
     while let Some(input) = rxx.recv().await {
+        let (_, __, ___, ____, engine) = setup(true);
+        tokio::task::yield_now().await;
         let input = input.clone();
-        let mut website: Website = Website::new(&input);
+        let mut website: Website = Website::new(&"urls-input.txt");
+        website.engine.campaign.name = input;
+        website.engine.campaign.paths = engine.campaign.paths;
+        website.engine.campaign.patterns = engine.campaign.patterns;
 
         tokio::spawn(async move {
             website.crawl().await;
-            log("crawl finished - ", &input)
+            log("crawl finished - ", &website.engine.campaign.name)
         });
     }
 
@@ -209,8 +286,6 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
         &addr.to_string(),
         " disconnected"
     ));
-
-    peer_map.lock().unwrap().remove(&addr);
 
     handle.await.unwrap();
 }
@@ -237,7 +312,7 @@ async fn main() -> Result<(), IoError> {
         let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
         let make_svc = make_service_fn(|_conn| async {
-            Ok::<_, Infallible>(service_fn(panel_html::panel_handle))
+            Ok::<_, Infallible>(service_fn(panel::panel_html::panel_handle))
         });
 
         if let Err(e) = Server::bind(&addr).serve(make_svc).await {
