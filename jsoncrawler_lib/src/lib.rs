@@ -20,6 +20,7 @@ extern crate lazy_static;
 
 pub use packages::spider::website::Website;
 
+/// crawl executed with args vec list
 pub async fn crawl(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     // list of file paths to run against
     if args.len() >= 2 {
@@ -33,11 +34,7 @@ pub async fn crawl(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> 
             website.crawl().await;
         }
     } else {
-        let mut website: Website = Website::new(if std::env::var("ENGINE_FD").is_ok() {
-            "_engines_/campaigns/list.txt"
-        } else {
-            "urls-input.txt"
-        });
+        let mut website: Website = Website::new("urls-input.txt");
 
         website.crawl().await;
     }

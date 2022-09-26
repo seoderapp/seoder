@@ -24,12 +24,9 @@ pub async fn create_file(path: &str) -> File {
 
 /// replace extra base adding
 fn repb(a: &str) -> String {
-    if a.starts_with("_engines_/campaigns/_engines_/campaigns/") {
-        a.replace(
-            "_engines_/campaigns/_engines_/campaigns/",
-            "_engines_/campaigns/",
-        )
-        .to_string()
+    if a.starts_with("_db/campaigns/_db/campaigns/") {
+        a.replace("_db/campaigns/_db/campaigns/", "_db/campaigns/")
+            .to_string()
     } else {
         a.to_string()
     }
@@ -120,7 +117,7 @@ pub async fn store_fs_io_matching(
 
     task::yield_now().await;
 
-    let eg_c = "_engines_/campaigns/";
+    let eg_c = "_db/campaigns/";
 
     if tokio::fs::metadata(eg_c).await.is_ok() == false {
         tokio::fs::create_dir(&repb(eg_c)).await.unwrap_or_default();
@@ -210,7 +207,7 @@ pub async fn store_fs_io_matching(
             }
         }
     } else {
-        let cmp_base = string_concat!("_engines_/campaigns/", path);
+        let cmp_base = string_concat!("_db/campaigns/", path);
 
         tokio::fs::create_dir(&repb(&cmp_base))
             .await

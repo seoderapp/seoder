@@ -98,7 +98,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
     // get paths * patterns
     if eg_enabled {
         // build file paths
-        match File::open("_engines_/campaigns/paths.txt") {
+        match File::open("_engines_/paths.txt") {
             Ok(file) => {
                 let reader = BufReader::new(file);
                 let lines = reader.lines();
@@ -115,7 +115,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
             }
         };
 
-        match File::open("_engines_/campaigns/patterns.txt") {
+        match File::open("_engines_/patterns.txt") {
             Ok(file) => {
                 let reader = BufReader::new(file);
                 let lines = reader.lines();
