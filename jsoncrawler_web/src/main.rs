@@ -73,7 +73,7 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
         let mut s = System::new_all();
 
         match receiver.recv().await {
-            Some(_) => {
+            Some(1) => {
                 loop {
                     interval.tick().await;
 
@@ -116,6 +116,13 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
                     }
                 }
             }
+            Some(2) => {
+                // stream iterate list campaigns to client
+                outgoing
+                    .send(Message::Text("campaigns list todo!".to_string().into()))
+                    .await
+                    .unwrap_or_default();
+            }
             _ => println!("the sender dropped"),
         };
     });
@@ -153,13 +160,10 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
             let cf = cc.to_owned();
             tokio::spawn(async move {
                 use crate::string_concat::string_concat;
-                let campaign_dir = string_concat!("_engines_/campaign/", cf);
+                let campaign_dir = string_concat!("_engines_/campaigns/", cf);
 
                 tokio::fs::create_dir(&campaign_dir).await.unwrap();
                 tokio::fs::create_dir(&string_concat!(campaign_dir, "/valid"))
-                    .await
-                    .unwrap();
-                tokio::fs::create_dir(&string_concat!(campaign_dir, "/invalid"))
                     .await
                     .unwrap();
             });
@@ -169,6 +173,18 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
             if let Err(_) = txx.send(cc) {
                 logd("receiver dropped");
             }
+        } else if c == "list-campaigns" {
+            tokio::spawn(async move {
+                if let Err(_) = sender.send(2) {
+                    logd("the receiver dropped");
+                }
+            });
+        } else if c == "run-all-campaigns" {
+            // tokio::spawn(async move {
+            //     if let Err(_) = sender.send(3) {
+            //         logd("the receiver dropped");
+            //     }
+            // });
         }
 
         future::ok(())

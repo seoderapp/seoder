@@ -20,9 +20,9 @@ fn raw_html() -> &'static str {
     
         <div>
           <h3>Create Campaigns</h3>
-          <form>
-            <label>Campaign name</label>
-            <input placeholder="Name" />
+          <form id="cform">
+            <label for="cname">Campaign name</label>
+            <input name="cname" placeholder="Name" type="text" />
             <button type="submit">Submit</button>
           </form>
         </div>
@@ -50,9 +50,21 @@ fn raw_html() -> &'static str {
           const stats = document.getElementById("feed-stats");
 
           socket.addEventListener("message", (event) => {
-            console.log("inc: ", event.data);
             stats.innerHTML = event.data;
           });
+
+          const cform = document.getElementById("cform");
+
+          cform.addEventListener("submit", (event) => {
+            const campaign = cform.querySelector('input[name="cname"]');
+            if (campaign && campaign.value) {
+              socket.send("create-campaign " + campaign.value);
+            } else {
+              window.alert("Please enter a campaign name");
+            }
+            event.preventDefault();
+          });
+
         </script>
       </body>
     </html>    
