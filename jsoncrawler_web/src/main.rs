@@ -13,22 +13,26 @@ use crate::string_concat::string_concat_impl;
 use jsoncrawler_lib::packages::spider::utils::{log, logd};
 use jsoncrawler_lib::{serde_json, string_concat, tokio};
 
+use futures_channel::mpsc::{unbounded, UnboundedSender};
+use futures_util::SinkExt;
+use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 use std::io::{Error as IoError, Write};
 use std::time::Duration;
 use std::{
     collections::HashMap,
+    convert::Infallible,
     env,
     net::SocketAddr,
     sync::{Arc, Mutex},
 };
 
-use futures_channel::mpsc::{unbounded, UnboundedSender};
-use futures_util::SinkExt;
-use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
-
+use hyper::service::{make_service_fn, service_fn};
+use hyper::Server;
 use tokio::net::{TcpListener, TcpStream};
 
 use crate::serde_json::json;
+
+mod panel_html;
 
 type Tx = UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
@@ -202,12 +206,29 @@ async fn main() -> Result<(), IoError> {
         .nth(1)
         .unwrap_or_else(|| "127.0.0.1:8080".to_string());
 
+    let client_port = env::args().nth(2).unwrap_or_else(|| "3000".to_string());
+
     let state = PeerMap::new(Mutex::new(HashMap::new()));
 
     let try_socket = TcpListener::bind(&addr).await;
     let listener = try_socket.expect("Failed to bind");
 
-    println!("Listening on: {}", &addr);
+    // http server
+    tokio::spawn(async move {
+        let port = client_port.parse::<u16>().unwrap_or(3000);
+        // todo allow custom http address
+        let addr = SocketAddr::from(([127, 0, 0, 1], port));
+
+        let make_svc = make_service_fn(|_conn| async {
+            Ok::<_, Infallible>(service_fn(panel_html::panel_handle))
+        });
+
+        if let Err(e) = Server::bind(&addr).serve(make_svc).await {
+            eprintln!("server error: {}. Port not found {}", e, port);
+        }
+    });
+
+    println!("Listening on: {} and 127.0.0.1:3000", &addr);
 
     while let Ok((stream, addr)) = listener.accept().await {
         tokio::spawn(handle_connection(state.clone(), stream, addr));

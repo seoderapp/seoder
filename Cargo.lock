@@ -878,6 +878,7 @@ dependencies = [
  "env_logger",
  "futures-channel",
  "futures-util",
+ "hyper",
  "jemalloc-sys",
  "jemallocator",
  "jsoncrawler_lib",
