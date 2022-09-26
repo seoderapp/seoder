@@ -38,7 +38,7 @@ pub const RAW_JS: &'static str = r#"
     if (raw.startsWith("{" + '"' + "stats")) {
       const data = JSON.parse(event.data);
       const {stats} = data;
-      console.log(stats)
+
       cpu.innerHTML = stats.cpu_usage.toFixed(2);
       cpua.innerHTML = "1 min Average " + stats.load_avg_min.toFixed(2);
 
@@ -139,6 +139,7 @@ pub const RAW_JS: &'static str = r#"
 
     if (engine && engine.value) {
       const m = JSON.stringify({ name: engine.value, paths: epaths.value, patterns: epatterns.value });
+
       socket.send("create-engine " + m);
       socket.send("list-engines");
     } else {

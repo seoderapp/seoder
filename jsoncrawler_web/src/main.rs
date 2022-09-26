@@ -13,7 +13,8 @@ use sysinfo::{System, SystemExt};
 use tokio::fs::OpenOptions;
 use tungstenite::{Message, Result};
 
-use crate::serde_json::Value;
+use serde::{Deserialize, Serialize};
+
 use crate::string_concat::string_concat_impl;
 use crate::tokio::fs::File;
 use futures_util::SinkExt;
@@ -40,6 +41,14 @@ mod panel;
 
 type Tx = futures_channel::mpsc::UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
+
+/// new engine
+#[derive(Serialize, Deserialize, Debug, Default)]
+struct Eng {
+    name: String,
+    paths: String,
+    patterns: String,
+}
 
 async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
     logd(string_concat::string_concat!(
@@ -229,14 +238,26 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         // remove newline
         let ms = txt.trim();
 
-        let hh = ms.split(" ").collect::<Vec<&str>>();
+        let mut p1 = false;
 
-        // validate crud messages
-        let (c, cc) = if hh.len() == 2 {
-            (hh[0], hh[1])
-        } else {
-            (ms, "")
-        };
+        let mut s = "".to_string();
+        let mut ss = "".to_string();
+
+        for c in ms.chars().into_iter() {
+            let cc = c.to_string();
+
+            // split at first white space
+            if p1 == false && c == ' ' {
+                p1 = true;
+            } else if !p1 {
+                s.push_str(&cc);
+            } else {
+                ss.push_str(&cc);
+            }
+        }
+
+        let c = s;
+        let cc = ss;
 
         // start the feed stats
         if c == "feed" {
@@ -285,43 +306,38 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 }
             });
         } else if c == "create-engine" {
-            let v: Value = serde_json::from_str(cc).unwrap_or_default();
+            let cc = cc.clone();
+            let v: Eng = serde_json::from_str(&cc).unwrap_or_default();
 
-            let n = v["name"].as_str().unwrap_or_default();
+            let n = v.name;
 
             if n.is_empty() == false {
                 let db_dir = string_concat!("_engines_/", n);
-                let pt = v["paths"].as_str().unwrap_or_default();
-                let pat = v["patterns"].as_str().unwrap_or_default();
-
-                let mut v: Vec<u8> = vec![];
-                let mut vv: Vec<u8> = vec![];
-
-                pt.split(',').for_each(|x| {
-                    let x = string_concat!(x, "\n");
-
-                    v.push(x.as_bytes()[0]);
-                });
-
-                pat.split(',').for_each(|x| {
-                    let x = string_concat!(x, "\n");
-
-                    vv.push(x.as_bytes()[0]);
-                });
+                let pt = v.paths;
+                let pat = v.patterns;
 
                 tokio::task::spawn(async move {
+                    let ptt = pt.split(',');
+                    let ott = pat.split(',');
                     tokio::fs::create_dir(&db_dir).await.unwrap();
 
                     let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
                         .await
                         .unwrap();
 
-                    file.write_all(&v).await.unwrap();
+                    for x in ptt {
+                        let x = string_concat!(x, "\n");
+                        file.write_all(&x.as_bytes()).await.unwrap();
+                    }
 
                     let mut file = File::create(string_concat!(db_dir, "/patterns.txt"))
                         .await
                         .unwrap();
-                    file.write_all(&vv).await.unwrap();
+
+                    for x in ott {
+                        let x = string_concat!(x, "\n");
+                        file.write_all(&x.as_bytes()).await.unwrap();
+                    }
                 });
                 if let Err(_) = sender.send(2) {
                     logd("the receiver dropped");
