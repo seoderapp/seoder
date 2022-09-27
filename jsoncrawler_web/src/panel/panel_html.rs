@@ -14,23 +14,16 @@ pub fn raw_html() -> &'static str {
     const BTOM: &str = r#"
   </head>
   <body>
-    <h1>Panel to monitor and manage spider</h1>
-    <p>The engines available - campaigns.</p>
-    <h2>Fully complete realtime custom engine and db handling</h2>
-
+    <div class="box">
+      <h1>Spider Panel Management</h1>
+      <p>Fast insight generation.</p>
+      <h2>Realtime custom engine and db handling</h2>
+    </div>
+  
     <div class="card">
       <div class="card-body">
         <h3>List campaigns</h3>
         <ul id="campaign-list"></ul>
-      </div>
-    </div>
-
-    <div class="seperator"></div>
-
-    <div class="card">
-      <div class="card-body">
-        <h3>List engines</h3>
-        <ul id="engine-list"></ul>
       </div>
     </div>
 
@@ -46,8 +39,9 @@ pub fn raw_html() -> &'static str {
           </div>
 
           <div class="box">
-            <h4 class="gutter">Engines</h4>
-            <div class="form-control" id="engine-select"></div>
+            <fieldset class="form-control" id="engine-select">
+            <legend>Select an engine:</legend>
+            </fieldset>
           </div>
 
           <div class="seperator"></div>
@@ -112,7 +106,20 @@ pub fn raw_html() -> &'static str {
           </div>
         </div>
       </div>
-    </div>  
+
+      </div>
+
+      <div class="seperator"></div>
+
+      <div class="card">
+      <div class="card-body">
+        <h3>List engines</h3>
+        <ul id="engine-list"></ul>
+      </div>
+
+    <div class="seperator"></div>
+
+    </div> 
 "#;
 
     const ENDB: &str = "</body>

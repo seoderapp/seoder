@@ -100,17 +100,17 @@ pub const RAW_JS: &'static str = r#"
 
           eKeys.forEach((key) => {
             const inputName = "eselect" + key;
-            
-            const item = document.getElementById("ekeys_" + key);
+            const kid = "ekeys_" + key;
+            const item = document.getElementById(kid);
 
             if (!item) {
               const cellContainer = document.createElement("div");
               const cellLabel = document.createElement("label");
               const cellSelect = document.createElement("input");
-              cellContainer.id = "ekeys_" + key;
-  
-              cellLabel.htmlFor = inputName;          
-              cellSelect.name = inputName;
+
+              cellContainer.id = kid;
+              cellLabel.htmlFor = kid          
+              cellSelect.name = "eselect";
               cellSelect.value = key;
               cellSelect.type = "radio";
   

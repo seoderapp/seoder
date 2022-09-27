@@ -7,7 +7,7 @@ pub const RAW_CSS: &'static str = r#"
     font-family: system-ui, Helvetica;
   }
 
-  h3,h4,h5,h6 {
+  h2,h3,h4,h5,h6 {
     padding: 0 0 0.4rem 0;
     margin: 0;
   }
