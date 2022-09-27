@@ -58,6 +58,9 @@ pub const RAW_JS: &'static str = r#"
           cell.className = "campaign-item";
           cell.id = "campaign_" + path;
 
+          const cellContentBlock = document.createElement("div");  
+          cellContentBlock.className = "flex";
+
           const cellTitle = document.createElement("div");  
           cellTitle.textContent = path;
 
@@ -67,9 +70,38 @@ pub const RAW_JS: &'static str = r#"
           const cellStats = document.createElement("div"); 
           cellStats.textContent = "( 0/0 )";
           
-          cell.appendChild(cellTitle);
-          cell.appendChild(cellEngine);
-          cell.appendChild(cellStats);
+          const cellBtnBlock = document.createElement("div");  
+          cellBtnBlock.className = "row";
+
+          const cellBtnRunButton = document.createElement("button");  
+          const cellBtnDeleteButton = document.createElement("button");  
+
+          cellBtnDeleteButton.textContent = "Delete";
+          cellBtnRunButton.textContent = "Run";
+
+          cellBtnRunButton.addEventListener("click", (event) => {
+            const item = event.path[2].firstChild.firstChild.value;
+            socket.send("run-campaign " + JSON.stringify({name: item}))
+            event.preventDefault();
+          });
+
+          cellBtnDeleteButton.addEventListener("click", (event) => {
+            const name = event.path[2].firstChild.firstChild.value;
+            socket.send("delete-campaign " + JSON.stringify({name: item}))
+            event.preventDefault();
+          });
+        
+          // actions
+          cellBtnBlock.appendChild(cellBtnRunButton);
+          cellBtnBlock.appendChild(cellBtnDeleteButton);
+
+          // content
+          cellContentBlock.appendChild(cellTitle);
+          cellContentBlock.appendChild(cellEngine);
+          cellContentBlock.appendChild(cellStats);
+
+          cell.appendChild(cellContentBlock);
+          cell.appendChild(cellBtnBlock);
 
           list.appendChild(cell);
       }
@@ -139,8 +171,10 @@ pub const RAW_JS: &'static str = r#"
 
       if(path in pathMap) {
           pathMap[path] = np.count;
-          const cell = document.getElementById("campaign_" + path); 
-          cell.firstChild.nextSibling.nextSibling.textContent = "( " + np.count + " / " + 0 + " ) ";
+          const cell = document.getElementById("campaign_" + path);
+          if (cell && cell.firstChild && cell.firstChild.firstChild.nextSibling) {
+            cell.firstChild.firstChild.nextSibling.nextSibling.textContent = "( " + np.count + " / " + 0 + " ) ";
+          }
       }
 
     }

@@ -59,19 +59,48 @@ pub const RAW_CSS: &'static str = r#"
     padding: 0.44rem 0.8rem;
     font-weight: 300;
     font-size: 1.1rem;
+    display: flex;
+    flex: 1;
   }
 
   #campaign-list > .campaign-item:not(:first-child) {
     border-top: 1px solid #ccc;
   }
 
-  #campaign-list li.campaign-item > div:nth-child(1) {
+  #campaign-list li.campaign-item > div > div:nth-child(1) {
     padding-bottom: 0.2rem;
     font-weight: bold;
   }
 
-  #campaign-list li.campaign-item > div:nth-child(2) {
+  #campaign-list li.campaign-item > div > div:nth-child(2) {
     padding-bottom: 0.22rem;
+  }
+
+  #campaign-list li.campaign-item button {
+    min-width: 65px;
+    border: none;
+    border-radius: 0.2rem;
+    margin-left: 0.4rem;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+
+  #campaign-list li.campaign-item button:hover {
+    opacity: 0.7;
+  }
+
+  #campaign-list li.campaign-item button:focus {
+    outline: 0.5px solid #ccc;
+  }
+
+  #campaign-list li.campaign-item button:nth-child(1) {
+    background-color: #fff;
+    color: #1b1b1b;
+  }
+
+  #campaign-list li.campaign-item button:nth-child(2) {
+    background-color: rgb(131 24 67);
+    color: #ccc;
   }
 
   #engine-list > .engine-item {
@@ -175,6 +204,18 @@ pub const RAW_CSS: &'static str = r#"
     padding-bottom: 0.45rem;
     padding-top: 0.45rem;
   }
+
+  .row {
+    display: flex;
+    padding: 0.5rem;
+  }
+
+  .flex {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
 </style>
 
 "#;
