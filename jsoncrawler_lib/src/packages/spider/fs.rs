@@ -1,4 +1,3 @@
-use crate::packages::spider::utils::logd;
 use crate::packages::spider::website::CONFIG;
 
 use super::utils::log;
@@ -6,7 +5,6 @@ use super::website::Message;
 use super::JsonOutFileType;
 use jsonl::write;
 use regex::RegexSet;
-use scraper::Html;
 use scraper::Selector;
 use serde_json::Value;
 use std::sync::Arc;
@@ -170,39 +168,10 @@ pub async fn store_fs_io_matching(
                     continue;
                 }
 
-                let response = response.clone();
-
-                let rgx = rgx.clone();
-                let response = response.clone();
-
-                let (tx, rxx) = tokio::sync::oneshot::channel();
-
-                task::spawn(async move {
-                    task::yield_now().await;
-                    let doc = Html::parse_document(&response);
-                    let items = doc.select(&SELECTOR);
-                    let mut senders: Vec<String> = Vec::with_capacity(items.size_hint().0);
-
-                    for element in items {
-                        senders.push(element.text().map(|s| s.chars()).flatten().collect());
-                    }
-
-                    if let Err(_) = tx.send(senders) {
-                        logd("the receiver dropped");
-                    }
-                });
-
+                let result = rgx.is_match(&response);
                 task::yield_now().await;
-
-                match rxx.await {
-                    Ok(v) => {
-                        let result = rgx.is_match(&v.join(""));
-                        task::yield_now().await;
-                        if result {
-                            o.write(&link.as_bytes()).await.unwrap();
-                        }
-                    }
-                    Err(_) => logd("the sender dropped"),
+                if result {
+                    o.write(&link.as_bytes()).await.unwrap();
                 }
             }
         }

@@ -1,10 +1,14 @@
 use super::panel_css::RAW_CSS;
 use super::panel_js::RAW_JS;
+use super::panel_js::RAW_JS_TOP;
+
+use crate::string_concat_impl;
 use const_format::concatcp;
 use hyper::{Body, Request, Response};
+use jsoncrawler_lib::string_concat::string_concat;
 use std::convert::Infallible;
 
-pub fn raw_html() -> &'static str {
+pub fn raw_html() -> String {
     const TOP: &str = r#"
 <!DOCTYPE html>
 <html>
@@ -120,7 +124,25 @@ pub fn raw_html() -> &'static str {
     const ENDB: &str = "</body>
 </html>";
 
-    concatcp!(TOP, RAW_CSS, BTOM, RAW_JS, ENDB)
+    let s: String = match std::env::var("WS_CONNECTION") {
+        Ok(v) => {
+            let js = format!(
+                r#"
+          <script>
+          
+            const socket = new WebSocket("{}");
+          "#,
+                v
+            );
+
+            let base = concatcp!(TOP, RAW_CSS, BTOM).to_string();
+
+            string_concat!(base, js, RAW_JS, ENDB).to_string()
+        }
+        Err(_) => concatcp!(TOP, RAW_CSS, BTOM, RAW_JS_TOP, RAW_JS, ENDB).to_string(),
+    };
+
+    s
 }
 
 /// generate the web panel

@@ -153,25 +153,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                                 _ => {}
                             };
 
-                            let mut nml = 0;
-
-                            match OpenOptions::new()
-                                .read(true)
-                                .open(string_concat!("_engines_/list.txt"))
-                                .await
-                            {
-                                Ok(file) => {
-                                    let reader = BufReader::new(file);
-                                    let mut lines = reader.lines();
-
-                                    while let Some(_) = lines.next_line().await.unwrap() {
-                                        nml += 1;
-                                    }
-                                }
-                                _ => {}
-                            };
-
-                            let v = json!({ "path": dpt.replacen("_db/campaigns/", "", 1), "pengine": engine, "ploc": nml });
+                            let v = json!({ "path": dpt.replacen("_db/campaigns/", "", 1), "pengine": engine});
 
                             outgoing
                                 .send(Message::Text(v.to_string()))
@@ -204,12 +186,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                                 website.crawl().await;
                                 log("crawl finished - ", &website.engine.campaign.name)
                             });
-
-                            // let v = json!({ "path": dpt });
-                            // outgoing
-                            //     .send(Message::Text(v.to_string()))
-                            //     .await
-                            //     .unwrap_or_default();
                         }
                     }
                 }
@@ -283,8 +259,17 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 website.engine.campaign.patterns = pat;
 
                 tokio::spawn(async move {
+                    let performance = crate::tokio::time::Instant::now();
+
                     website.crawl().await;
-                    log("crawl finished - ", &website.engine.campaign.name)
+
+                    let b = format!(
+                        "{:?} - {}",
+                        performance.elapsed(),
+                        website.engine.campaign.name
+                    );
+
+                    log("crawl finished - time elasped: ", &b);
                 });
             }
 
@@ -313,6 +298,67 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     .send(Message::Text(v.to_string()))
                     .await
                     .unwrap_or_default();
+            }
+
+            if st == 9 {
+                let mut dir = tokio::fs::read_dir("_db/campaigns").await.unwrap();
+
+                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
+                    if child.metadata().await.unwrap().is_dir() {
+                        let dpt = child.path().to_str().unwrap().to_owned();
+
+                        if !dpt.ends_with("/valid") {
+                            // todo: set engine in memory
+                            let mut engine = "default".to_string();
+                            match OpenOptions::new()
+                                .read(true)
+                                .open(string_concat!(dpt, "/config.txt"))
+                                .await
+                            {
+                                Ok(file) => {
+                                    let reader = BufReader::new(file);
+                                    let mut lines = reader.lines();
+
+                                    while let Some(line) = lines.next_line().await.unwrap() {
+                                        let hh = line.split(" ").collect::<Vec<&str>>();
+
+                                        if hh.len() == 2 {
+                                            if hh[0] == "engine" {
+                                                engine = hh[1].to_string();
+                                            }
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            };
+
+                            let mut nml = 0;
+
+                            match OpenOptions::new()
+                                .read(true)
+                                .open(string_concat!("_engines_/list.txt"))
+                                .await
+                            {
+                                Ok(file) => {
+                                    let reader = BufReader::new(file);
+                                    let mut lines = reader.lines();
+
+                                    while let Some(_) = lines.next_line().await.unwrap() {
+                                        nml += 1;
+                                    }
+                                }
+                                _ => {}
+                            };
+
+                            let v = json!({ "apath": dpt.replacen("_db/campaigns/", "", 1), "pengine": engine, "ploc": nml });
+
+                            outgoing
+                                .send(Message::Text(v.to_string()))
+                                .await
+                                .unwrap_or_default();
+                        }
+                    }
+                }
             }
         }
     });
@@ -458,6 +504,12 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             if let Err(_) = sender.send((8, e_name)) {
                 logd("receiver dropped");
             }
+        } else if c == "list-totals" {
+            let e_name = cc.to_owned();
+
+            if let Err(_) = sender.send((9, e_name)) {
+                logd("receiver dropped");
+            }
         }
 
         future::ok(())
@@ -484,18 +536,24 @@ async fn main() -> Result<(), IoError> {
         .nth(1)
         .unwrap_or_else(|| "127.0.0.1:8080".to_string());
 
-    let client_port = env::args().nth(2).unwrap_or_else(|| "3000".to_string());
+    let client_addr = env::args().nth(2).unwrap_or_else(|| "0.0.0.0".to_string());
+    let client_port = env::args().nth(3).unwrap_or_else(|| "3000".to_string());
 
     let state = PeerMap::new(Mutex::new(HashMap::new()));
 
     let try_socket = TcpListener::bind(&addr).await;
     let listener = try_socket.expect("Failed to bind");
+    let address = client_addr.split(".");
+
+    let cad = address
+        .map(|x| x.parse::<u8>().unwrap())
+        .collect::<Vec<u8>>();
 
     // http server
     tokio::spawn(async move {
         let port = client_port.parse::<u16>().unwrap_or(3000);
         // todo allow custom http address
-        let addr = SocketAddr::from(([127, 0, 0, 1], port));
+        let addr = SocketAddr::from(([cad[0], cad[1], cad[2], cad[3]], port));
 
         let make_svc = make_service_fn(|_conn| async {
             Ok::<_, Infallible>(service_fn(panel::panel_html::panel_handle))
@@ -506,7 +564,7 @@ async fn main() -> Result<(), IoError> {
         }
     });
 
-    println!("Listening on: {} and 127.0.0.1:3000", &addr);
+    println!("Listening on: {} and 0.0.0.0:3000", &addr);
 
     while let Ok((stream, addr)) = listener.accept().await {
         tokio::spawn(handle_connection(state.clone(), stream, addr));

@@ -1,17 +1,20 @@
-pub const RAW_JS: &'static str = r#"
+pub const RAW_JS_TOP: &'static str = r#"
 <script>
 
   const socket = new WebSocket("ws://127.0.0.1:8080");
+"#;
 
+pub const RAW_JS: &'static str = r#"
   socket.addEventListener("open", (event) => {
     socket.send("list-campaigns");
     socket.send("list-engines");
     socket.send("feed");
+    socket.send("list-totals");
+
     setTimeout(() => {
       socket.send("list-campaign-stats")
     })
 
-    // todo: allow multi outgoing messages between thread loops
     setInterval(() => {
       socket.send("list-campaigns");
     }, 3500)
@@ -22,6 +25,10 @@ pub const RAW_JS: &'static str = r#"
     setInterval(() => {
       socket.send("list-campaign-stats")
     }, 5000)
+
+    setInterval(() => {
+      socket.send("list-totals")
+    }, 30000)
 
   });
 
@@ -50,17 +57,38 @@ pub const RAW_JS: &'static str = r#"
       return;
     }
 
+    const ptpal = "{" + '"' + "apath" + '"' + ":" + '"';
+
+    if (raw.startsWith(ptpal)) {
+      const list = document.getElementById("campaign-list");
+      const np = JSON.parse(raw);
+      const { apath, pengine, ploc } = np || {};
+      const path = apath;
+
+      if(path in pathMap) {
+          pathMap[path] = {
+            total: ploc,
+            valid: pathMap[path].valid || 0
+          };
+          
+          const cell = document.getElementById("campaign_" + path);
+          if (cell && cell.firstChild && cell.firstChild.firstChild.nextSibling) {
+            cell.firstChild.firstChild.nextSibling.nextSibling.textContent = "( " + np.count + " / " + pathMap[path].total + " ) ";
+          }
+      }
+
+      return;
+    }
+
     const ptp = "{" + '"' + "path" + '"' + ":" + '"';
 
     if (raw.startsWith(ptp)) {
       const list = document.getElementById("campaign-list");
       const np = JSON.parse(raw);
-      const { path, pengine, ploc } = np || {};
+      const { path, pengine } = np || {};
 
       if(path in pathMap === false) {
-          pathMap[path] = {
-            total: ploc
-          };
+          pathMap[path] = 0;
           const cell = document.createElement("li");  
           cell.className = "campaign-item";
           cell.id = "campaign_" + path;
@@ -75,7 +103,7 @@ pub const RAW_JS: &'static str = r#"
           cellEngine.textContent = pengine ||  "engine_default";
 
           const cellStats = document.createElement("div"); 
-          cellStats.textContent = "( 0/" + ploc + " )";
+          cellStats.textContent = "( 0/" + 0 + " )";
           
           const cellBtnBlock = document.createElement("div");  
           cellBtnBlock.className = "row";
@@ -201,7 +229,7 @@ pub const RAW_JS: &'static str = r#"
 
       if(path in pathMap) {
           pathMap[path] = {
-            total: pathMap[path].total,
+            total: pathMap[path].total || 0,
             valid: np.count
           };
           const cell = document.getElementById("campaign_" + path);

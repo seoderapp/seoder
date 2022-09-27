@@ -12,9 +12,22 @@ or
 
 1. `cargo run -r`
 
+or example with generated exposed connections for ss.
+
+1. `WS_CONNECTION=ws://135.181.21.254:8080 cargo run --package jsoncrawler_web -r -- 0.0.0.0:8080 0.0.0.0 3000`
+
 If you need to enable logs add the flag `RUST_LOG=info` ex: `RUST_LOG=info cargo run -r`.
 
 The central `urls-input.txt` and the `_engines_/list.txt` file is the base for crawls between the spider programs.
+
+The server binds all on the `0.0.0.0` interface. To not not bind all change the `jsoncrawler_web` ports established at `0.0.0.0`.
+You can also use `cargo run --package jsoncrawler_web -r -- 127.0.0.1:8080 0.0.0.0 3000` to bind the server locally and not the crawler.
+
+The first param is the socket server:port, web http server, the web http port. Change between `0.0.0.0` and `127.0.0.1` depending on your exposure.
+
+To adjust the client static resources for connecting to the WSS server use the env variable `WS_CONNECTION` followed by the full url like the following
+
+`WS_CONNECTION=ws://135.181.21.254:8080 cargo run --package jsoncrawler_web -r -- 0.0.0.0:8080 0.0.0.0 3000`.
 
 ## Installation
 
