@@ -6,7 +6,6 @@ static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 use crate::string_concat::string_concat;
 use crate::string_concat::string_concat_impl;
-use jsoncrawler_lib::packages::spider::configuration::setup;
 use jsoncrawler_lib::tokio::io::AsyncBufReadExt;
 use jsoncrawler_lib::tokio::sync::mpsc::unbounded_channel;
 use jsoncrawler_lib::Website;
@@ -232,6 +231,28 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
     tokio::task::yield_now().await;
 
+
+    // run - delete campaign targeting
+    let cp_handles = tokio::spawn(async move {
+        while let Some(input) = rxx.recv().await {        
+            let cp = input.clone();
+            let (pt, pat) = builder::engine_builder(input).await;
+    
+            let mut website: Website = Website::new(&"urls-input.txt");
+
+            website.engine.campaign.name = cp;
+            website.engine.campaign.paths = pt;
+            website.engine.campaign.patterns = pat;
+
+            println!("{:?}", website);
+
+            tokio::spawn(async move {
+                website.crawl().await;
+                log("crawl finished - ", &website.engine.campaign.name)
+            });
+        }
+    });
+
     let broadcast_incoming = incoming.try_for_each(|msg| {
         let m = msg.clone();
         let txt = m.to_text().unwrap();
@@ -297,7 +318,18 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             });
         } else if c == "run-campaign" {
             let txx = txx.clone();
+            let campain_name =  cc.to_owned();
+
+            if let Err(_) = txx.send(campain_name) {
+                logd("receiver dropped");
+            }
+        } else if c == "delete-campaign" {
+            let txx = txx.clone();
             let cc = cc.to_owned();
+
+            println!("delete campaign");
+
+
             if let Err(_) = txx.send(cc) {
                 logd("receiver dropped");
             }
@@ -369,28 +401,13 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
     broadcast_incoming.await.unwrap_or_default();
 
-    // run direct campaign todo
-    while let Some(input) = rxx.recv().await {
-        let (_, __, ___, ____, engine) = setup(true);
-        tokio::task::yield_now().await;
-        let input = input.clone();
-        let mut website: Website = Website::new(&"urls-input.txt");
-        website.engine.campaign.name = input;
-        website.engine.campaign.paths = engine.campaign.paths;
-        website.engine.campaign.patterns = engine.campaign.patterns;
-
-        tokio::spawn(async move {
-            website.crawl().await;
-            log("crawl finished - ", &website.engine.campaign.name)
-        });
-    }
-
     logd(string_concat::string_concat!(
         &addr.to_string(),
         " disconnected"
     ));
 
     handle.await.unwrap();
+    cp_handles.await.unwrap();
 }
 
 #[tokio::main]

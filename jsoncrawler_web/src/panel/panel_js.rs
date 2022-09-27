@@ -80,14 +80,14 @@ pub const RAW_JS: &'static str = r#"
           cellBtnRunButton.textContent = "Run";
 
           cellBtnRunButton.addEventListener("click", (event) => {
-            const item = event.path[2].firstChild.firstChild.value;
-            socket.send("run-campaign " + JSON.stringify({name: item}))
+            const name = event.path[2].firstChild.firstChild.textContent;
+            socket.send("run-campaign " + name)
             event.preventDefault();
           });
 
           cellBtnDeleteButton.addEventListener("click", (event) => {
-            const name = event.path[2].firstChild.firstChild.value;
-            socket.send("delete-campaign " + JSON.stringify({name: item}))
+            const name = event.path[2].firstChild.firstChild.textContent;
+            socket.send("delete-campaign " + name)
             event.preventDefault();
           });
         
