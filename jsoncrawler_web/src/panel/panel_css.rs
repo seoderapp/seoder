@@ -12,6 +12,10 @@ pub const RAW_CSS: &'static str = r#"
     margin: 0;
   }
 
+  h3 {
+    padding-bottom: 0.55rem;
+  }
+
   .gutter {
     padding-bottom: 0.25rem;
   }
@@ -73,7 +77,12 @@ pub const RAW_CSS: &'static str = r#"
   }
 
   #campaign-list li.campaign-item > div > div:nth-child(2) {
+    padding-bottom: 0.3rem;
+  }
+
+  #campaign-list li.campaign-item > div > div:nth-child(3) {
     padding-bottom: 0.22rem;
+    font-size: 0.9rem;
   }
 
   #campaign-list li.campaign-item button {
@@ -242,6 +251,17 @@ pub const RAW_CSS: &'static str = r#"
     place-content: center;
   }
 
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
 </style>
 
 "#;

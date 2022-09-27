@@ -28,6 +28,8 @@ pub const RAW_JS: &'static str = r#"
   const stats = document.getElementById("feed-stats");
   const cpu = document.getElementById("cpu-stats");
   const cpua = document.getElementById("cpu-stats-average");
+  const netstats = document.getElementById("network-stats");
+  const memstats = document.getElementById("memory-stats");
 
   const pathMap = {};
   const engineMap = {};
@@ -37,10 +39,13 @@ pub const RAW_JS: &'static str = r#"
 
     if (raw.startsWith("{" + '"' + "stats")) {
       const data = JSON.parse(event.data);
-      const {stats} = data;
+      const { cpu_usage, load_avg_min, network_received, network_transmited, network_total_transmitted, memory_free, memory_used, memory_total } = data.stats;
 
-      cpu.innerHTML = stats.cpu_usage.toFixed(2);
-      cpua.innerHTML = "1 min Average " + stats.load_avg_min.toFixed(2);
+      cpu.innerHTML = cpu_usage.toFixed(2);
+      cpua.innerHTML = "1 min Average " + load_avg_min.toFixed(2);
+
+      netstats.innerHTML = network_received + " kb / " + network_transmited + " kb / " + network_total_transmitted + " kb";
+      memstats.innerHTML = memory_free + " bytes / " + memory_used + " bytes / " + memory_total + " bytes";
 
       return;
     }
@@ -50,10 +55,12 @@ pub const RAW_JS: &'static str = r#"
     if (raw.startsWith(ptp)) {
       const list = document.getElementById("campaign-list");
       const np = JSON.parse(raw);
-      const path = np && np.path;
+      const { path, pengine, ploc } = np || {};
 
       if(path in pathMap === false) {
-          pathMap[path] = 0;
+          pathMap[path] = {
+            total: ploc
+          };
           const cell = document.createElement("li");  
           cell.className = "campaign-item";
           cell.id = "campaign_" + path;
@@ -65,10 +72,10 @@ pub const RAW_JS: &'static str = r#"
           cellTitle.textContent = path;
 
           const cellEngine = document.createElement("div");  
-          cellEngine.textContent = "engine_default";
+          cellEngine.textContent = pengine ||  "engine_default";
 
           const cellStats = document.createElement("div"); 
-          cellStats.textContent = "( 0/0 )";
+          cellStats.textContent = "( 0/" + ploc + " )";
           
           const cellBtnBlock = document.createElement("div");  
           cellBtnBlock.className = "row";
@@ -105,6 +112,7 @@ pub const RAW_JS: &'static str = r#"
 
           list.appendChild(cell);
       }
+
       return;
     }
 
@@ -192,10 +200,13 @@ pub const RAW_JS: &'static str = r#"
       const path = np && np.path;
 
       if(path in pathMap) {
-          pathMap[path] = np.count;
+          pathMap[path] = {
+            total: pathMap[path].total,
+            valid: np.count
+          };
           const cell = document.getElementById("campaign_" + path);
           if (cell && cell.firstChild && cell.firstChild.firstChild.nextSibling) {
-            cell.firstChild.firstChild.nextSibling.nextSibling.textContent = "( " + np.count + " / " + 0 + " ) ";
+            cell.firstChild.firstChild.nextSibling.nextSibling.textContent = "( " + np.count + " / " + pathMap[path].total + " ) ";
           }
       }
     }

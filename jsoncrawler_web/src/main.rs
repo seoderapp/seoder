@@ -120,17 +120,58 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     .unwrap_or_default();
             }
 
-            // list all websites
+            // list all campaigns
             if st == 2 {
                 let mut dir = tokio::fs::read_dir("_db/campaigns").await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
                     if child.metadata().await.unwrap().is_dir() {
                         let dpt = child.path().to_str().unwrap().to_owned();
-                        if !dpt.ends_with("/valid") {
 
-                            // todo: read engine config file
-                            let v = json!({ "path": dpt.replacen("_db/campaigns/", "", 1) });
+                        if !dpt.ends_with("/valid") {
+                            // todo: set engine in memory
+                            let mut engine = "default".to_string();
+                            match OpenOptions::new()
+                                .read(true)
+                                .open(string_concat!(dpt, "/config.txt"))
+                                .await
+                            {
+                                Ok(file) => {
+                                    let reader = BufReader::new(file);
+                                    let mut lines = reader.lines();
+
+                                    while let Some(line) = lines.next_line().await.unwrap() {
+                                        let hh = line.split(" ").collect::<Vec<&str>>();
+
+                                        if hh.len() == 2 {
+                                            if hh[0] == "engine" {
+                                                engine = hh[1].to_string();
+                                            }
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            };
+
+                            let mut nml = 0;
+
+                            match OpenOptions::new()
+                                .read(true)
+                                .open(string_concat!("_engines_/list.txt"))
+                                .await
+                            {
+                                Ok(file) => {
+                                    let reader = BufReader::new(file);
+                                    let mut lines = reader.lines();
+
+                                    while let Some(_) = lines.next_line().await.unwrap() {
+                                        nml += 1;
+                                    }
+                                }
+                                _ => {}
+                            };
+
+                            let v = json!({ "path": dpt.replacen("_db/campaigns/", "", 1), "pengine": engine, "ploc": nml });
 
                             outgoing
                                 .send(Message::Text(v.to_string()))

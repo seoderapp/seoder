@@ -14,7 +14,7 @@ pub fn raw_html() -> &'static str {
     const BTOM: &str = r#"
   </head>
   <body>
-    <div class="box">
+    <div class="box sr-only">
       <h1>Spider Panel Management</h1>
       <p>Fast insight generation.</p>
       <h2>Realtime custom engine and db handling</h2>
@@ -24,6 +24,32 @@ pub fn raw_html() -> &'static str {
     <form id="rform" class="bar">
       <button type="submit" type="submit" class="button">Run all Campaigns</button>
     </form>
+
+    <div class="card">
+      <div class="card-body">
+        <h3>Stats</h3>
+        <div id="feed-stats">
+          <div class="stats-box">
+            <h4 class="gutter">CPU</h4>
+            <div id="cpu-stats"></div>
+            <div class="seperator"></div>
+            <div id="cpu-stats-average"></div>
+          </div>
+          <div class="stats-box">
+            <h4 class="gutter">Network</h4>
+            <h5>Received, Transmited, Total Transmited</h5>
+            <div id="network-stats"></div>
+          </div>
+          <div class="stats-box">
+            <h4 class="gutter">Memory</h4>
+            <h5>Free, Used, Total</h5>
+            <div id="memory-stats"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="seperator"></div>
 
     <div class="card">
       <div class="card-body">
@@ -66,30 +92,6 @@ pub fn raw_html() -> &'static str {
 
           <button type="submit" class="button btn-primary">Submit</button>
         </form>
-      </div>
-    </div>
-
-    <div class="seperator"></div>
-
-    <div class="card">
-      <div class="card-body">
-        <h3>Stats</h3>
-        <div id="feed-stats">
-          <div class="stats-box">
-            <h4 class="gutter">CPU</h4>
-            <div id="cpu-stats"></div>
-            <div class="seperator"></div>
-            <div id="cpu-stats-average"></div>
-          </div>
-          <div class="stats-box">
-            <h4 class="gutter">Network</h4>
-            <div id="network-stats"></div>
-          </div>
-          <div class="stats-box">
-            <h4 class="gutter">Memory</h4>
-            <div id="memory-stats"></div>
-          </div>
-        </div>
       </div>
     </div>
 
