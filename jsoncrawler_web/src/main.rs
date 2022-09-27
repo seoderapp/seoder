@@ -5,23 +5,22 @@
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 use crate::string_concat::string_concat;
+use crate::string_concat::string_concat_impl;
 use jsoncrawler_lib::packages::spider::configuration::setup;
+use jsoncrawler_lib::tokio::io::AsyncBufReadExt;
 use jsoncrawler_lib::tokio::sync::mpsc::unbounded_channel;
 use jsoncrawler_lib::Website;
-
 use sysinfo::{System, SystemExt};
-use tokio::fs::OpenOptions;
 use tungstenite::{Message, Result};
 
-use serde::{Deserialize, Serialize};
-use serde_json::{Value};
-use crate::string_concat::string_concat_impl;
 use crate::tokio::fs::File;
 use futures_util::SinkExt;
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 use jsoncrawler_lib::packages::spider::utils::{log, logd};
 use jsoncrawler_lib::tokio::io::AsyncWriteExt;
 use jsoncrawler_lib::{serde_json, string_concat, tokio};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::io::Error as IoError;
 use std::{
     collections::HashMap,
@@ -33,11 +32,15 @@ use std::{
 
 use hyper::service::{make_service_fn, service_fn};
 use hyper::Server;
+use tokio::fs::OpenOptions;
 use tokio::net::{TcpListener, TcpStream};
 
 use crate::serde_json::json;
+use crate::tokio::io::BufReader;
 
+mod builder;
 mod panel;
+mod utils;
 
 type Tx = futures_channel::mpsc::UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
@@ -137,25 +140,29 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 }
             }
 
-            // run campaigns
+            // run all campaigns
             if st == 3 {
                 let mut dir = tokio::fs::read_dir("_db/campaigns").await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
                     if child.metadata().await.unwrap().is_dir() {
+                        // path
                         let dpt = child.path().to_str().unwrap().to_owned();
                         if !dpt.ends_with("/valid") {
-                            let (_, __, ___, ____, engine) = setup(true);
-                            tokio::task::yield_now().await;
+                            let dptt = dpt.clone();
+
+                            let (pt, pat) = builder::engine_builder(dptt).await;
+
                             let mut website: Website = Website::new(&"urls-input.txt");
                             website.engine.campaign.name = dpt;
-                            website.engine.campaign.paths = engine.campaign.paths;
-                            website.engine.campaign.patterns = engine.campaign.patterns;
+                            website.engine.campaign.paths = pt;
+                            website.engine.campaign.patterns = pat;
 
                             tokio::spawn(async move {
                                 website.crawl().await;
                                 log("crawl finished - ", &website.engine.campaign.name)
                             });
+
                             // let v = json!({ "path": dpt });
                             // outgoing
                             //     .send(Message::Text(v.to_string()))
@@ -175,8 +182,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         let dpt = child.path().to_str().unwrap().to_owned();
 
                         if !dpt.ends_with("/valid") {
-                            use crate::tokio::io::BufReader;
-                            use jsoncrawler_lib::tokio::io::AsyncBufReadExt;
                             let file = OpenOptions::new()
                                 .read(true)
                                 .open(string_concat!(dpt, "/valid/links.txt"))
@@ -258,7 +263,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
         let c = s;
         let cc = ss;
-        
+
         // start the feed stats
         if c == "feed" {
             if let Err(_) = sender.send(1) {
@@ -283,7 +288,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     .unwrap();
 
                 let e = string_concat!("engine ", v["engine"].as_str().unwrap_or("default"));
-                
+
                 file.write_all(&e.as_bytes()).await.unwrap();
 
                 if let Err(_) = sender.send(2) {
@@ -364,7 +369,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
     broadcast_incoming.await.unwrap_or_default();
 
-    // run direct campaign
+    // run direct campaign todo
     while let Some(input) = rxx.recv().await {
         let (_, __, ___, ____, engine) = setup(true);
         tokio::task::yield_now().await;
