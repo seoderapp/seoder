@@ -29,13 +29,13 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use crate::serde_json::json;
+use crate::tokio::io::BufReader;
+use crate::tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use hyper::service::{make_service_fn, service_fn};
 use hyper::Server;
 use tokio::fs::OpenOptions;
 use tokio::net::{TcpListener, TcpStream};
-
-use crate::serde_json::json;
-use crate::tokio::io::BufReader;
 
 mod builder;
 mod panel;
@@ -43,6 +43,7 @@ mod utils;
 
 type Tx = futures_channel::mpsc::UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
+type Controller = (i32, String);
 
 /// new engine
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -69,12 +70,8 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
     let (mut outgoing, incoming) = ws_stream.split();
 
-    let (sender, mut receiver) = unbounded_channel();
-
-    let (txx, mut rxx): (
-        tokio::sync::mpsc::UnboundedSender<String>,
-        tokio::sync::mpsc::UnboundedReceiver<String>,
-    ) = unbounded_channel();
+    let (sender, mut receiver): (UnboundedSender<Controller>, UnboundedReceiver<Controller>) =
+        unbounded_channel();
 
     let handle = tokio::spawn(async move {
         use sysinfo::CpuExt;
@@ -82,7 +79,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         let mut s = System::new_all();
         // let mut interval = tokio::time::interval(Duration::from_millis(1000));
 
-        while let Some(st) = receiver.recv().await {
+        while let Some(m) = receiver.recv().await {
+            let (st, input) = m;
+
             if st == 1 {
                 s.refresh_all();
 
@@ -226,32 +225,42 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     }
                 }
             }
+
+            let crun_input = input.clone();
+
+            if st == 6 {
+                let cp = input.clone();
+                let (pt, pat) = builder::engine_builder(crun_input).await;
+
+                let mut website: Website = Website::new(&"urls-input.txt");
+
+                website.engine.campaign.name = cp;
+                website.engine.campaign.paths = pt;
+                website.engine.campaign.patterns = pat;
+
+                tokio::spawn(async move {
+                    website.crawl().await;
+                    log("crawl finished - ", &website.engine.campaign.name)
+                });
+            }
+
+            let d_input = input.clone();
+
+            if st == 7 {
+                tokio::fs::remove_dir_all(string_concat!("_db/campaigns/", &d_input))
+                    .await
+                    .unwrap();
+
+                let v = json!({ "dcpath": input });
+                outgoing
+                    .send(Message::Text(v.to_string()))
+                    .await
+                    .unwrap_or_default();
+            }
         }
     });
 
     tokio::task::yield_now().await;
-
-
-    // run - delete campaign targeting
-    let cp_handles = tokio::spawn(async move {
-        while let Some(input) = rxx.recv().await {        
-            let cp = input.clone();
-            let (pt, pat) = builder::engine_builder(input).await;
-    
-            let mut website: Website = Website::new(&"urls-input.txt");
-
-            website.engine.campaign.name = cp;
-            website.engine.campaign.paths = pt;
-            website.engine.campaign.patterns = pat;
-
-            println!("{:?}", website);
-
-            tokio::spawn(async move {
-                website.crawl().await;
-                log("crawl finished - ", &website.engine.campaign.name)
-            });
-        }
-    });
 
     let broadcast_incoming = incoming.try_for_each(|msg| {
         let m = msg.clone();
@@ -287,7 +296,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
         // start the feed stats
         if c == "feed" {
-            if let Err(_) = sender.send(1) {
+            if let Err(_) = sender.send((1, "".to_string())) {
                 logd("the receiver dropped");
             }
         }
@@ -312,44 +321,39 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                 file.write_all(&e.as_bytes()).await.unwrap();
 
-                if let Err(_) = sender.send(2) {
+                if let Err(_) = sender.send((2, "".to_string())) {
                     logd("the receiver dropped");
                 }
             });
         } else if c == "run-campaign" {
-            let txx = txx.clone();
-            let campain_name =  cc.to_owned();
+            let campain_name = cc.to_owned();
 
-            if let Err(_) = txx.send(campain_name) {
+            if let Err(_) = sender.send((6, campain_name)) {
                 logd("receiver dropped");
             }
         } else if c == "delete-campaign" {
-            let txx = txx.clone();
-            let cc = cc.to_owned();
+            let campain_name = cc.to_owned();
 
-            println!("delete campaign");
-
-
-            if let Err(_) = txx.send(cc) {
+            if let Err(_) = sender.send((7, campain_name)) {
                 logd("receiver dropped");
             }
         } else if c == "list-campaigns" {
-            if let Err(_) = sender.send(2) {
+            if let Err(_) = sender.send((2, "".to_string())) {
                 logd("the receiver dropped");
             }
         } else if ms == "run-all-campaigns" {
-            if let Err(_) = sender.send(3) {
+            if let Err(_) = sender.send((3, "".to_string())) {
                 logd("the receiver dropped");
             }
         } else if c == "list-campaign-stats" {
             tokio::task::spawn(async move {
-                if let Err(_) = sender.send(4) {
+                if let Err(_) = sender.send((4, "".to_string())) {
                     logd("the receiver dropped");
                 }
             });
         } else if c == "list-engines" {
             tokio::task::spawn(async move {
-                if let Err(_) = sender.send(5) {
+                if let Err(_) = sender.send((5, "".to_string())) {
                     logd("the receiver dropped");
                 }
             });
@@ -387,7 +391,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         file.write_all(&x.as_bytes()).await.unwrap();
                     }
                 });
-                if let Err(_) = sender.send(2) {
+                if let Err(_) = sender.send((2, "".to_string())) {
                     logd("the receiver dropped");
                 }
             }
@@ -407,7 +411,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
     ));
 
     handle.await.unwrap();
-    cp_handles.await.unwrap();
 }
 
 #[tokio::main]

@@ -176,7 +176,20 @@ pub const RAW_JS: &'static str = r#"
             cell.firstChild.firstChild.nextSibling.nextSibling.textContent = "( " + np.count + " / " + 0 + " ) ";
           }
       }
+    }
 
+    const dptc = "{" + '"' + "dcpath" + '"';
+
+    if (raw.startsWith(dptc)) {
+      // parse json for now
+      const np = JSON.parse(raw);
+      const path = np && np.dcpath;
+
+      if(path in pathMap) {
+          const cell = document.getElementById("campaign_" + path);
+          cell.remove();
+          delete pathMap[path];
+      }
     }
   });
 
