@@ -76,6 +76,9 @@ pub const RAW_JS: &'static str = r#"
       return;
     }
 
+    // todo delete pipe message on delete
+
+
     const ptpe = "{" + '"' + "epath" + '"' + ":" + '"';
 
     if (raw.startsWith(ptpe)) {
@@ -149,8 +152,12 @@ pub const RAW_JS: &'static str = r#"
 
   cform.addEventListener("submit", (event) => {
     const campaign = cform.querySelector('input[name="cname"]');
+    const cengine = cform.querySelector('input[name="eselect"]');
+
     if (campaign && campaign.value) {
-      socket.send("create-campaign " + campaign.value);
+      const m = JSON.stringify({ name: campaign.value, engine: cengine.value });
+
+      socket.send("create-campaign " + m);
     } else {
       window.alert("Please enter a campaign name");
     }

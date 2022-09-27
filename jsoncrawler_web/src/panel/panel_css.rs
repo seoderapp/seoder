@@ -168,6 +168,13 @@ pub const RAW_CSS: &'static str = r#"
     padding: 0.3rem;
   }
 
+  .bar {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    padding-bottom: 0.45rem;
+    padding-top: 0.45rem;
+  }
 </style>
 
 "#;

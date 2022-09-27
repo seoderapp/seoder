@@ -20,9 +20,14 @@ pub fn raw_html() -> &'static str {
       <h2>Realtime custom engine and db handling</h2>
     </div>
   
+
+    <form id="rform" class="bar">
+      <button type="submit" type="submit" class="button">Run all Campaigns</button>
+    </form>
+
     <div class="card">
       <div class="card-body">
-        <h3>List campaigns</h3>
+        <h3>Campaigns</h3>
         <ul id="campaign-list"></ul>
       </div>
     </div>
@@ -77,17 +82,6 @@ pub fn raw_html() -> &'static str {
 
     <div class="card">
       <div class="card-body">
-        <h3>Run all Campaigns</h3>
-        <form id="rform">
-          <button type="submit" type="submit" class="button">Submit</button>
-        </form>
-      </div>
-    </div>
-
-    <div class="seperator"></div>
-
-    <div class="card">
-      <div class="card-body">
         <h3>Stats</h3>
         <div id="feed-stats">
           <div class="stats-box">
@@ -113,7 +107,7 @@ pub fn raw_html() -> &'static str {
 
       <div class="card">
       <div class="card-body">
-        <h3>List engines</h3>
+        <h3>Engines</h3>
         <ul id="engine-list"></ul>
       </div>
 

@@ -14,7 +14,7 @@ use tokio::fs::OpenOptions;
 use tungstenite::{Message, Result};
 
 use serde::{Deserialize, Serialize};
-
+use serde_json::{Value};
 use crate::string_concat::string_concat_impl;
 use crate::tokio::fs::File;
 use futures_util::SinkExt;
@@ -258,7 +258,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
         let c = s;
         let cc = ss;
-
+        
         // start the feed stats
         if c == "feed" {
             if let Err(_) = sender.send(1) {
@@ -269,12 +269,23 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         else if c == "create-campaign" {
             let cf = cc.to_owned();
             tokio::spawn(async move {
-                let campaign_dir = string_concat!("_db/campaigns/", cf);
+                let v: Value = serde_json::from_str(&cf).unwrap_or_default();
+
+                let campaign_dir = string_concat!("_db/campaigns/", v["name"].as_str().unwrap());
 
                 tokio::fs::create_dir(&campaign_dir).await.unwrap();
                 tokio::fs::create_dir(&string_concat!(campaign_dir, "/valid"))
                     .await
                     .unwrap();
+
+                let mut file = File::create(string_concat!(campaign_dir, "/config.txt"))
+                    .await
+                    .unwrap();
+
+                let e = string_concat!("engine ", v["engine"].as_str().unwrap_or("default"));
+                
+                file.write_all(&e.as_bytes()).await.unwrap();
+
                 if let Err(_) = sender.send(2) {
                     logd("the receiver dropped");
                 }
