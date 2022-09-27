@@ -59,7 +59,7 @@ pub const RAW_JS: &'static str = r#"
           cell.id = "campaign_" + path;
 
           const cellContentBlock = document.createElement("div");  
-          cellContentBlock.className = "flex";
+          cellContentBlock.className = "flex center";
 
           const cellTitle = document.createElement("div");  
           cellTitle.textContent = path;
@@ -124,11 +124,33 @@ pub const RAW_JS: &'static str = r#"
           cell.className = "engine-item";
           cell.id = "engine_" + path;
 
+          const cellContentBlock = document.createElement("div");  
+          cellContentBlock.className = "flex center";
+
           const cellTitle = document.createElement("div");  
-          cellTitle.textContent = path;          
-          cell.appendChild(cellTitle);
+          cellTitle.textContent = path;
+
+          cellContentBlock.appendChild(cellTitle);
+
+          // engine list item
+          const cellBtnBlock = document.createElement("div");  
+          cellBtnBlock.className = "row";
+
+          const cellBtnDeleteButton = document.createElement("button");  
+          cellBtnDeleteButton.textContent = "Delete";
+
+          cellBtnDeleteButton.addEventListener("click", (event) => {
+            const name = event.path[2].firstChild.textContent;
+            socket.send("delete-engine " + name)
+            event.preventDefault();
+          });
+        
+          cellBtnBlock.appendChild(cellBtnDeleteButton);
+          cell.appendChild(cellContentBlock);
+          cell.appendChild(cellBtnBlock);
           list.appendChild(cell);
 
+          // engine select
           const engineSelect = document.getElementById("engine-select");
 
           const eKeys = Object.keys(engineMap);
@@ -189,6 +211,25 @@ pub const RAW_JS: &'static str = r#"
           const cell = document.getElementById("campaign_" + path);
           cell.remove();
           delete pathMap[path];
+      }
+    }
+
+    const deptc = "{" + '"' + "depath" + '"';
+
+    if (raw.startsWith(deptc)) {
+      // parse json for now
+      const np = JSON.parse(raw);
+      const path = np && np.depath;
+
+      if(path in engineMap) {
+          const cell = document.getElementById("engine_" + path);
+          cell.remove();
+          delete engineMap[path];
+
+          const kid = "ekeys_" + path;
+          const kitem = document.getElementById(kid);
+
+          kitem.remove();
       }
     }
   });

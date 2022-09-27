@@ -80,9 +80,10 @@ pub const RAW_CSS: &'static str = r#"
     min-width: 65px;
     border: none;
     border-radius: 0.2rem;
-    margin-left: 0.4rem;
+    margin-left: 0.54rem;
     font-weight: bold;
     font-size: 1rem;
+    padding: 0.45rem 0.7rem;
   }
 
   #campaign-list li.campaign-item button:hover {
@@ -99,14 +100,35 @@ pub const RAW_CSS: &'static str = r#"
   }
 
   #campaign-list li.campaign-item button:nth-child(2) {
-    background-color: rgb(131 24 67);
+    background-color: #1b1b1b;
     color: #ccc;
   }
 
   #engine-list > .engine-item {
-    padding: 9px 12px;
+    padding: 0.44rem 0.8rem;
     font-weight: 300;
     font-size: 1.1rem;
+    display: flex;
+    flex: 1;
+  }
+
+  #engine-list li.engine-item button:hover {
+    opacity: 0.7;
+  }
+
+  #engine-list li.engine-item button {
+    min-width: 65px;
+    border: none;
+    border-radius: 0.2rem;
+    margin-left: 0.54rem;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+
+  #engine-list li.engine-item button:nth-child(1) {
+    background-color: #1b1b1b;
+    color: #ccc;
+    padding: 0.45rem 0.7rem;
   }
 
   #engine-list > .engine-item:not(:first-child) {
@@ -214,6 +236,10 @@ pub const RAW_CSS: &'static str = r#"
     flex: 1;
     display: flex;
     flex-direction: column;
+  }
+
+  .center {
+    place-content: center;
   }
 
 </style>

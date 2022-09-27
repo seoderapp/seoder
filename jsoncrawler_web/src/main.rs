@@ -128,7 +128,10 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     if child.metadata().await.unwrap().is_dir() {
                         let dpt = child.path().to_str().unwrap().to_owned();
                         if !dpt.ends_with("/valid") {
+
+                            // todo: read engine config file
                             let v = json!({ "path": dpt.replacen("_db/campaigns/", "", 1) });
+
                             outgoing
                                 .send(Message::Text(v.to_string()))
                                 .await
@@ -252,6 +255,19 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     .unwrap();
 
                 let v = json!({ "dcpath": input });
+                outgoing
+                    .send(Message::Text(v.to_string()))
+                    .await
+                    .unwrap_or_default();
+            }
+
+            // delete engine - this does not delete configs attached!
+            if st == 8 {
+                tokio::fs::remove_dir_all(string_concat!("_engines_/", &d_input))
+                    .await
+                    .unwrap();
+
+                let v = json!({ "depath": input });
                 outgoing
                     .send(Message::Text(v.to_string()))
                     .await
@@ -394,6 +410,12 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 if let Err(_) = sender.send((2, "".to_string())) {
                     logd("the receiver dropped");
                 }
+            }
+        } else if c == "delete-engine" {
+            let e_name = cc.to_owned();
+
+            if let Err(_) = sender.send((8, e_name)) {
+                logd("receiver dropped");
             }
         }
 

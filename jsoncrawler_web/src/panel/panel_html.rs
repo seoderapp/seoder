@@ -27,8 +27,19 @@ pub fn raw_html() -> &'static str {
 
     <div class="card">
       <div class="card-body">
-        <h3>Campaigns</h3>
-        <ul id="campaign-list"></ul>
+        <h3>Create Engine</h3>
+        <form id="eform">
+          <label for="ename">Name</label>
+          <input name="ename" placeholder="Vanalla, starship, and etc" type="text" class="form-control" />
+
+          <label for="epaths">Paths</label>
+          <input name="epaths" placeholder="/,/welcome,/about" type="text" class="form-control" />
+
+          <label for="epatterns"Patterns</label>
+          <input name="epatterns" placeholder="wild thunder,holy,pizza,*cats*" type="text" class="form-control" />
+
+          <button type="submit" class="button btn-primary">Submit</button>
+        </form>
       </div>
     </div>
 
@@ -62,26 +73,6 @@ pub fn raw_html() -> &'static str {
 
     <div class="card">
       <div class="card-body">
-        <h3>Create Engine</h3>
-        <form id="eform">
-          <label for="ename">Name</label>
-          <input name="ename" placeholder="Vanalla, starship, and etc" type="text" class="form-control" />
-
-          <label for="epaths">Paths</label>
-          <input name="epaths" placeholder="/,/welcome,/about" type="text" class="form-control" />
-
-          <label for="epatterns"Patterns</label>
-          <input name="epatterns" placeholder="wild thunder,holy,pizza,*cats*" type="text" class="form-control" />
-
-          <button type="submit" class="button btn-primary">Submit</button>
-        </form>
-      </div>
-    </div>
-
-    <div class="seperator"></div>
-
-    <div class="card">
-      <div class="card-body">
         <h3>Stats</h3>
         <div id="feed-stats">
           <div class="stats-box">
@@ -100,20 +91,28 @@ pub fn raw_html() -> &'static str {
           </div>
         </div>
       </div>
+    </div>
 
-      </div>
+    <div class="seperator"></div>
 
-      <div class="seperator"></div>
-
-      <div class="card">
+    <div class="card">
       <div class="card-body">
         <h3>Engines</h3>
         <ul id="engine-list"></ul>
       </div>
+    </div> 
 
     <div class="seperator"></div>
 
-    </div> 
+    <div class="card">
+      <div class="card-body">
+        <h3>Campaigns</h3>
+        <ul id="campaign-list"></ul>
+      </div>
+    </div>
+
+    <div class="seperator"></div>
+
 "#;
 
     const ENDB: &str = "</body>
