@@ -1,12 +1,12 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use jsoncrawler_lib::crawl;
-use jsoncrawler_lib::tokio::runtime::Builder;
+use seoder_lib::crawl;
+use seoder_lib::tokio::runtime::Builder;
 
 /// benchmark crawl speed
 pub fn bench_speed(c: &mut Criterion) {
     let mut group = c.benchmark_group("perf/crawl");
     let sample_count = 100;
-    let sample_title = format!("jsoncrawler {} samples", sample_count);
+    let sample_title = format!("seoder {} samples", sample_count);
 
     group.sample_size(sample_count);
 

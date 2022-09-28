@@ -2,6 +2,12 @@
 target
 output.jsonl
 
+_db/files/*
+_db/campaigns/*
+_db/engines/*
+
+!_db/**/README.md
+
 all-others.txt
 connection_error.txt
 ok-not_valid_json.txt

@@ -1,11 +1,10 @@
 [workspace]
 members = [
-    "jsoncrawler",
-    "jsoncrawler_lib",
-    "jsoncrawler_web",
-    "jsoncrawler_client",
+    "seoder",
+    "seoder_lib",
+    "seoder_web",
     # internal
     "benches"
 ]
-default-members = [ "jsoncrawler", "jsoncrawler_lib", "benches" ]
+default-members = [ "seoder", "seoder_lib", "benches" ]
 

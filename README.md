@@ -1,33 +1,29 @@
-# jsoncrawler
+# seoder
 
-Json web crawler
+A performant marketing tool to determine relevant keywords for your next campaign.
 
 ## Getting Started
 
 To run the program make sure to have [Rust](https://doc.rust-lang.org/book/ch01-01-installation.html) installed.
 
-1. `cargo run --package jsoncrawler_web -r`
-
-or
-
-1. `cargo run -r`
+1. `cargo run --package seoder_web -r`
 
 or example with generated exposed connections for ss.
 
-1. `WS_CONNECTION=ws://135.181.21.254:8080 cargo run --package jsoncrawler_web -r -- 0.0.0.0:8080 0.0.0.0 3000`
+1. `WS_CONNECTION=ws://123.2423.21.213:8080 cargo run --package seoder_web -r -- 0.0.0.0:8080 0.0.0.0 3000`
 
 If you need to enable logs add the flag `RUST_LOG=info` ex: `RUST_LOG=info cargo run -r`.
 
-The central `urls-input.txt` and the `_engines_/list.txt` file is the base for crawls between the spider programs.
+The central `urls-input.txt` file is the base list input for crawls.
 
-The server binds all on the `0.0.0.0` interface. To not not bind all change the `jsoncrawler_web` ports established at `0.0.0.0`.
-You can also use `cargo run --package jsoncrawler_web -r -- 127.0.0.1:8080 0.0.0.0 3000` to bind the server locally and not the crawler.
+The server binds all on the `0.0.0.0` interface. To not not bind all change the `seoder_web` ports established at `0.0.0.0`.
+You can also use `cargo run --package seoder_web -r -- 127.0.0.1:8080 0.0.0.0 3000` to bind the server locally and not the crawler.
 
 The first param is the socket server:port, web http server, the web http port. Change between `0.0.0.0` and `127.0.0.1` depending on your exposure.
 
 To adjust the client static resources for connecting to the WSS server use the env variable `WS_CONNECTION` followed by the full url like the following
 
-`WS_CONNECTION=ws://135.181.21.254:8080 cargo run --package jsoncrawler_web -r -- 0.0.0.0:8080 0.0.0.0 3000`.
+`WS_CONNECTION=ws://123.2423.21.213:8080 cargo run --package seoder_web -r -- 0.0.0.0:8080 0.0.0.0 3000`.
 
 ## Installation
 
@@ -67,17 +63,7 @@ the application may fail.
 ```sh
 # [required] increase u limits for crawl mode
 ulimit -n 999999
-# all other options not required but, may be adjusted
-ulimit -t unlimited
-ulimit -m unlimited
-ulimit -f unlimited
-ulimit -s unlimited
-ulimit -v unlimited
 ```
-
-## About
-
-This is a fs crawler that handles a list of urls to store contents as json.
 
 ## Program Files
 
@@ -131,14 +117,12 @@ Run benchmarks by using `cargo bench`.
 
 ## Web
 
-To run the web server use the command `RUST_LOG=info cargo run --package jsoncrawler_web`.
+To run the web server use the command `RUST_LOG=info cargo run --package seoder_web`.
 
 ### Browser
 
 Navigate to `127.0.0.1:3000` to view the UI panel for the project.
 
-### Client
+## Todo
 
-The native client can be used to interact with the web server by running `RUST_LOG=info cargo run --package jsoncrawler_client`.
-
-The RUST_LOG env variable is optional.
+Add input source ability selection for list of urls to crawl.

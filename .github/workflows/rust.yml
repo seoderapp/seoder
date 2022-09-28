@@ -27,6 +27,6 @@ jobs:
       - name: Build
         run: cargo build --release --verbose
       - name: Copy txt list
-        run: cp urls-input.txt jsoncrawler_lib
+        run: cp urls-input.txt seoder_lib
       - name: Run tests
         run: cargo test --release --verbose
