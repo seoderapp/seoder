@@ -350,6 +350,21 @@ pub const RAW_JS: &'static str = r#"
       }
     }
 
+    const dfpath = "{" + '"' + "dfpath" + '"';
+
+    if (raw.startsWith(dfpath)) {
+        // parse json for now
+        const np = JSON.parse(raw);
+        const path = np && np.dfpath;
+
+      if(path in fileMap) {
+          const kid = "fskeys_" + path;
+          const cell = document.getElementById(kid);
+
+          cell.remove();
+          delete fileMap[path];
+      }
+    }
 
     const bftc = "{" + '"' + "buffer" + '"';
 
@@ -363,8 +378,11 @@ pub const RAW_JS: &'static str = r#"
         defaultOptionSet = true;
         initialTarget = np.target;
         const buffer = document.getElementById("buffer-select");
+        const proxyform = document.getElementById("proxy-select");
 
         buffer.value = np.buffer;
+        proxyform.checked = np.proxy;
+
       }
     }
 
@@ -426,6 +444,29 @@ pub const RAW_JS: &'static str = r#"
     socket.send("set-buffer " + selected);
 
     event.preventDefault();
+  });
+
+  const proxyform = document.getElementById("proxyform");
+
+  proxyform.addEventListener("submit", (event) => {
+    const prox = proxyform.querySelector('input[name="proxy"]');
+
+    socket.send("set-proxy " + prox.checked);
+
+    event.preventDefault();
+  });
+
+  const fsDelete = document.getElementById("fs-delete");
+
+  fsDelete.addEventListener("click", (event) => {
+    const cf = window.confirm("Are, you sure you want to delete this file?");
+    
+    if(cf) {
+      const campaign = fsform.querySelector('select[name="target"]');
+      const selected = campaign.value;
+      socket.send("delete-file " + selected);
+    }
+
   });
 
   fsform.addEventListener("submit", (event) => {

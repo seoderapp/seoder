@@ -59,8 +59,10 @@ enum Action {
     ListValidCampaigns,
     RemoveCampaign,
     RemoveEngine,
+    RemoveFile,
     SetList,
     SetBuffer,
+    SetProxy,
 }
 
 type Tx = futures_channel::mpsc::UnboundedSender<Message>;
@@ -271,86 +273,33 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 }
             }
 
-            // set selected list item
-            if st == Action::SetBuffer {
-                let file = OpenOptions::new().read(true).open("config.txt").await;
-
-                let mut sl: Vec<String> = vec![];
-
-                match file {
-                    Ok(ff) => {
-                        let reader = BufReader::new(ff);
-                        let mut lines = reader.lines();
-
-                        while let Some(line) = lines.next_line().await.unwrap() {
-                            let hh = line.split(" ").collect::<Vec<&str>>();
-
-                            let mut slots: [String; 2] = ["".to_string(), "".to_string()];
-
-                            if hh.len() >= 2 {
-                                slots[0] = hh[0].to_string();
-                                if hh[0] == "buffer" {
-                                    slots[1] = input.to_string();
-                                } else {
-                                    slots[1] = hh[1].to_string();
-                                }
-                                sl.push(slots.join(" "));
-                            }
-                        }
-                    }
-                    _ => {}
-                };
-
-                let mut filec = OpenOptions::new()
-                    .write(true)
-                    .truncate(true)
-                    .open("config.txt")
+            // remoe file todo remove from ui
+            if st == Action::RemoveFile {
+                tokio::fs::remove_file(string_concat!("_db/files/", &input))
                     .await
                     .unwrap();
 
-                filec.write_all(&sl.join("\n").as_bytes()).await.unwrap();
-                filec.flush().await.unwrap();
+                let v = json!({ "dfpath": input });
+                outgoing
+                    .send(Message::Text(v.to_string()))
+                    .await
+                    .unwrap_or_default();
+            }
+
+            // set enable proxies
+            if st == Action::SetProxy {
+                utils::write_config("proxy", &input).await;
+            }
+
+            // set selected buffer timeout
+            if st == Action::SetBuffer {
+                utils::write_config("buffer", &input).await;
             }
 
             // set selected list item
             if st == Action::SetList {
-                let file = OpenOptions::new().read(true).open("config.txt").await;
-
-                let mut sl: Vec<String> = vec![];
-
-                match file {
-                    Ok(ff) => {
-                        let reader = BufReader::new(ff);
-                        let mut lines = reader.lines();
-
-                        while let Some(line) = lines.next_line().await.unwrap() {
-                            let hh = line.split(" ").collect::<Vec<&str>>();
-
-                            let mut slots: [String; 2] = ["".to_string(), "".to_string()];
-
-                            if hh.len() >= 2 {
-                                slots[0] = hh[0].to_string();
-                                if hh[0] == "target" {
-                                    slots[1] = string_concat!("./_db/files/", input.to_string());
-                                } else {
-                                    slots[1] = hh[1].to_string();
-                                }
-                                sl.push(slots.join(" "));
-                            }
-                        }
-                    }
-                    _ => {}
-                };
-
-                let mut filec = OpenOptions::new()
-                    .write(true)
-                    .truncate(true)
-                    .open("config.txt")
-                    .await
-                    .unwrap();
-
-                filec.write_all(&sl.join("\n").as_bytes()).await.unwrap();
-                filec.flush().await.unwrap();
+                utils::write_config("target", &string_concat!("./_db/files/", input.to_string()))
+                    .await;
             }
 
             // list all engines
@@ -631,10 +580,22 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             if let Err(_) = sender.send((Action::SetBuffer, list_name)) {
                 logd("receiver dropped");
             }
+        } else if c == "set-proxy" {
+            let list_name = cc.to_owned();
+
+            if let Err(_) = sender.send((Action::SetProxy, list_name)) {
+                logd("receiver dropped");
+            }
         } else if c == "delete-campaign" {
             let campain_name = cc.to_owned();
 
             if let Err(_) = sender.send((Action::RemoveCampaign, campain_name)) {
+                logd("receiver dropped");
+            }
+        } else if c == "delete-file" {
+            let file_name = cc.to_owned();
+
+            if let Err(_) = sender.send((Action::RemoveFile, file_name)) {
                 logd("receiver dropped");
             }
         } else if c == "list-campaigns" {

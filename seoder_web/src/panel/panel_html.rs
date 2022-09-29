@@ -24,42 +24,42 @@ pub fn raw_html() -> String {
     </div>
   
     <div class="row">
+      <div>
+        <div class="row">
+          <div class="text-center ph cpu-box">
+            <div class="gutter stats-head">CPU</div>
+            <canvas id="cpu-stats" width="200" height="200"></canvas>
+            <div id="cpu-stats-average" class="center flex-col ph"></div>
+          </div>
 
-      <div class="row center">
-        <div class="text-center ph cpu-box">
-          <div class="gutter stats-head">CPU</div>
-          <canvas id="cpu-stats" width="200" height="200"></canvas>
-          <div id="cpu-stats-average" class="center flex-col ph"></div>
+          <div class="stats-box ph">
+            <div class="gutter stats-head">Network</div>
+            <div class="tild">Received, Transmited, Total Transmited</div>
+            <div id="network-stats" class="stats-bar gutter"></div>
+            <div class="seperator gutter"></div>
+            <div class="gutter stats-head">Memory</div>
+            <div class="tild">Used, Free, Total</div>
+            <div id="memory-stats" class="stats-bar"></div>
+          </div>
         </div>
-        <div class="stats-box ph">
-          <div class="gutter stats-head">Network</div>
-          <div class="tild">Received, Transmited, Total Transmited</div>
-          <div id="network-stats" class="stats-bar gutter"></div>
-          <div class="seperator gutter"></div>
-          <div class="gutter stats-head">Memory</div>
-          <div class="tild">Used, Free, Total</div>
-          <div id="memory-stats" class="stats-bar"></div>
-      </div>
+        <form id="bufferform" class="ph frame">
+          <label for="buffer-select">Buffer</label>
+          <input type="range" name="buffer" id="buffer-select" min="30" max="1000"></input>
+          <button type="submit" class="button btn-primary">Update</button>
+        </form>
 
-      </div>
+        <form id="proxyform" class="ph frame">
+          <label for="target-select">Enable proxies:</label>
+          <input name="proxy" id="proxy-select" type="checkbox"></input>
+          <button type="submit" class="button btn-primary">Update</button>
+        </form>
 
-      <div class="row bar">
-
-        <div class="ph">
-          <form id="bufferform" class="ph frame">
-            <label for="buffer-select">Buffer</label>
-            <input type="range" name="buffer" id="buffer-select" min="30" max="1000"></input>
-            <button type="submit" class="button btn-primary">Update</button>
-          </form>
-        </div>
-
-        <div class="ph">
-          <form id="fsform" class="ph frame">
-            <label for="target-select">Choose a Target:</label>
-            <select name="target" id="target-select"></select>
-            <button type="submit" class="button btn-primary">Update</button>
-          </form>
-        </div>
+        <form id="fsform" class="ph frame">
+          <label for="target-select">Choose a Target:</label>
+          <select name="target" id="target-select"></select>
+          <button type="submit" class="button btn-primary">Update</button>
+          <button type="button" class="button" id="fs-delete">Delete</button>
+        </form>
 
         <form id="uploadform" class="ph frame" enctype="multipart/form-data" method="post">
           <label for="file" class="ph">Set crawl list</label>
@@ -71,9 +71,8 @@ pub fn raw_html() -> String {
           <button type="submit" class="button btn-primary">Run Campaigns</button>
         </form>
       </div>
-    </div>
-
-    <div class="seperator"></div>
+      
+      <div>
 
     <div class="card">
       <div class="card-body">
@@ -131,9 +130,11 @@ pub fn raw_html() -> String {
         <h3>Campaigns</h3>
         <ul id="campaign-list"></ul>
       </div>
-    </div>
+    </div>  
+  </div>
 
-    <div class="seperator"></div>
+      </div>
+    </div>
 
 "#;
 

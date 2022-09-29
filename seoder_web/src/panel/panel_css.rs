@@ -246,6 +246,7 @@ pub const RAW_CSS: &'static str = r#"
     align-items: center;
     padding-bottom: 0.45rem;
     padding-top: 0.45rem;
+    flex-wrap: wrap-reverse;
   }
 
   .row {
