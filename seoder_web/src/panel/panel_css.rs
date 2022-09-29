@@ -307,8 +307,9 @@ pub const RAW_CSS: &'static str = r#"
 
   .frame {
     border: 1px solid #ccc;
-    padding: 2px;
     border-radius: 2px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
 
   .flex-col {

@@ -44,11 +44,29 @@ pub fn raw_html() -> String {
       </div>
 
       <div class="row bar">
+
+        <div class="ph">
+          <form id="bufferform" class="ph frame">
+            <label for="buffer-select">Buffer</label>
+            <input type="range" name="buffer" id="buffer-select" min="30" max="1000"></input>
+            <button type="submit" class="button btn-primary">Update</button>
+          </form>
+        </div>
+
+        <div class="ph">
+          <form id="fsform" class="ph frame">
+            <label for="target-select">Choose a Target:</label>
+            <select name="target" id="target-select"></select>
+            <button type="submit" class="button btn-primary">Update</button>
+          </form>
+        </div>
+
         <form id="uploadform" class="ph frame" enctype="multipart/form-data" method="post">
           <label for="file" class="ph">Set crawl list</label>
           <input type="file" class="" accept="text/plain" name="file"/>
           <button class="btn-primary button">Upload</button>
         </form>
+
         <form id="rform" class="ph">
           <button type="submit" class="button btn-primary">Run Campaigns</button>
         </form>

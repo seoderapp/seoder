@@ -34,6 +34,7 @@ use crate::tokio::io::BufReader;
 use crate::tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use hyper::service::{make_service_fn, service_fn};
 use hyper::Server;
+use tokio::fs::create_dir;
 use tokio::fs::OpenOptions;
 use tokio::net::{TcpListener, TcpStream};
 
@@ -42,9 +43,29 @@ mod ft;
 mod panel;
 mod utils;
 
+/// determine action
+#[derive(PartialEq)]
+enum Action {
+    Stats,
+    Config,
+    ListCampaigns,
+    ListEngines,
+    ListFiles,
+    ListFileCount,
+    RunCampaign,
+    RunAllCampaigns,
+    CreateCampaign,
+    CreateEngine,
+    ListValidCampaigns,
+    RemoveCampaign,
+    RemoveEngine,
+    SetList,
+    SetBuffer,
+}
+
 type Tx = futures_channel::mpsc::UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
-type Controller = (i32, String);
+type Controller = (Action, String);
 
 /// new engine
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -83,7 +104,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         while let Some(m) = receiver.recv().await {
             let (st, input) = m;
 
-            if st == 1 {
+            if st == Action::Stats {
                 s.refresh_all();
 
                 let mut net_total_received = 0;
@@ -122,7 +143,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             }
 
             // list all campaigns
-            if st == 2 {
+            if st == Action::ListCampaigns {
                 let mut dir = tokio::fs::read_dir("_db/campaigns").await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
@@ -166,7 +187,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             }
 
             // run all campaigns
-            if st == 3 {
+            if st == Action::RunAllCampaigns {
                 let mut dir = tokio::fs::read_dir("_db/campaigns").await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
@@ -193,7 +214,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             }
 
             // determine valid count across files
-            if st == 4 {
+            if st == Action::ListValidCampaigns {
                 let mut dir = tokio::fs::read_dir("_db/campaigns").await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
@@ -231,8 +252,109 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 }
             }
 
+            // list all files
+            if st == Action::ListFiles {
+                let mut dir = tokio::fs::read_dir("_db/files/").await.unwrap();
+
+                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
+                    if child.metadata().await.unwrap().is_file() {
+                        let dpt = child.path().to_str().unwrap().to_owned();
+                        let dpt = dpt.replacen("_db/files/", "", 1);
+                        if dpt != "README.md" {
+                            let v = json!({ "fpath": dpt });
+                            outgoing
+                                .send(Message::Text(v.to_string()))
+                                .await
+                                .unwrap_or_default();
+                        }
+                    }
+                }
+            }
+
+            // set selected list item
+            if st == Action::SetBuffer {
+                let file = OpenOptions::new().read(true).open("config.txt").await;
+
+                let mut sl: Vec<String> = vec![];
+
+                match file {
+                    Ok(ff) => {
+                        let reader = BufReader::new(ff);
+                        let mut lines = reader.lines();
+
+                        while let Some(line) = lines.next_line().await.unwrap() {
+                            let hh = line.split(" ").collect::<Vec<&str>>();
+
+                            let mut slots: [String; 2] = ["".to_string(), "".to_string()];
+
+                            if hh.len() >= 2 {
+                                slots[0] = hh[0].to_string();
+                                if hh[0] == "buffer" {
+                                    slots[1] = input.to_string();
+                                } else {
+                                    slots[1] = hh[1].to_string();
+                                }
+                                sl.push(slots.join(" "));
+                            }
+                        }
+                    }
+                    _ => {}
+                };
+
+                let mut filec = OpenOptions::new()
+                    .write(true)
+                    .truncate(true)
+                    .open("config.txt")
+                    .await
+                    .unwrap();
+
+                filec.write_all(&sl.join("\n").as_bytes()).await.unwrap();
+                filec.flush().await.unwrap();
+            }
+
+            // set selected list item
+            if st == Action::SetList {
+                let file = OpenOptions::new().read(true).open("config.txt").await;
+
+                let mut sl: Vec<String> = vec![];
+
+                match file {
+                    Ok(ff) => {
+                        let reader = BufReader::new(ff);
+                        let mut lines = reader.lines();
+
+                        while let Some(line) = lines.next_line().await.unwrap() {
+                            let hh = line.split(" ").collect::<Vec<&str>>();
+
+                            let mut slots: [String; 2] = ["".to_string(), "".to_string()];
+
+                            if hh.len() >= 2 {
+                                slots[0] = hh[0].to_string();
+                                if hh[0] == "target" {
+                                    slots[1] = string_concat!("./_db/files/", input.to_string());
+                                } else {
+                                    slots[1] = hh[1].to_string();
+                                }
+                                sl.push(slots.join(" "));
+                            }
+                        }
+                    }
+                    _ => {}
+                };
+
+                let mut filec = OpenOptions::new()
+                    .write(true)
+                    .truncate(true)
+                    .open("config.txt")
+                    .await
+                    .unwrap();
+
+                filec.write_all(&sl.join("\n").as_bytes()).await.unwrap();
+                filec.flush().await.unwrap();
+            }
+
             // list all engines
-            if st == 5 {
+            if st == Action::ListEngines {
                 let mut dir = tokio::fs::read_dir("_db/engines/").await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
@@ -249,7 +371,8 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             let crun_input = input.clone();
 
-            if st == 6 {
+            // run campaign
+            if st == Action::RunCampaign {
                 let cp = input.clone();
                 let (pt, pat) = builder::engine_builder(crun_input).await;
 
@@ -276,7 +399,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             let d_input = input.clone();
 
-            if st == 7 {
+            if st == Action::RemoveCampaign {
                 tokio::fs::remove_dir_all(string_concat!("_db/campaigns/", &d_input))
                     .await
                     .unwrap();
@@ -289,7 +412,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             }
 
             // delete engine - this does not delete configs attached!
-            if st == 8 {
+            if st == Action::RemoveEngine {
                 tokio::fs::remove_dir_all(string_concat!("_db/engines/", &d_input))
                     .await
                     .unwrap();
@@ -301,7 +424,62 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     .unwrap_or_default();
             }
 
-            if st == 9 {
+            if st == Action::Config {
+                let file = OpenOptions::new().read(true).open("config.txt").await;
+
+                let mut timeout = 50;
+                let mut buffer = 50;
+                let mut proxy = false;
+                let mut target = String::from("./_db/files/urls-input.txt");
+
+                match file {
+                    Ok(ff) => {
+                        let reader = BufReader::new(ff);
+                        let mut lines = reader.lines();
+
+                        while let Some(line) = lines.next_line().await.unwrap() {
+                            let hh = line.split(" ").collect::<Vec<&str>>();
+
+                            if hh.len() >= 2 {
+                                let h0 = hh[0];
+                                let h1 = hh[1].to_string();
+
+                                if h0 == "timeout" {
+                                    timeout = h1.parse::<u16>().unwrap_or(15);
+                                }
+                                if h0 == "buffer" {
+                                    buffer = h1.parse::<u16>().unwrap_or(50);
+                                }
+                                if h0 == "proxy" {
+                                    proxy = h1.parse::<bool>().unwrap_or(false);
+                                }
+                                if h0 == "target" {
+                                    if h1.starts_with("./_db/files/") {
+                                        target = h1.replacen("./_db/files/", "", 1);
+                                    } else {
+                                        target = h1.clone();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                };
+
+                let sl = json!({
+                   "timeout": timeout,
+                   "buffer": buffer,
+                   "proxy": proxy,
+                   "target": target
+                });
+
+                outgoing
+                    .send(Message::Text(sl.to_string()))
+                    .await
+                    .unwrap_or_default();
+            }
+
+            if st == Action::ListFileCount {
                 let mut dir = tokio::fs::read_dir("_db/campaigns").await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
@@ -400,7 +578,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
         // start the feed stats
         if c == "feed" {
-            if let Err(_) = sender.send((1, "".to_string())) {
+            if let Err(_) = sender.send((Action::Stats, "".to_string())) {
                 logd("the receiver dropped");
             }
         }
@@ -412,10 +590,10 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                 let campaign_dir = string_concat!("_db/campaigns/", v["name"].as_str().unwrap());
 
-                tokio::fs::create_dir(&campaign_dir).await.unwrap();
-                tokio::fs::create_dir(&string_concat!(campaign_dir, "/valid"))
-                    .await
-                    .unwrap();
+                let dir = &string_concat!(campaign_dir, "/valid");
+
+                create_dir(&campaign_dir).await.unwrap();
+                create_dir(&dir).await.unwrap();
 
                 let mut file = File::create(string_concat!(campaign_dir, "/config.txt"))
                     .await
@@ -425,39 +603,63 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                 file.write_all(&e.as_bytes()).await.unwrap();
 
-                if let Err(_) = sender.send((2, "".to_string())) {
+                if let Err(_) = sender.send((Action::CreateCampaign, "".to_string())) {
                     logd("the receiver dropped");
                 }
             });
+        } else if c == "config" {
+            let campain_name = cc.to_owned();
+
+            if let Err(_) = sender.send((Action::Config, campain_name)) {
+                logd("receiver dropped");
+            }
         } else if c == "run-campaign" {
             let campain_name = cc.to_owned();
 
-            if let Err(_) = sender.send((6, campain_name)) {
+            if let Err(_) = sender.send((Action::RunCampaign, campain_name)) {
+                logd("receiver dropped");
+            }
+        } else if c == "set-list" {
+            let list_name = cc.to_owned();
+
+            if let Err(_) = sender.send((Action::SetList, list_name)) {
+                logd("receiver dropped");
+            }
+        } else if c == "set-buffer" {
+            let list_name = cc.to_owned();
+
+            if let Err(_) = sender.send((Action::SetBuffer, list_name)) {
                 logd("receiver dropped");
             }
         } else if c == "delete-campaign" {
             let campain_name = cc.to_owned();
 
-            if let Err(_) = sender.send((7, campain_name)) {
+            if let Err(_) = sender.send((Action::RemoveCampaign, campain_name)) {
                 logd("receiver dropped");
             }
         } else if c == "list-campaigns" {
-            if let Err(_) = sender.send((2, "".to_string())) {
+            if let Err(_) = sender.send((Action::ListCampaigns, "".to_string())) {
                 logd("the receiver dropped");
             }
         } else if ms == "run-all-campaigns" {
-            if let Err(_) = sender.send((3, "".to_string())) {
+            if let Err(_) = sender.send((Action::RunAllCampaigns, "".to_string())) {
                 logd("the receiver dropped");
             }
         } else if c == "list-campaign-stats" {
             tokio::task::spawn(async move {
-                if let Err(_) = sender.send((4, "".to_string())) {
+                if let Err(_) = sender.send((Action::ListValidCampaigns, "".to_string())) {
                     logd("the receiver dropped");
                 }
             });
         } else if c == "list-engines" {
             tokio::task::spawn(async move {
-                if let Err(_) = sender.send((5, "".to_string())) {
+                if let Err(_) = sender.send((Action::ListEngines, "".to_string())) {
+                    logd("the receiver dropped");
+                }
+            });
+        } else if c == "list-files" {
+            tokio::task::spawn(async move {
+                if let Err(_) = sender.send((Action::ListFiles, "".to_string())) {
                     logd("the receiver dropped");
                 }
             });
@@ -495,20 +697,20 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         file.write_all(&x.as_bytes()).await.unwrap();
                     }
                 });
-                if let Err(_) = sender.send((2, "".to_string())) {
+                if let Err(_) = sender.send((Action::CreateEngine, "".to_string())) {
                     logd("the receiver dropped");
                 }
             }
         } else if c == "delete-engine" {
             let e_name = cc.to_owned();
 
-            if let Err(_) = sender.send((8, e_name)) {
+            if let Err(_) = sender.send((Action::RemoveEngine, e_name)) {
                 logd("receiver dropped");
             }
         } else if c == "list-totals" {
             let e_name = cc.to_owned();
 
-            if let Err(_) = sender.send((9, e_name)) {
+            if let Err(_) = sender.send((Action::ListFileCount, e_name)) {
                 logd("receiver dropped");
             }
         }

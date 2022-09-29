@@ -33,27 +33,32 @@ pub const RAW_JS: &'static str = r#"
   socket.addEventListener("open", (event) => {
     socket.send("list-campaigns");
     socket.send("list-engines");
-    socket.send("feed");
     socket.send("list-totals");
+    socket.send("list-files");
+    socket.send("feed");
+    socket.send("config");
 
     setTimeout(() => {
       socket.send("list-campaign-stats")
-    })
+    });
 
     setInterval(() => {
       socket.send("list-campaigns");
-    }, 3500)
+    }, 3500);
+
     setInterval(() => {
       socket.send("feed");
-    }, 1000)
+    }, 1000);
 
     setInterval(() => {
       socket.send("list-campaign-stats")
-    }, 5000)
+    }, 5000);
 
     setInterval(() => {
       socket.send("list-totals")
-    }, 30000)
+      socket.send("list-files")
+      socket.send("config");
+    }, 30000);
 
   });
 
@@ -65,7 +70,8 @@ pub const RAW_JS: &'static str = r#"
 
   const pathMap = {};
   const engineMap = {};
-
+  const fileMap = {};
+  let initialTarget = "";
 
   const units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
    
@@ -189,7 +195,56 @@ pub const RAW_JS: &'static str = r#"
       return;
     }
 
-    // todo delete pipe message on delete
+    const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"';
+
+    if (raw.startsWith(selectFile)) {
+      const list = document.getElementById("fsform");
+      const np = JSON.parse(raw);
+      const path = np && np.fpath;
+
+      if(path in fileMap === false) {
+          fileMap[path] = true;
+
+          // file select
+          const fileSelect = document.getElementById("target-select");
+          const fkeys = Object.keys(fileMap);
+
+          if(initialTarget) {
+            const kid = "fskeys_" + initialTarget;
+            const item = document.getElementById(kid);
+            if (!item) {
+              const cellSelect = document.createElement("option");
+  
+              cellSelect.id = kid;
+              cellSelect.name = "fsselect";
+              cellSelect.value = initialTarget;
+              cellSelect.innerText = initialTarget;
+
+              fileSelect.appendChild(cellSelect);
+            }
+          }
+
+          fkeys.forEach((key) => {
+            if(key !== initialTarget) {
+              const kid = "fskeys_" + key;
+              const item = document.getElementById(kid);
+  
+              if (!item) {
+                const cellSelect = document.createElement("option");
+  
+                cellSelect.id = kid;
+                cellSelect.name = "fsselect";
+                cellSelect.value = key;
+                cellSelect.innerText = key;
+  
+                fileSelect.appendChild(cellSelect);
+              }
+            }
+          });
+
+      }
+      return;
+    }
 
     const ptpe = "{" + '"' + "epath" + '"' + ":" + '"';
 
@@ -258,9 +313,6 @@ pub const RAW_JS: &'static str = r#"
               engineSelect.appendChild(cellContainer);
             }
           });
-
-
-     
       }
       return;
     }
@@ -298,6 +350,24 @@ pub const RAW_JS: &'static str = r#"
       }
     }
 
+
+    const bftc = "{" + '"' + "buffer" + '"';
+
+    let defaultOptionSet = false;
+
+    if (raw.startsWith(bftc)) {
+      // parse json for now
+      const np = JSON.parse(raw);
+
+      if(!defaultOptionSet) {
+        defaultOptionSet = true;
+        initialTarget = np.target;
+        const buffer = document.getElementById("buffer-select");
+
+        buffer.value = np.buffer;
+      }
+    }
+
     const deptc = "{" + '"' + "depath" + '"';
 
     if (raw.startsWith(deptc)) {
@@ -322,6 +392,8 @@ pub const RAW_JS: &'static str = r#"
   const rform = document.getElementById("rform");
   const eform = document.getElementById("eform");
   const uploadform = document.getElementById("uploadform");
+  const fsform = document.getElementById("fsform");
+  const bufferform = document.getElementById("bufferform");
 
   uploadform.addEventListener("submit", (event) => {
     const url = "http://localhost:8001/upload";
@@ -347,6 +419,28 @@ pub const RAW_JS: &'static str = r#"
     event.preventDefault();
   });
   
+  bufferform.addEventListener("submit", (event) => {
+    const buffer = bufferform.querySelector('input[name="buffer"]');
+    const selected = buffer.value;
+
+    socket.send("set-buffer " + selected);
+
+    event.preventDefault();
+  });
+
+  fsform.addEventListener("submit", (event) => {
+    const campaign = fsform.querySelector('select[name="target"]');
+    const selected = campaign.value;
+
+    if (!selected) {
+      window.alert("Please select a list type");
+    } else {
+      socket.send("set-list " + selected);
+    }
+
+    event.preventDefault();
+  });
+
   cform.addEventListener("submit", (event) => {
     const campaign = cform.querySelector('input[name="cname"]');
     let cengine = "";
