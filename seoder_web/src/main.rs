@@ -155,6 +155,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         if !dpt.ends_with("/valid") {
                             // todo: set engine in memory
                             let mut engine = "default".to_string();
+
                             match OpenOptions::new()
                                 .read(true)
                                 .open(string_concat!(dpt, "/config.txt"))
@@ -309,7 +310,52 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
                     if child.metadata().await.unwrap().is_dir() {
                         let dpt = child.path().to_str().unwrap().to_owned();
-                        let v = json!({ "epath": dpt.replacen("_db/engines/", "", 1) });
+
+                        // engine paths
+                        // engine patterns
+                        let file = OpenOptions::new()
+                            .read(true)
+                            .open(string_concat!(dpt, "/paths.txt"))
+                            .await;
+
+                        let mut paths: Vec<String> = vec![];
+                        let mut patterns: Vec<String> = vec![];
+
+                        match file {
+                            Ok(file) => {
+                                let reader = BufReader::new(file);
+                                let mut lines = reader.lines();
+
+                                while let Some(line) = lines.next_line().await.unwrap() {
+                                    paths.push(line)
+                                }
+                            }
+                            _ => {}
+                        };
+
+                        let file = OpenOptions::new()
+                            .read(true)
+                            .open(string_concat!(dpt, "/patterns.txt"))
+                            .await;
+
+                        match file {
+                            Ok(file) => {
+                                let reader = BufReader::new(file);
+                                let mut lines = reader.lines();
+
+                                while let Some(line) = lines.next_line().await.unwrap() {
+                                    patterns.push(line)
+                                }
+                            }
+                            _ => {}
+                        };
+
+                        let v = json!({
+                              "epath": dpt.replacen("_db/engines/", "", 1),
+                              "paths": paths,
+                              "patterns": patterns
+                        });
+
                         outgoing
                             .send(Message::Text(v.to_string()))
                             .await

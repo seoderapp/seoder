@@ -80,7 +80,7 @@ pub const RAW_JS: &'static str = r#"
     let n = parseInt(x, 10) || 0;
 
     while(n >= 1024 && ++l){
-        n = n/1024;
+        n = n / 1024;
     }
     
     return(n.toFixed(n < 10 && l > 0 ? 1 : 0) + ' ' + units[l]);
@@ -259,13 +259,19 @@ pub const RAW_JS: &'static str = r#"
           cell.className = "engine-item";
           cell.id = "engine_" + path;
 
-          const cellContentBlock = document.createElement("div");  
+          const cellContentPaths = document.createElement("div");
+          const cellContentBlock = document.createElement("div");
+          cellContentPaths.className = "row";
+
           cellContentBlock.className = "flex center";
 
           const cellTitle = document.createElement("div");  
           cellTitle.textContent = path;
 
+          cellContentPaths.textContent = np.paths;
+
           cellContentBlock.appendChild(cellTitle);
+          cellContentBlock.appendChild(cellContentPaths);
 
           // engine list item
           const cellBtnBlock = document.createElement("div");  

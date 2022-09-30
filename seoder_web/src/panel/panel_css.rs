@@ -15,7 +15,11 @@ pub const RAW_CSS: &'static str = r#"
   }
 
   .gutter {
-    padding-bottom: 0.18rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .gutter-t {
+    padding-top: 0.5rem;
   }
 
   .card {
@@ -101,12 +105,15 @@ pub const RAW_CSS: &'static str = r#"
   }
 
   #campaign-list li.campaign-item button:nth-child(1) {
-    color: #1b1b1b;
+    border: 1px solid #0e1116;
+    color: #0e1116;
+    padding: 0.45rem 0.7rem;
   }
 
   #campaign-list li.campaign-item button:nth-child(2) {
-    background-color: #1b1b1b;
-    color: #fff;
+    border: 1px solid rgb(220 38 38);
+    color: rgb(220 38 38);
+    padding: 0.45rem 0.7rem;
   }
 
   #engine-list > .engine-item {
@@ -131,8 +138,8 @@ pub const RAW_CSS: &'static str = r#"
   }
 
   #engine-list li.engine-item button:nth-child(1) {
-    border: 1px solid #0e1116;
-    color: #0e1116;
+    border: 1px solid rgb(220 38 38);
+    color: rgb(220 38 38);
     padding: 0.45rem 0.7rem;
   }
 
@@ -217,8 +224,8 @@ pub const RAW_CSS: &'static str = r#"
   .stats-box {
     border: 1px solid #ccc;
     padding: 0.5rem;
+    width: 100%;
     font-size: 0.87rem;
-    width: 260px;
     place-content: center;
     display: flex;
     flex-direction: column;
@@ -253,6 +260,12 @@ pub const RAW_CSS: &'static str = r#"
     display: flex;
     padding: 0.5rem;
     flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .spaceless {
+    padding: 0;
+    margin: 0;
   }
 
   .stats-box .seperator {
@@ -265,8 +278,30 @@ pub const RAW_CSS: &'static str = r#"
     flex-direction: column;
   }
 
+  .flex-row {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+  }
+
   .center {
     place-content: center;
+  }
+
+  .form-w {
+    width: 50%;
+  }
+
+  .full-w {
+    width: 100%;
+  }
+
+  .align-end {
+    align-items: flex-end;
+  }
+
+  .center-align {
+    align-items: center;
   }
 
   .text-center {
@@ -292,11 +327,11 @@ pub const RAW_CSS: &'static str = r#"
 
   .stats-bar {
     font-size: 0.8rem;
-    width: 180px;
-    max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    width: 100%;
+
   }
 
   #cpu-stats {
@@ -332,6 +367,14 @@ pub const RAW_CSS: &'static str = r#"
     background-color: transparent;
     border: 1px solid #0e1116;
     color: #0e1116;
+  }
+
+  .wrap {
+    flex-wrap: wrap;
+  }
+
+  .thin {
+    font-weight: 400;
   }
 </style>
 

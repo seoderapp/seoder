@@ -1,4 +1,4 @@
 timeout 15
-buffer 123
+buffer 20
 proxy false
 target ./_db/files/urls-input.txt

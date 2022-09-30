@@ -25,7 +25,7 @@ pub fn raw_html() -> String {
   
     <div class="row">
       <div>
-        <div class="row">
+        <div class="flex-row spaceless">
           <div class="text-center ph cpu-box">
             <div class="gutter stats-head">CPU</div>
             <canvas id="cpu-stats" width="200" height="200"></canvas>
@@ -42,96 +42,120 @@ pub fn raw_html() -> String {
             <div id="memory-stats" class="stats-bar"></div>
           </div>
         </div>
-        <form id="bufferform" class="ph frame">
+        
+        <form id="bufferform" class="ph frame flex-row center-align">
           <label for="buffer-select">Buffer</label>
-          <input type="range" name="buffer" id="buffer-select" min="30" max="1000"></input>
-          <button type="submit" class="button btn-primary">Update</button>
+          <div class="ph">
+            <input type="range" name="buffer" id="buffer-select" min="30" max="1000"></input>
+          </div>
+          <div class="flex align-end">
+            <div>
+              <button type="submit" class="button btn-primary">Update</button>
+            </div>
+          </div>
         </form>
 
-        <form id="proxyform" class="ph frame">
-          <label for="target-select">Enable proxies:</label>
-          <input name="proxy" id="proxy-select" type="checkbox"></input>
-          <button type="submit" class="button btn-primary">Update</button>
+        <form id="proxyform" class="ph frame flex-row center-align">
+          <label for="target-select">Proxy</label>
+          <div class="ph">
+            <input name="proxy" id="proxy-select" type="checkbox"></input>
+          </div>
+          <div class="flex align-end">
+            <div>
+              <button type="submit" class="button btn-primary">Update</button>
+            </div>
+          </div>
         </form>
 
-        <form id="fsform" class="ph frame">
-          <label for="target-select">Choose a Target:</label>
-          <select name="target" id="target-select"></select>
-          <button type="submit" class="button btn-primary">Update</button>
-          <button type="button" class="button" id="fs-delete">Delete</button>
+        <form id="fsform" class="ph frame flex-row center-align">
+          <label for="target-select">Target</label>
+          <div class="ph">
+            <select name="target" id="target-select"></select>
+          </div>
+          <div class="flex align-end">
+            <div>
+            <button type="button" class="button" id="fs-delete">Delete</button>
+              <button type="submit" class="button btn-primary">Update</button>
+            </div>
+          </div>
         </form>
 
-        <form id="uploadform" class="ph frame" enctype="multipart/form-data" method="post">
-          <label for="file" class="ph">Set crawl list</label>
-          <input type="file" class="" accept="text/plain" name="file"/>
+        <form id="uploadform" class="ph frame flex-row center-align" enctype="multipart/form-data" method="post">
+          <label for="file">Set crawl list</label>
+          <div class="ph">
+            <input type="file" accept="text/plain" name="file"/>
+          </div>
           <button class="btn-primary button">Upload</button>
         </form>
 
-        <form id="rform" class="ph">
-          <button type="submit" class="button btn-primary">Run Campaigns</button>
+        <form id="rform" class="gutter-t full-w">
+          <button type="submit" class="button btn-primary full-w">Run Campaigns</button>
         </form>
       </div>
       
-      <div>
+    <div class="ph">
+      <div class="card">
+        <div class="card-body">
+          <h3>Create Engine</h3>
+          <form id="eform">
+            <label for="ename">Name</label>
+            <input name="ename" placeholder="engine name" type="text" class="form-control" />
 
-    <div class="card">
-      <div class="card-body">
-        <h3>Create Engine</h3>
-        <form id="eform">
-          <label for="ename">Name</label>
-          <input name="ename" placeholder="engine name" type="text" class="form-control" />
+            <label for="epaths">Paths</label>
+            <input name="epaths" placeholder="/home,/welcome,/about" type="text" class="form-control" />
 
-          <label for="epaths">Paths</label>
-          <input name="epaths" placeholder="/home,/welcome,/about" type="text" class="form-control" />
+            <label for="epatterns"Patterns</label>
+            <input name="epatterns" placeholder="wild cat,holy,pizza,*cats*" type="text" class="form-control" />
 
-          <label for="epatterns"Patterns</label>
-          <input name="epatterns" placeholder="wild cat,holy,pizza,*cats*" type="text" class="form-control" />
-
-          <button type="submit" class="button btn-primary">Submit</button>
-        </form>
+            <div class="gutter-t">
+              <button type="submit" class="button btn-primary">Submit</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
 
-    <div class="seperator"></div>
+      <div class="seperator"></div>
 
-    <div class="card">
-      <div class="card-body">
-        <h3>Create Campaign</h3>
-        <form id="cform">
-          <div>
-            <label for="cname">Campaign name</label>
-            <input name="cname" placeholder="_rainmain" type="text" class="form-control" />
+        <div class="card">
+          <div class="card-body">
+            <h3>Create Campaign</h3>
+            <form id="cform">
+              <div>
+                <label for="cname">Name</label>
+                <input name="cname" placeholder="_rainmain" type="text" class="form-control" />
+              </div>
+
+              <div class="box gutter">
+                <fieldset class="form-control" id="engine-select">
+                  <legend>Select an engine:</legend>
+                </fieldset>
+              </div>
+
+              <div class="gutter-t">
+                <button type="submit" class="button btn-primary">Submit</button>
+              </div>
+            </form>
           </div>
+        </div>
 
-          <div class="box gutter">
-            <fieldset class="form-control" id="engine-select">
-              <legend>Select an engine:</legend>
-            </fieldset>
+        <div class="seperator"></div>
+
+        <div class="card">
+          <div class="card-body">
+            <h3>Engines</h3>
+            <ul id="engine-list"></ul>
           </div>
+        </div> 
 
-          <button type="submit" class="button btn-primary">Submit</button>
-        </form>
+        <div class="seperator"></div>
+
+        <div class="card">
+          <div class="card-body">
+            <h3>Campaigns</h3>
+            <ul id="campaign-list"></ul>
+          </div>
+        </div>  
       </div>
-    </div>
-
-    <div class="seperator"></div>
-
-    <div class="card">
-      <div class="card-body">
-        <h3>Engines</h3>
-        <ul id="engine-list"></ul>
-      </div>
-    </div> 
-
-    <div class="seperator"></div>
-
-    <div class="card">
-      <div class="card-body">
-        <h3>Campaigns</h3>
-        <ul id="campaign-list"></ul>
-      </div>
-    </div>  
-  </div>
 
       </div>
     </div>
