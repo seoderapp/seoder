@@ -48,7 +48,7 @@ pub async fn store_fs_io_matching(
 
     task::yield_now().await;
 
-    let eg_c = "_db/campaigns/";
+    let eg_c = "./_db/campaigns/";
 
     if tokio::fs::metadata(eg_c).await.is_ok() == false {
         tokio::fs::create_dir(&repb(eg_c)).await.unwrap_or_default();
