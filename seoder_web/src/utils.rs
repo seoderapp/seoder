@@ -1,7 +1,11 @@
+use std::path::Path;
+
 use crate::tokio::io::BufReader;
+
 use seoder_lib::packages::spider::utils::log;
 use seoder_lib::tokio;
 use seoder_lib::tokio::io::AsyncBufReadExt;
+use seoder_lib::tokio::io::AsyncWriteExt;
 use tokio::fs::File;
 use tokio::fs::OpenOptions;
 
@@ -26,7 +30,6 @@ pub async fn lines_to_vec(pt: String) -> Vec<String> {
 
 /// write to config file
 pub async fn write_config(config: &str, input: &String) {
-    use seoder_lib::tokio::io::AsyncWriteExt;
     let file = OpenOptions::new().read(true).open("config.txt").await;
 
     let mut sl: Vec<String> = vec![];
@@ -64,4 +67,23 @@ pub async fn write_config(config: &str, input: &String) {
 
     filec.write_all(&sl.join("\n").as_bytes()).await.unwrap();
     filec.flush().await.unwrap();
+}
+
+/// make sure conf is ready
+pub async fn init_config() {
+    let loc = "config.txt";
+    let conf = Path::new(&loc).is_file();
+
+    // setup one time config
+    if !conf {
+        let mut file = File::create(&loc).await.unwrap();
+        file.write_all(
+            b"timeout 15
+buffer 30
+proxy false
+target ./urls-input.txt",
+        )
+        .await
+        .unwrap();
+    }
 }

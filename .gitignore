@@ -12,3 +12,6 @@ all-others.txt
 connection_error.txt
 ok-not_valid_json.txt
 ok-valid_json.txt
+
+# app config
+config.txt

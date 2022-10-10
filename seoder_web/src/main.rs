@@ -757,6 +757,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 #[tokio::main]
 async fn main() -> Result<(), IoError> {
     env_logger::init();
+    utils::init_config().await;
 
     let addr = env::args()
         .nth(1)
