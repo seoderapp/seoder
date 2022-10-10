@@ -1,4 +1,4 @@
 timeout 15
-buffer 66
+buffer 35
 proxy false
 target ./_db/files/5k.txt

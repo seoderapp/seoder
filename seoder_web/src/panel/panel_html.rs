@@ -46,7 +46,7 @@ pub fn raw_html() -> String {
         <form id="bufferform" class="ph frame flex-row center-align">
           <label for="buffer-select">Buffer</label>
           <div class="ph">
-            <input type="range" name="buffer" id="buffer-select" min="30" max="1000"></input>
+            <input type="range" name="buffer" id="buffer-select" min="25" max="200"></input>
           </div>
           <div class="flex align-end">
             <div>
