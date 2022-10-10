@@ -199,10 +199,10 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         let dpt = child.path().to_str().unwrap().to_owned();
                         if !dpt.ends_with("/valid") {
                             let dptt = dpt.clone();
+                            let (pt, pat, target) = builder::engine_builder(dptt).await;
 
-                            let (pt, pat) = builder::engine_builder(dptt).await;
+                            let mut website: Website = Website::new(&target);
 
-                            let mut website: Website = Website::new(&"urls-input.txt");
                             website.engine.campaign.name = dpt;
                             website.engine.campaign.paths = pt;
                             website.engine.campaign.patterns = pat;
@@ -369,9 +369,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             // run campaign
             if st == Action::RunCampaign {
                 let cp = input.clone();
-                let (pt, pat) = builder::engine_builder(crun_input).await;
+                let (pt, pat, target) = builder::engine_builder(crun_input).await;
 
-                let mut website: Website = Website::new(&"urls-input.txt");
+                let mut website: Website = Website::new(&target);
 
                 website.engine.campaign.name = cp;
                 website.engine.campaign.paths = pt;

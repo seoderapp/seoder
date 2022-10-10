@@ -1,4 +1,4 @@
 timeout 15
 buffer 66
 proxy false
-target ./_db/files/urls-input.txt
+target ./_db/files/5k.txt
