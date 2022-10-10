@@ -482,6 +482,26 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         let dpt = child.path().to_str().unwrap().to_owned();
 
                         if !dpt.ends_with("/valid") {
+                            let mut target = String::from("urls-input.txt");
+
+                            match OpenOptions::new().read(true).open("./config.txt").await {
+                                Ok(file) => {
+                                    let reader = BufReader::new(file);
+                                    let mut lines = reader.lines();
+
+                                    while let Some(line) = lines.next_line().await.unwrap() {
+                                        let hh = line.split(" ").collect::<Vec<&str>>();
+
+                                        if hh.len() == 2 {
+                                            if hh[0] == "target" {
+                                                target = hh[1].to_string();
+                                            }
+                                        }
+                                    }
+                                }
+                                _ => {}
+                            };
+
                             // todo: set engine in memory
                             let mut engine = "default".to_string();
                             match OpenOptions::new()
@@ -508,11 +528,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                             let mut nml = 0;
 
-                            match OpenOptions::new()
-                                .read(true)
-                                .open(string_concat!("urls-input.txt"))
-                                .await
-                            {
+                            match OpenOptions::new().read(true).open(target).await {
                                 Ok(file) => {
                                     let reader = BufReader::new(file);
                                     let mut lines = reader.lines();
