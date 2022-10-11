@@ -14,6 +14,7 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::sync::Semaphore;
 use tokio::task;
+use tokio_stream::StreamExt;
 
 /// Represents a a web crawler for gathering links.
 /// ```rust
@@ -170,87 +171,120 @@ impl Website {
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
         let spawn_limit = CONFIG.2 * num_cpus::get();
-        // full
-        let (tx, rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) = unbounded_channel();
-        // soft
-        let (txx, mut rxx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
-            unbounded_channel();
-
-        let txxx = tx.clone();
 
         // hard main spawn limit
         let global_thread_count = Arc::new(Mutex::new(0));
         // global counter clone
         let thread_count = global_thread_count.clone();
 
-        let client_sem = client.clone();
-
         let p = self.path.to_owned();
 
-        task::spawn(async move {
-            let f = File::open(&p).await.unwrap();
+        let path_names = if !self.engine.campaign.paths.is_empty() {
+            self.engine.campaign.paths.to_owned()
+        } else if !CONFIG.4.campaign.paths.is_empty() {
+            CONFIG.4.campaign.paths.to_owned()
+        } else {
+            let mut vc = Vec::new();
+            vc.push(String::from(""));
 
-            let reader = BufReader::new(f);
-            let mut lines = reader.lines();
+            vc
+        };
 
-            while let Some(link) = lines.next_line().await.unwrap() {
-                if *thread_count.lock().unwrap() < spawn_limit {
-                    *thread_count.lock().unwrap() += 1;
+        let mut st = tokio_stream::iter(path_names);
 
-                    let tx = tx.clone();
-                    let client = client.clone();
+        // full
+        let (tx, rx): (UnboundedSender<Message>, UnboundedReceiver<Message>) = unbounded_channel();
 
-                    task::spawn(async move {
-                        let json = fetch_page_html(&link, &client).await;
-                        if let Err(_) = tx.send((link, json, true)) {
-                            log("receiver dropped", "");
-                        }
-                    });
-                } else {
-                    if let Err(_) =
-                        txx.send((link, ("".into(), ResponseOutFileType::Unknown), false))
-                    {
-                        log("receiver dropped", "");
-                    }
-                }
-            }
+        let txxx = tx.clone();
 
-            // end channels
-            drop(tx);
-            drop(txx);
-        });
-
-        let semaphore = Arc::new(Semaphore::new(spawn_limit / 4)); // 4x less than spawns
-        let mut join_handles = Vec::new();
-
-        let soft_spawn = task::spawn(async move {
-            while let Some(i) = rxx.recv().await {
-                let (link, _, __) = i;
+        let handle = tokio::spawn(async move {
+            while let Some(path) = st.next().await {
+                // soft
+                let (txx, mut rxx): (UnboundedSender<Message>, UnboundedReceiver<Message>) =
+                    unbounded_channel();
 
                 let txxx = txxx.clone();
-                let client = client_sem.clone();
+                let tx = tx.clone();
+                let p = p.clone();
+                let client = client.clone();
+                let client_sem = client.clone();
+                let thread_count = thread_count.clone();
 
-                let permit = semaphore.clone().acquire_owned().await.unwrap();
+                let path = path.clone();
+                let path1 = path.clone();
 
-                join_handles.push(tokio::spawn(async move {
-                    let json = fetch_page_html(&link, &client).await;
-                    if let Err(_) = txxx.send((link, json, false)) {
-                        log("receiver dropped", "");
+                task::spawn(async move {
+                    let f = File::open(&p).await.unwrap();
+
+                    let reader = BufReader::new(f);
+                    let mut lines = reader.lines();
+
+                    while let Some(link) = lines.next_line().await.unwrap() {
+                        if *thread_count.lock().unwrap() < spawn_limit {
+                            *thread_count.lock().unwrap() += 1;
+
+                            let client = client.clone();
+                            let tx = tx.clone();
+                            let link = link.clone();
+                            let path = path.clone();
+
+                            task::spawn(async move {
+                                let json = fetch_page_html(&link, &client, &path).await;
+                                if let Err(_) = tx.send((link, json, true)) {
+                                    log("receiver dropped", "");
+                                }
+                            });
+                        } else {
+                            if let Err(_) =
+                                txx.send((link, ("".into(), ResponseOutFileType::Unknown), false))
+                            {
+                                log("receiver dropped", "");
+                            }
+                        }
                     }
-                    drop(permit);
-                }));
-            }
 
-            for handle in join_handles {
-                handle.await.unwrap();
+                    // end channels
+                    drop(tx);
+                    drop(txx);
+                });
+
+                let semaphore = Arc::new(Semaphore::new(spawn_limit / 4)); // 4x less than spawns
+                let mut join_handles = Vec::new();
+
+                let soft_spawn = task::spawn(async move {
+                    while let Some(i) = rxx.recv().await {
+                        let (link, _, __) = i;
+
+                        let txxx = txxx.clone();
+                        let client = client_sem.clone();
+                        let link = link.clone();
+                        let permit = semaphore.clone().acquire_owned().await.unwrap();
+                        let path = path1.clone();
+
+                        join_handles.push(tokio::spawn(async move {
+                            let json = fetch_page_html(&link, &client, &path).await;
+                            if let Err(_) = txxx.send((link, json, false)) {
+                                log("receiver dropped", "");
+                            }
+                            drop(permit);
+                        }));
+                    }
+
+                    for handle in join_handles {
+                        handle.await.unwrap();
+                    }
+                });
+
+                task::yield_now().await;
+
+                soft_spawn.await.unwrap();
             }
+            drop(tx);
         });
-
-        task::yield_now().await;
 
         store_fs_io_matching(&self.engine.campaign, rx, global_thread_count).await;
 
-        soft_spawn.await.unwrap();
+        handle.await.unwrap();
     }
 }
 

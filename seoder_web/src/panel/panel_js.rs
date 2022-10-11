@@ -281,8 +281,7 @@ pub const RAW_JS: &'static str = r#"
           cellBtnDeleteButton.textContent = "Delete";
 
           cellBtnDeleteButton.addEventListener("click", (event) => {
-            const name = event.path[2].firstChild.textContent;
-            socket.send("delete-engine " + name)
+            socket.send("delete-engine " + cellTitle.outerText)
             event.preventDefault();
           });
         
@@ -470,6 +469,7 @@ pub const RAW_JS: &'static str = r#"
     if(cf) {
       const campaign = fsform.querySelector('select[name="target"]');
       const selected = campaign.value;
+      
       socket.send("delete-file " + selected);
     }
 

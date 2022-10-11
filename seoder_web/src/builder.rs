@@ -66,7 +66,7 @@ pub async fn engine_builder(dptt: String) -> (Vec<String>, Vec<String>, String) 
     .await
     .unwrap();
 
-    if selected_engine.is_empty() == false {
+    if !selected_engine.is_empty() {
         let eselected = selected_engine.clone();
 
         tokio::spawn(async move {

@@ -1,4 +1,3 @@
-use super::website::CONFIG;
 use super::ResponseOutFileType;
 use log::{info, log_enabled, Level};
 use reqwest::Client;
@@ -32,9 +31,13 @@ fn build_error(url: &str, error: &reqwest::Error) -> String {
 }
 
 /// Perform a network request to a resource extracting all content as text.
-pub async fn fetch_page_html(url: &str, client: &Client) -> (String, ResponseOutFileType) {
+pub async fn fetch_page_html(
+    url: &str,
+    client: &Client,
+    path: &str,
+) -> (String, ResponseOutFileType) {
     match client
-        .get(string_concat!("http://", url, CONFIG.0))
+        .get(string_concat!("http://", url, path))
         .send()
         .await
     {

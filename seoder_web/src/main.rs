@@ -700,7 +700,10 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 tokio::task::spawn(async move {
                     let ptt = pt.split(',');
                     let ott = pat.split(',');
-                    tokio::fs::create_dir(&db_dir).await.unwrap();
+
+                    if !std::path::Path::new(&db_dir).exists() {
+                        tokio::fs::create_dir(&db_dir).await.unwrap();
+                    }
 
                     let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
                         .await
