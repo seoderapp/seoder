@@ -2,12 +2,12 @@
   "build": {
     "beforeDevCommand": "",
     "beforeBuildCommand": "",
-    "devPath": "../src",
-    "distDir": "../src",
+    "devPath": "../../templates",
+    "distDir": "../../templates",
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "seoder_e",
+    "productName": "seoder_app",
     "version": "0.0.0"
   },
   "tauri": {
@@ -17,7 +17,7 @@
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "MIT",
+      "copyright": "",
       "deb": {
         "depends": []
       },
@@ -58,7 +58,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "seoder_e",
+        "title": "seoder_app",
         "width": 800
       }
     ]

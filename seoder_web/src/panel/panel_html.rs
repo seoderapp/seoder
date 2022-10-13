@@ -8,7 +8,7 @@ pub fn raw_html() -> String {
     let s: String = match std::env::var("WS_CONNECTION") {
         Ok(v) => {
             let js = format!(
-                r#"<script>const socket = new WebSocket("{}");</script>"#,
+                r#"<script>const sock = new WebSocket("{}");</script>"#,
                 v
             );
 
@@ -40,7 +40,7 @@ pub async fn panel_handle(_: Request<Body>) -> Result<Response<Body>, Infallible
     let mut context = Context::new();
     context.insert("js", &js);
     context.insert("title", &"Home");
-
+    
     let templ = TEMPLATES.render("app.html", &context).unwrap();
 
     Ok(Response::new(templ.into()))

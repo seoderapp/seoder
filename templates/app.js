@@ -1,3 +1,7 @@
+// check if socket already ready
+const socket =
+  typeof sock === "undefined" ? new WebSocket("ws://127.0.0.1:8080") : sock;
+
 socket.addEventListener("open", (event) => {
   socket.send("list-campaigns");
   socket.send("list-engines");
