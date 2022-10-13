@@ -82,7 +82,7 @@ struct Eng {
     patterns: String,
 }
 
-/// read file to target 
+/// read file to target
 async fn get_file_value(path: &str, value: &str) -> String {
     let mut target = String::from("");
 
@@ -96,17 +96,26 @@ async fn get_file_value(path: &str, value: &str) -> String {
 
                 if hh.len() == 2 {
                     if hh[0] == value {
-                        target =  hh[1].to_string();
+                        target = hh[1].to_string();
                     }
                 }
             }
         }
-        _ => {
-        }
+        _ => {}
     };
 
     target
 }
+
+/// clean target _db string
+fn clean_target_cmp_str(dpt: &str) -> String {
+    if dpt.starts_with("../_db/campaigns/") {
+        dpt.replacen("../_db/campaigns/", "", 1)
+    } else {
+        dpt.replacen("_db/campaigns/", "", 1)
+    }
+}
+
 /// handle async connections to socket
 async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
     logd(string_concat::string_concat!(
@@ -191,13 +200,18 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                         if !dpt.ends_with("/valid") {
                             // todo: set engine in memory
-                            let mut engine = get_file_value(&string_concat!(dpt, "/config.txt"), "engine").await;
-                            
+                            let mut engine =
+                                get_file_value(&string_concat!(dpt, "/config.txt"), "engine").await;
+
                             if engine.is_empty() {
                                 engine = String::from("default");
                             }
 
-                            let v = json!({ "path": dpt.replacen(pt, "", 1), "pengine": engine});
+                            let mut d = dpt.replacen(pt, "", 1);
+
+                            d.remove(0);
+
+                            let v = json!({ "path": d, "pengine": engine });
 
                             outgoing
                                 .send(Message::Text(v.to_string()))
@@ -234,7 +248,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     }
                 }
             }
-            
+
             // determine valid count across files
             if st == Action::ListValidCampaigns {
                 let c = if Path::new("./_db/campaigns").exists() {
@@ -257,20 +271,30 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                             let mut lns = 0;
 
+                            let mut d = dpt.replacen(c, "", 1);
+
+                            if d.starts_with("/") {
+                                d.remove(0);
+                            }
+
                             match file {
                                 Ok(file) => {
                                     let reader = BufReader::new(file);
                                     let mut lines = reader.lines();
 
-                                    while let Some(_) = lines.next_line().await.unwrap() {
-                                        // todo: output campaign name to stream
+                                    while let Some(url) = lines.next_line().await.unwrap() {
+                                        let v = json!({ "url": url, "path": d });
+                                        outgoing
+                                            .send(Message::Text(v.to_string()))
+                                            .await
+                                            .unwrap_or_default();
                                         lns += 1;
                                     }
                                 }
                                 _ => {}
                             };
 
-                            let v = json!({ "count": lns, "path": dpt.replacen(c, "", 1) });
+                            let v = json!({ "count": lns, "path": d });
 
                             outgoing
                                 .send(Message::Text(v.to_string()))
@@ -397,8 +421,14 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                             _ => {}
                         };
 
+                        let mut d = dpt.replacen(eg, "", 1);
+
+                        if d.starts_with("/") {
+                            d.remove(0);
+                        }
+
                         let v = json!({
-                              "epath": dpt.replacen(eg, "", 1),
+                              "epath": d,
                               "paths": paths,
                               "patterns": patterns
                         });
@@ -535,13 +565,14 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                         if !dpt.ends_with("/valid") {
                             let mut target = get_file_value("./config.txt", "target").await;
-                            let mut engine = get_file_value(&string_concat!(dpt, "/config.txt"), "engine").await;
+                            let mut engine =
+                                get_file_value(&string_concat!(dpt, "/config.txt"), "engine").await;
 
-                            if !target.is_empty() {
+                            if target.is_empty() {
                                 target = String::from("urls-input.txt");
                             }
 
-                            if !engine.is_empty() {
+                            if engine.is_empty() {
                                 engine = String::from("default");
                             }
 
@@ -560,7 +591,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                                 _ => {}
                             };
 
-                            let v = json!({ "apath": dpt.replacen("_db/campaigns/", "", 1), "pengine": engine, "ploc": nml });
+                            let dpt = clean_target_cmp_str(&dpt);
+
+                            let v = json!({ "apath": dpt.replacen("/", "", 1), "pengine": engine, "ploc": nml });
 
                             outgoing
                                 .send(Message::Text(v.to_string()))

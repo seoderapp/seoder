@@ -2,7 +2,7 @@
 const socket =
   typeof sock === "undefined" ? new WebSocket("ws://127.0.0.1:8080") : sock;
 
-socket.addEventListener("open", (event) => {
+socket.addEventListener("open", () => {
   socket.send("list-campaigns");
   socket.send("list-engines");
   socket.send("list-totals");
@@ -39,27 +39,15 @@ const cpua = document.getElementById("cpu-stats-average");
 const netstats = document.getElementById("network-stats");
 const memstats = document.getElementById("memory-stats");
 
-const pathMap = {};
-const engineMap = {};
-const fileMap = {};
+const pathMap = new Map();
+const fileMap = new Map();
+const engineMap = new Map();
+
 let initialTarget = "";
-
-const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-function slowBytes(x) {
-  let l = 0;
-  let n = parseInt(x, 10) || 0;
-
-  while (n >= 1024 && ++l) {
-    n = n / 1024;
-  }
-
-  return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
-}
 
 socket.addEventListener("message", (event) => {
   const raw = event.data;
-
+  
   if (raw.startsWith("{" + '"' + "stats")) {
     const data = JSON.parse(event.data);
     const {
@@ -74,8 +62,6 @@ socket.addEventListener("message", (event) => {
     } = data.stats;
 
     setProgress(cpu_usage);
-
-    let nextAVG = load_avg_min.toFixed(2);
 
     if (cpua.innerHTML !== "1 min avg " + load_avg_min.toFixed(2) + "%") {
       cpua.innerHTML = "1 min avg " + load_avg_min.toFixed(2) + "%";
@@ -100,22 +86,20 @@ socket.addEventListener("message", (event) => {
   const ptpal = "{" + '"' + "apath" + '"' + ":" + '"';
 
   if (raw.startsWith(ptpal)) {
-    const list = document.getElementById("campaign-list");
     const np = JSON.parse(raw);
-    const { apath, pengine, ploc } = np || {};
+    const { apath, ploc } = np || {};
     const path = apath;
 
-    if (path in pathMap && typeof ploc !== "undefined") {
-      pathMap[path] = {
-        total: ploc ?? 0,
-        valid: np.count ?? pathMap[path].valid ?? 0,
-      };
-
+    if (pathMap.has(path) && typeof ploc !== "undefined") {
+      const item = pathMap.get(path);
       const cell = document.getElementById("campaign_" + path);
+
+      item.total = ploc ?? 0 
+      item.valid = np.count ?? item.valid ?? 0;
 
       if (cell && cell.firstChild && cell.firstChild.firstChild.nextSibling) {
         cell.firstChild.firstChild.nextSibling.nextSibling.textContent =
-          "( " + pathMap[path].valid + " / " + pathMap[path].total + " ) ";
+          "( " + item.valid + " / " + item.total + " ) ";
       }
     }
 
@@ -127,10 +111,20 @@ socket.addEventListener("message", (event) => {
   if (raw.startsWith(ptp)) {
     const list = document.getElementById("campaign-list");
     const np = JSON.parse(raw);
-    const { path, pengine } = np || {};
 
-    if (path in pathMap === false) {
-      pathMap[path] = 0;
+    const { path, pengine, url } = np || {};
+    
+    if(pathMap.has(path)) {
+      const item = pathMap.get(path);
+
+      if(item.urls && !item.urls.has(path)) {
+        item.urls.add(url);
+      }
+    }
+    if (!pathMap.has(path)) {
+      pathMap.set(path, {
+        urls: new Set()
+      });
       const cell = document.createElement("li");
       cell.className = "campaign-item";
       cell.id = "campaign_" + path;
@@ -145,6 +139,7 @@ socket.addEventListener("message", (event) => {
       cellEngine.textContent = pengine || "engine_default";
 
       const cellStats = document.createElement("div");
+
       cellStats.textContent = "( 0/" + 0 + " )";
 
       const cellBtnBlock = document.createElement("div");
@@ -162,8 +157,7 @@ socket.addEventListener("message", (event) => {
       });
 
       cellBtnDeleteButton.addEventListener("click", (event) => {
-        const name = event.path[2].firstChild.firstChild.textContent;
-        socket.send("delete-campaign " + name);
+        socket.send("delete-campaign " + path);
         event.preventDefault();
       });
 
@@ -188,16 +182,13 @@ socket.addEventListener("message", (event) => {
   const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"';
 
   if (raw.startsWith(selectFile)) {
-    const list = document.getElementById("fsform");
     const np = JSON.parse(raw);
     const path = np && np.fpath;
 
-    if (path in fileMap === false) {
-      fileMap[path] = true;
-
+    if (!fileMap.has(path)) {
+      fileMap.set(path, {});
       // file select
       const fileSelect = document.getElementById("target-select");
-      const fkeys = Object.keys(fileMap);
 
       if (initialTarget) {
         const kid = "fskeys_" + initialTarget;
@@ -213,8 +204,8 @@ socket.addEventListener("message", (event) => {
           fileSelect.appendChild(cellSelect);
         }
       }
-
-      fkeys.forEach((key) => {
+      
+      for (const [key, _] of fileMap) {
         if (key !== initialTarget) {
           const kid = "fskeys_" + key;
           const item = document.getElementById(kid);
@@ -230,20 +221,20 @@ socket.addEventListener("message", (event) => {
             fileSelect.appendChild(cellSelect);
           }
         }
-      });
+      }
     }
     return;
   }
 
   const ptpe = "{" + '"' + "epath" + '"' + ":" + '"';
-
+  
   if (raw.startsWith(ptpe)) {
     const list = document.getElementById("engine-list");
     const np = JSON.parse(raw);
     const path = np && np.epath;
 
-    if (path in engineMap === false) {
-      engineMap[path] = 0;
+    if (!engineMap.has(path)) {
+      engineMap.set(path, {})
       const cell = document.createElement("li");
       cell.className = "engine-item";
       cell.id = "engine_" + path;
@@ -270,7 +261,7 @@ socket.addEventListener("message", (event) => {
       cellBtnDeleteButton.textContent = "Delete";
 
       cellBtnDeleteButton.addEventListener("click", (event) => {
-        socket.send("delete-engine " + cellTitle.outerText);
+        socket.send("delete-engine " + path);
         event.preventDefault();
       });
 
@@ -282,10 +273,7 @@ socket.addEventListener("message", (event) => {
       // engine select
       const engineSelect = document.getElementById("engine-select");
 
-      const eKeys = Object.keys(engineMap);
-
-      eKeys.forEach((key) => {
-        const inputName = "eselect" + key;
+      for (const [key, _] of engineMap) {
         const kid = "ekeys_" + key;
         const item = document.getElementById(kid);
 
@@ -306,7 +294,7 @@ socket.addEventListener("message", (event) => {
           cellContainer.appendChild(cellSelect);
           engineSelect.appendChild(cellContainer);
         }
-      });
+      }
     }
     return;
   }
@@ -318,15 +306,15 @@ socket.addEventListener("message", (event) => {
     const np = JSON.parse(raw);
     const path = np && np.path;
 
-    if (path in pathMap) {
-      pathMap[path] = {
-        total: pathMap[path].total ?? 0,
-        valid: np.count ?? pathMap[path].valid ?? 0,
-      };
+    if (pathMap.has(path)) {
+      const item = pathMap.get(path);
+      item.total = item.total ?? 0;
+      item.valid = np.count ?? item.valid ?? 0;
+
       const cell = document.getElementById("campaign_" + path);
       if (cell && cell.firstChild && cell.firstChild.firstChild.nextSibling) {
         cell.firstChild.firstChild.nextSibling.nextSibling.textContent =
-          "( " + pathMap[path].valid + " / " + pathMap[path].total + " ) ";
+          "( " + item.valid + " / " + item.total + " ) ";
       }
     }
   }
@@ -338,10 +326,10 @@ socket.addEventListener("message", (event) => {
     const np = JSON.parse(raw);
     const path = np && np.dcpath;
 
-    if (path in pathMap) {
+    if (pathMap.has(path)) {
       const cell = document.getElementById("campaign_" + path);
       cell.remove();
-      delete pathMap[path];
+      pathMap.delete(path);
     }
   }
 
@@ -352,12 +340,13 @@ socket.addEventListener("message", (event) => {
     const np = JSON.parse(raw);
     const path = np && np.dfpath;
 
-    if (path in fileMap) {
+    if (fileMap.has(path)) {
       const kid = "fskeys_" + path;
       const cell = document.getElementById(kid);
 
       cell.remove();
-      delete fileMap[path];
+
+      fileMap.delete(path)
     }
   }
 
@@ -387,15 +376,13 @@ socket.addEventListener("message", (event) => {
     const np = JSON.parse(raw);
     const path = np && np.depath;
 
-    if (path in engineMap) {
+    if (engineMap.has(path)) {
       const cell = document.getElementById("engine_" + path);
+      const kitem = document.getElementById("ekeys_" + path);
+
       cell.remove();
-      delete engineMap[path];
-
-      const kid = "ekeys_" + path;
-      const kitem = document.getElementById(kid);
-
       kitem.remove();
+      engineMap.delete(path)
     }
   }
 });

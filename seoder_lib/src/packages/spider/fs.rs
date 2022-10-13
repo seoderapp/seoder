@@ -68,9 +68,7 @@ pub async fn store_fs_io_matching(
                 continue;
             }
 
-            tokio::fs::create_dir(&cmp_base)
-                .await
-                .unwrap_or_default();
+            tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
 
             let mut o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
 
@@ -146,15 +144,11 @@ pub async fn store_fs_io_matching(
             string_concat!("../", cmp_base)
         };
 
-        tokio::fs::create_dir(&&cmp_base)
-            .await
-            .unwrap_or_default();
+        tokio::fs::create_dir(&&cmp_base).await.unwrap_or_default();
 
         let cmp_base = string_concat!(&cmp_base, "/valid");
 
-        tokio::fs::create_dir(&&cmp_base)
-            .await
-            .unwrap_or_default();
+        tokio::fs::create_dir(&&cmp_base).await.unwrap_or_default();
 
         let mut o = create_file(&&string_concat!(&cmp_base, "/links.txt")).await;
 
