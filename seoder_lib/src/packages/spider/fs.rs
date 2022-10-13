@@ -20,16 +20,6 @@ pub async fn create_file(path: &str) -> File {
     File::create(&path).await.unwrap()
 }
 
-/// replace extra base adding
-fn repb(a: &str) -> String {
-    if a.starts_with("_db/campaigns/_db/campaigns/") {
-        a.replace("_db/campaigns/_db/campaigns/", "_db/campaigns/")
-            .to_string()
-    } else {
-        a.to_string()
-    }
-}
-
 /// store the content to file system
 pub async fn store_fs_io_matching(
     campaign: &Campaign,
@@ -78,7 +68,7 @@ pub async fn store_fs_io_matching(
                 continue;
             }
 
-            tokio::fs::create_dir(&repb(&cmp_base))
+            tokio::fs::create_dir(&cmp_base)
                 .await
                 .unwrap_or_default();
 
@@ -156,17 +146,17 @@ pub async fn store_fs_io_matching(
             string_concat!("../", cmp_base)
         };
 
-        tokio::fs::create_dir(&repb(&cmp_base))
+        tokio::fs::create_dir(&&cmp_base)
             .await
             .unwrap_or_default();
 
         let cmp_base = string_concat!(&cmp_base, "/valid");
 
-        tokio::fs::create_dir(&repb(&cmp_base))
+        tokio::fs::create_dir(&&cmp_base)
             .await
             .unwrap_or_default();
 
-        let mut o = create_file(&repb(&string_concat!(&cmp_base, "/links.txt"))).await;
+        let mut o = create_file(&&string_concat!(&cmp_base, "/links.txt")).await;
 
         while let Some(i) = rx.recv().await {
             let (link, jor, spawned) = i;

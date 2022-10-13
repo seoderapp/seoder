@@ -57,11 +57,11 @@ enum Action {
     ListEngines,
     ListFiles,
     ListFileCount,
+    ListValidCampaigns,
     RunCampaign,
     RunAllCampaigns,
     CreateCampaign,
     CreateEngine,
-    ListValidCampaigns,
     RemoveCampaign,
     RemoveEngine,
     RemoveFile,
@@ -82,6 +82,32 @@ struct Eng {
     patterns: String,
 }
 
+/// read file to target 
+async fn get_file_value(path: &str, value: &str) -> String {
+    let mut target = String::from("");
+
+    match OpenOptions::new().read(true).open(&path).await {
+        Ok(file) => {
+            let reader = BufReader::new(file);
+            let mut lines = reader.lines();
+
+            while let Some(line) = lines.next_line().await.unwrap() {
+                let hh = line.split(" ").collect::<Vec<&str>>();
+
+                if hh.len() == 2 {
+                    if hh[0] == value {
+                        target =  hh[1].to_string();
+                    }
+                }
+            }
+        }
+        _ => {
+        }
+    };
+
+    target
+}
+/// handle async connections to socket
 async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
     logd(string_concat::string_concat!(
         "TCP connection from: ",
@@ -165,29 +191,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                         if !dpt.ends_with("/valid") {
                             // todo: set engine in memory
-                            let mut engine = "default".to_string();
-
-                            match OpenOptions::new()
-                                .read(true)
-                                .open(string_concat!(dpt, "/config.txt"))
-                                .await
-                            {
-                                Ok(file) => {
-                                    let reader = BufReader::new(file);
-                                    let mut lines = reader.lines();
-
-                                    while let Some(line) = lines.next_line().await.unwrap() {
-                                        let hh = line.split(" ").collect::<Vec<&str>>();
-
-                                        if hh.len() == 2 {
-                                            if hh[0] == "engine" {
-                                                engine = hh[1].to_string();
-                                            }
-                                        }
-                                    }
-                                }
-                                _ => {}
-                            };
+                            let mut engine = get_file_value(&string_concat!(dpt, "/config.txt"), "engine").await;
+                            
+                            if engine.is_empty() {
+                                engine = String::from("default");
+                            }
 
                             let v = json!({ "path": dpt.replacen(pt, "", 1), "pengine": engine});
 
@@ -226,7 +234,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     }
                 }
             }
-
+            
             // determine valid count across files
             if st == Action::ListValidCampaigns {
                 let c = if Path::new("./_db/campaigns").exists() {
@@ -255,6 +263,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                                     let mut lines = reader.lines();
 
                                     while let Some(_) = lines.next_line().await.unwrap() {
+                                        // todo: output campaign name to stream
                                         lns += 1;
                                     }
                                 }
@@ -525,52 +534,20 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         let dpt = child.path().to_str().unwrap().to_owned();
 
                         if !dpt.ends_with("/valid") {
-                            let mut target = String::from("urls-input.txt");
+                            let mut target = get_file_value("./config.txt", "target").await;
+                            let mut engine = get_file_value(&string_concat!(dpt, "/config.txt"), "engine").await;
 
-                            match OpenOptions::new().read(true).open("./config.txt").await {
-                                Ok(file) => {
-                                    let reader = BufReader::new(file);
-                                    let mut lines = reader.lines();
+                            if !target.is_empty() {
+                                target = String::from("urls-input.txt");
+                            }
 
-                                    while let Some(line) = lines.next_line().await.unwrap() {
-                                        let hh = line.split(" ").collect::<Vec<&str>>();
-
-                                        if hh.len() == 2 {
-                                            if hh[0] == "target" {
-                                                target = hh[1].to_string();
-                                            }
-                                        }
-                                    }
-                                }
-                                _ => {}
-                            };
-
-                            // todo: set engine in memory
-                            let mut engine = "default".to_string();
-                            match OpenOptions::new()
-                                .read(true)
-                                .open(string_concat!(dpt, "/config.txt"))
-                                .await
-                            {
-                                Ok(file) => {
-                                    let reader = BufReader::new(file);
-                                    let mut lines = reader.lines();
-
-                                    while let Some(line) = lines.next_line().await.unwrap() {
-                                        let hh = line.split(" ").collect::<Vec<&str>>();
-
-                                        if hh.len() == 2 {
-                                            if hh[0] == "engine" {
-                                                engine = hh[1].to_string();
-                                            }
-                                        }
-                                    }
-                                }
-                                _ => {}
-                            };
+                            if !engine.is_empty() {
+                                engine = String::from("default");
+                            }
 
                             let mut nml = 0;
 
+                            // target file length
                             match OpenOptions::new().read(true).open(target).await {
                                 Ok(file) => {
                                     let reader = BufReader::new(file);
