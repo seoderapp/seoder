@@ -6,24 +6,30 @@ A performant marketing tool to determine relevant keywords for your next campaig
 
 To run the program make sure to have [Rust](https://doc.rust-lang.org/book/ch01-01-installation.html) installed.
 
-1. `cargo run --package seoder_web -r`
+1. `RUST_LOG=info cargo run --package seoder -r`
 
 or example with generated exposed connections for ss.
 
-1. `WS_CONNECTION=ws://123.2423.21.213:8080 cargo run --package seoder_web -r -- 0.0.0.0:8080 0.0.0.0 3000`
+1. `WS_CONNECTION=ws://123.2423.21.213:8080 cargo run --package seoder -r -- 0.0.0.0:8080 0.0.0.0 3000`
 
 If you need to enable logs add the flag `RUST_LOG=info` ex: `RUST_LOG=info cargo run -r`.
 
 The central `urls-input.txt` file is the base list input for crawls.
 
-The server binds all on the `0.0.0.0` interface. To not not bind all change the `seoder_web` ports established at `0.0.0.0`.
-You can also use `cargo run --package seoder_web -r -- 127.0.0.1:8080 0.0.0.0 3000` to bind the server locally and not the crawler.
+The server binds all on the `0.0.0.0` interface. To not not bind all change the `seoder` ports established at `0.0.0.0`.
+You can also use `cargo run --package seoder -r -- 127.0.0.1:8080 0.0.0.0 3000` to bind the server locally and not the crawler.
 
 The first param is the socket server:port, web http server, the web http port. Change between `0.0.0.0` and `127.0.0.1` depending on your exposure.
 
 To adjust the client static resources for connecting to the WSS server use the env variable `WS_CONNECTION` followed by the full url like the following
 
-`WS_CONNECTION=ws://123.2423.21.213:8080 cargo run --package seoder_web -r -- 0.0.0.0:8080 0.0.0.0 3000`.
+`WS_CONNECTION=ws://123.2423.21.213:8080 cargo run --package seoder -r -- 0.0.0.0:8080 0.0.0.0 3000`.
+
+## Application
+
+Make sure to have `tauri` installed - (ex: cargo install tauri-cli);
+
+If you want to run the native app run `cargo tauri dev`.
 
 ## Installation
 
@@ -125,4 +131,12 @@ Navigate to `127.0.0.1:3000` to view the UI panel for the project.
 
 ## Todo
 
-Add input source ability selection for list of urls to crawl.
+1. Add handling of project location path detion instead of the following:
+
+```rust
+let f = if Path::new("./_db/files").exists() {
+        "./_db/files/"
+    } else {
+        "../../_db/files/"
+    };
+```

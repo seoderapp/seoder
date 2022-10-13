@@ -8,6 +8,7 @@ publish = false
 [dependencies]
 env_logger = "0.9.0"
 seoder_lib = { path = "../seoder_lib" }
+seoder_web = { path = "../seoder_web" }
 
 [target.'cfg(all(not(target_os = "android")))'.dependencies]
 jemallocator = { version = "0.5.0", optional = true }

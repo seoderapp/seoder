@@ -3,8 +3,9 @@ members = [
     "seoder",
     "seoder_lib",
     "seoder_web",
+    "seoder_app/src-tauri",
     # internal
     "benches"
 ]
-default-members = [ "seoder", "seoder_lib", "benches" ]
+default-members = [ "seoder", "seoder_web", "seoder_lib", "benches" ]
 
