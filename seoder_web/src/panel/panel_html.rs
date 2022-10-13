@@ -37,6 +37,7 @@ pub async fn panel_handle(_: Request<Body>) -> Result<Response<Body>, Infallible
     }
     let js = raw_html();
 
+    // todo: move to build step and manipulate static html with custom js target from raw html
     let mut context = Context::new();
     context.insert("js", &js);
     context.insert("title", &"Home");
