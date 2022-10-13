@@ -36,6 +36,12 @@ pub async fn store_fs_io_matching(
     mut rx: UnboundedReceiver<Message>,
     global_thread_count: Arc<Mutex<usize>>,
 ) {
+    lazy_static! {
+        static ref SELECTOR: Selector =
+            Selector::parse("body > *:not(script):not(noscript):not(css):not(style):not(link)")
+                .unwrap();
+    }
+
     let path = &campaign.name;
     let patterns = &campaign.patterns;
 
@@ -50,14 +56,8 @@ pub async fn store_fs_io_matching(
 
     let eg_c = "./_db/campaigns/";
 
-    if tokio::fs::metadata(eg_c).await.is_ok() == false {
-        tokio::fs::create_dir(&repb(eg_c)).await.unwrap_or_default();
-    }
-
-    lazy_static! {
-        static ref SELECTOR: Selector =
-            Selector::parse("body > *:not(script):not(noscript):not(css):not(style):not(link)")
-                .unwrap();
+    if !tokio::fs::metadata(eg_c).await.is_ok() {
+        tokio::fs::create_dir(&eg_c).await.unwrap_or_default();
     }
 
     let source_match = campaign.source_match;
@@ -109,9 +109,10 @@ pub async fn store_fs_io_matching(
 
                 if source_match {
                     let result = rgx.is_match(&response);
-                    task::yield_now().await;
                     if result {
                         o.write(&link.as_bytes()).await.unwrap();
+                    } else {
+                        task::yield_now().await;
                     }
                     continue;
                 }
@@ -152,7 +153,7 @@ pub async fn store_fs_io_matching(
         let cmp_base = if std::path::Path::new(&cmp_base).exists() {
             cmp_base
         } else {
-           string_concat!("../", cmp_base)
+            string_concat!("../", cmp_base)
         };
 
         tokio::fs::create_dir(&repb(&cmp_base))

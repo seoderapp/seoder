@@ -241,7 +241,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     if child.metadata().await.unwrap().is_dir() {
                         let dpt = child.path().to_str().unwrap().to_owned();
 
-                        if !dpt.ends_with("/valid") {                            
+                        if !dpt.ends_with("/valid") {
                             let file = OpenOptions::new()
                                 .read(true)
                                 .open(string_concat!(dpt, "/valid/links.txt"))
