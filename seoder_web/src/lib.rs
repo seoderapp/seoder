@@ -459,9 +459,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                     website.crawl().await;
 
-                    let b = format!(
-                        "{:?} - {}",
-                        performance.elapsed(),
+                    let b = string_concat!(
+                        performance.elapsed().as_secs().to_string(),
+                        "s - ",
                         website.engine.campaign.name
                     );
 

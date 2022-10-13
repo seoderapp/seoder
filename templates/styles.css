@@ -115,13 +115,13 @@ h3 {
   outline: 0.5px solid #ccc;
 }
 
-#campaign-list li.campaign-item button:nth-child(1) {
+.active-cell {
   border: 1px solid #0e1116;
   color: #0e1116;
   padding: 0.45rem 0.7rem;
 }
 
-#campaign-list li.campaign-item button:nth-child(2) {
+.active-delete {
   border: 1px solid rgb(220 38 38);
   color: rgb(220 38 38);
   padding: 0.45rem 0.7rem;
@@ -405,4 +405,17 @@ h3 {
     color: #ffffff;
     background-color: #0f0f0f98;
   }
+}
+
+#feed-log {
+  max-height: 60vh;
+  overflow: auto;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  list-style-type: none;
+}
+
+#feed-log li {
+  border-bottom: 1px solid #ccc;
+  padding: 0.5rem 1rem;
 }

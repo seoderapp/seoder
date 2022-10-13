@@ -38,16 +38,20 @@ const cpu = document.getElementById("cpu-stats");
 const cpua = document.getElementById("cpu-stats-average");
 const netstats = document.getElementById("network-stats");
 const memstats = document.getElementById("memory-stats");
+const logfeed = document.getElementById("feed-log");
 
+// campaign paths
 const pathMap = new Map();
+// files for uploading
 const fileMap = new Map();
+// engine map
 const engineMap = new Map();
 
 let initialTarget = "";
 
 socket.addEventListener("message", (event) => {
   const raw = event.data;
-  
+
   if (raw.startsWith("{" + '"' + "stats")) {
     const data = JSON.parse(event.data);
     const {
@@ -94,7 +98,7 @@ socket.addEventListener("message", (event) => {
       const item = pathMap.get(path);
       const cell = document.getElementById("campaign_" + path);
 
-      item.total = ploc ?? 0 
+      item.total = ploc ?? 0;
       item.valid = np.count ?? item.valid ?? 0;
 
       if (cell && cell.firstChild && cell.firstChild.firstChild.nextSibling) {
@@ -113,69 +117,99 @@ socket.addEventListener("message", (event) => {
     const np = JSON.parse(raw);
 
     const { path, pengine, url } = np || {};
-    
-    if(pathMap.has(path)) {
+
+    const validPath = pathMap.has(path);
+
+    if (validPath) {
       const item = pathMap.get(path);
 
-      if(item.urls && !item.urls.has(path)) {
+      // todo: swap current log
+      if (url && item.urls && !item.urls.has(url)) {
         item.urls.add(url);
+
+        if (logfeed.previousElementSibling.innerText !== path) {
+          logfeed.previousElementSibling.innerText = path;
+        }
+
+        const logc = document.createElement("li");
+        logc.innerText = url;
+
+        logfeed.appendChild(logc);
+      }
+    } else {
+      pathMap.set(path, {
+        urls: new Set(),
+      });
+
+      const camp = document.getElementById("campaign_" + path);
+
+      if (!camp) {
+        const cell = document.createElement("li");
+        cell.className = "campaign-item";
+        cell.id = "campaign_" + path;
+
+        const cellContentBlock = document.createElement("div");
+        cellContentBlock.className = "flex center";
+
+        const cellTitle = document.createElement("div");
+        cellTitle.textContent = path;
+
+        const cellEngine = document.createElement("div");
+        cellEngine.textContent = pengine || "engine_default";
+
+        const cellStats = document.createElement("div");
+
+        cellStats.textContent = "( 0/" + 0 + " )";
+
+        const cellBtnBlock = document.createElement("div");
+        cellBtnBlock.className = "row";
+
+        const cellBtnRunButton = document.createElement("button");
+        const cellBtnActiveButton = document.createElement("button");
+        const cellBtnDeleteButton = document.createElement("button");
+
+        cellBtnActiveButton.textContent = "Active";
+        cellBtnActiveButton.className = "active-cell";
+        cellBtnDeleteButton.textContent = "Delete";
+        cellBtnDeleteButton.className = "active-delete";
+        cellBtnRunButton.textContent = "Run";
+
+        cellBtnActiveButton.addEventListener("click", (event) => {
+          window.alert("todo");
+          event.preventDefault();
+        });
+
+        cellBtnRunButton.addEventListener("click", (event) => {
+          if (pathMap.has(path)) {
+            pathMap.delete(path);
+            logfeed.replaceChildren();
+          }
+
+          socket.send("run-campaign " + path);
+          event.preventDefault();
+        });
+
+        cellBtnDeleteButton.addEventListener("click", (event) => {
+          socket.send("delete-campaign " + path);
+          event.preventDefault();
+        });
+
+        // actions
+        cellBtnBlock.appendChild(cellBtnActiveButton);
+        cellBtnBlock.appendChild(cellBtnRunButton);
+        cellBtnBlock.appendChild(cellBtnDeleteButton);
+
+        // content
+        cellContentBlock.appendChild(cellTitle);
+        cellContentBlock.appendChild(cellEngine);
+        cellContentBlock.appendChild(cellStats);
+
+        cell.appendChild(cellContentBlock);
+        cell.appendChild(cellBtnBlock);
+
+        list.appendChild(cell);
       }
     }
-    if (!pathMap.has(path)) {
-      pathMap.set(path, {
-        urls: new Set()
-      });
-      const cell = document.createElement("li");
-      cell.className = "campaign-item";
-      cell.id = "campaign_" + path;
-
-      const cellContentBlock = document.createElement("div");
-      cellContentBlock.className = "flex center";
-
-      const cellTitle = document.createElement("div");
-      cellTitle.textContent = path;
-
-      const cellEngine = document.createElement("div");
-      cellEngine.textContent = pengine || "engine_default";
-
-      const cellStats = document.createElement("div");
-
-      cellStats.textContent = "( 0/" + 0 + " )";
-
-      const cellBtnBlock = document.createElement("div");
-      cellBtnBlock.className = "row";
-
-      const cellBtnRunButton = document.createElement("button");
-      const cellBtnDeleteButton = document.createElement("button");
-
-      cellBtnDeleteButton.textContent = "Delete";
-      cellBtnRunButton.textContent = "Run";
-
-      cellBtnRunButton.addEventListener("click", (event) => {
-        socket.send("run-campaign " + path);
-        event.preventDefault();
-      });
-
-      cellBtnDeleteButton.addEventListener("click", (event) => {
-        socket.send("delete-campaign " + path);
-        event.preventDefault();
-      });
-
-      // actions
-      cellBtnBlock.appendChild(cellBtnRunButton);
-      cellBtnBlock.appendChild(cellBtnDeleteButton);
-
-      // content
-      cellContentBlock.appendChild(cellTitle);
-      cellContentBlock.appendChild(cellEngine);
-      cellContentBlock.appendChild(cellStats);
-
-      cell.appendChild(cellContentBlock);
-      cell.appendChild(cellBtnBlock);
-
-      list.appendChild(cell);
-    }
-
     return;
   }
 
@@ -204,7 +238,7 @@ socket.addEventListener("message", (event) => {
           fileSelect.appendChild(cellSelect);
         }
       }
-      
+
       for (const [key, _] of fileMap) {
         if (key !== initialTarget) {
           const kid = "fskeys_" + key;
@@ -227,14 +261,14 @@ socket.addEventListener("message", (event) => {
   }
 
   const ptpe = "{" + '"' + "epath" + '"' + ":" + '"';
-  
+
   if (raw.startsWith(ptpe)) {
     const list = document.getElementById("engine-list");
     const np = JSON.parse(raw);
     const path = np && np.epath;
 
     if (!engineMap.has(path)) {
-      engineMap.set(path, {})
+      engineMap.set(path, {});
       const cell = document.createElement("li");
       cell.className = "engine-item";
       cell.id = "engine_" + path;
@@ -346,7 +380,7 @@ socket.addEventListener("message", (event) => {
 
       cell.remove();
 
-      fileMap.delete(path)
+      fileMap.delete(path);
     }
   }
 
@@ -382,7 +416,7 @@ socket.addEventListener("message", (event) => {
 
       cell.remove();
       kitem.remove();
-      engineMap.delete(path)
+      engineMap.delete(path);
     }
   }
 });
@@ -439,7 +473,7 @@ proxyform.addEventListener("submit", (event) => {
 
 const fsDelete = document.getElementById("fs-delete");
 
-fsDelete.addEventListener("click", (event) => {
+fsDelete.addEventListener("click", () => {
   const cf = window.confirm("Are, you sure you want to delete this file?");
 
   if (cf) {
