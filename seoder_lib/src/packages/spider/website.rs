@@ -114,7 +114,7 @@ impl Website {
                 }
             }
             Err(_) => {
-                log("headers.txt file does not exist {}", "");
+                log("headers.txt file does not exist", "");
             }
         };
 
@@ -148,7 +148,7 @@ impl Website {
                     }
                 }
                 Err(_) => {
-                    log("proxies.txt file does not exist {}", "");
+                    log("proxies.txt file does not exist", "");
                 }
             };
         }
@@ -213,9 +213,14 @@ impl Website {
                 let path = path.clone();
                 let path1 = path.clone();
 
-                task::spawn(async move {
-                    let f = File::open(&p).await.unwrap();
+                let f = if tokio::fs::metadata(&p).await.is_ok() {
+                    p
+                } else {
+                    string_concat!("../", &p)
+                };
+                let f = File::open(&f).await.unwrap();
 
+                task::spawn(async move {
                     let reader = BufReader::new(f);
                     let mut lines = reader.lines();
 

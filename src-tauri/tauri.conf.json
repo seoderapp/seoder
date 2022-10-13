@@ -2,8 +2,8 @@
   "build": {
     "beforeDevCommand": "",
     "beforeBuildCommand": "",
-    "devPath": "../../templates",
-    "distDir": "../../templates",
+    "devPath": "../templates",
+    "distDir": "../templates",
     "withGlobalTauri": false
   },
   "package": {

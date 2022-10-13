@@ -12,6 +12,7 @@ use tokio::fs::OpenOptions;
 /// read a file line by line to a vector
 pub async fn lines_to_vec(pt: String) -> Vec<String> {
     let mut builder: Vec<String> = Vec::new();
+
     match File::open(&pt).await {
         Ok(file) => {
             let reader = BufReader::new(file);
@@ -22,7 +23,7 @@ pub async fn lines_to_vec(pt: String) -> Vec<String> {
             }
         }
         Err(_) => {
-            log("{} file does not exist {}", &pt);
+            log("file does not exist", &pt);
         }
     };
     builder

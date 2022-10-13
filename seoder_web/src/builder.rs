@@ -12,7 +12,15 @@ pub async fn engine_builder(dptt: String) -> (Vec<String>, Vec<String>, String) 
     let selected_engine = tokio::spawn(async move {
         let mut engine = "".to_string();
 
-        match File::open(string_concat!("./_db/campaigns/", dptt, "/config.txt")).await {
+        let config = string_concat!("./_db/campaigns/", dptt, "/config.txt");
+
+        let f = if tokio::fs::metadata(&config).await.is_ok() {
+            config
+        } else {
+            string_concat!("../_db/campaigns/", dptt, "/config.txt")
+        };
+
+        match File::open(f).await {
             Ok(file) => {
                 let reader = BufReader::new(file);
                 let mut lines = reader.lines();
@@ -57,7 +65,7 @@ pub async fn engine_builder(dptt: String) -> (Vec<String>, Vec<String>, String) 
                 }
             }
             Err(_) => {
-                log("config.txt file does not exist {}", "");
+                log("config.txt file does not exist", "");
             }
         };
 
@@ -70,16 +78,23 @@ pub async fn engine_builder(dptt: String) -> (Vec<String>, Vec<String>, String) 
         let eselected = selected_engine.clone();
 
         tokio::spawn(async move {
-            let paths =
-                crate::utils::lines_to_vec(string_concat!("_db/engines/", eselected, "/paths.txt"))
-                    .await;
+            let b = string_concat!("_db/engines/", eselected, "/paths.txt");
+            let f = if tokio::fs::metadata(&b).await.is_ok() {
+                b
+            } else {
+                string_concat!("../", b)
+            };
 
-            let patterns = crate::utils::lines_to_vec(string_concat!(
-                "_db/engines/",
-                eselected,
-                "/patterns.txt"
-            ))
-            .await;
+            let paths = crate::utils::lines_to_vec(f).await;
+
+            let b = string_concat!("_db/engines/", eselected, "/patterns.txt");
+            let f = if tokio::fs::metadata(&b).await.is_ok() {
+                b
+            } else {
+                string_concat!("../", b)
+            };
+
+            let patterns = crate::utils::lines_to_vec(f).await;
 
             (paths, patterns, selected_file)
         })

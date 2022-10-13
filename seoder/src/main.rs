@@ -4,7 +4,7 @@
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
-use seoder_lib::{tokio};
+use seoder_lib::tokio;
 
 /// web json crawler.
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -14,9 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .unwrap();
 
-    rt.block_on(async {
-        seoder_web::start().await.unwrap()
-    });
+    rt.block_on(async { seoder_web::start().await.unwrap() });
 
     Ok(())
 }

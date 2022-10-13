@@ -25,8 +25,16 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
     let mut buffer: usize = 100;
     let mut proxy = false;
 
+    let ff = "config.txt";
+
+    let f = if std::fs::metadata(&ff).is_ok() {
+        ff
+    } else {
+        "../config.txt"
+    };
+
     // read through config file cpu bound quickly
-    match File::open("config.txt") {
+    match File::open(f) {
         Ok(file) => {
             let reader = BufReader::new(file);
             let lines = reader.lines();
@@ -58,7 +66,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
             }
         }
         Err(_) => {
-            log("config.txt file does not exist {}", "");
+            log("config.txt file does not exist", "");
         }
     };
 
@@ -66,8 +74,14 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
 
     // get paths * patterns
     if eg_enabled {
+        let f = if std::fs::metadata(&"_db/engines/paths.txt").is_ok() {
+            "_db/engines/paths.txt"
+        } else {
+            "../_db/engines/paths.txt"
+        };
+
         // build file paths
-        match File::open("_db/engines/paths.txt") {
+        match File::open(f) {
             Ok(file) => {
                 let reader = BufReader::new(file);
                 let lines = reader.lines();
@@ -80,11 +94,17 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
                 }
             }
             Err(_) => {
-                log("_db/engines paths.txt file does not exist {}", "");
+                log("_db/engines paths.txt file does not exist", "");
             }
         };
 
-        match File::open("_db/engines/patterns.txt") {
+        let f = if std::fs::metadata(&"_db/engines/patterns.txt").is_ok() {
+            "./_db/engines/patterns.txt"
+        } else {
+            "../_db/engines/patterns.txt"
+        };
+
+        match File::open(f) {
             Ok(file) => {
                 let reader = BufReader::new(file);
                 let lines = reader.lines();
@@ -97,7 +117,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
                 }
             }
             Err(_) => {
-                log("_db/engines patterns.txt file does not exist {}", "");
+                log("_db/engines patterns.txt file does not exist", "");
             }
         };
     }

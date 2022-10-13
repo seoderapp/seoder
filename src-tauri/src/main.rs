@@ -9,10 +9,8 @@ use seoder_web::tokio;
 
 #[tokio::main]
 async fn main() {
-    tokio::spawn(async move {
-        seoder_web::start().await.unwrap()
-    });
-    
+    tokio::spawn(async move { seoder_web::start().await.unwrap() });
+
     tauri::Builder::default()
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

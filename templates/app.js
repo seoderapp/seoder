@@ -157,8 +157,7 @@ socket.addEventListener("message", (event) => {
       cellBtnRunButton.textContent = "Run";
 
       cellBtnRunButton.addEventListener("click", (event) => {
-        const name = event.path[2].firstChild.firstChild.textContent;
-        socket.send("run-campaign " + name);
+        socket.send("run-campaign " + path);
         event.preventDefault();
       });
 

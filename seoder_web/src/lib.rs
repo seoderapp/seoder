@@ -150,11 +150,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             }
 
             // list all campaigns
-            if st == Action::ListCampaigns {                
+            if st == Action::ListCampaigns {
                 let pt = if Path::new("./_db/campaigns").exists() {
                     "./_db/campaigns"
                 } else {
-                    "../../_db/campaigns"
+                    "../_db/campaigns"
                 };
 
                 let mut dir = tokio::fs::read_dir(pt).await.unwrap();
@@ -232,7 +232,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 let c = if Path::new("./_db/campaigns").exists() {
                     "./_db/campaigns"
                 } else {
-                    "../../_db/campaigns"
+                    "../_db/campaigns"
                 };
 
                 let mut dir = tokio::fs::read_dir(c).await.unwrap();
@@ -241,7 +241,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     if child.metadata().await.unwrap().is_dir() {
                         let dpt = child.path().to_str().unwrap().to_owned();
 
-                        if !dpt.ends_with("/valid") {
+                        if !dpt.ends_with("/valid") {                            
                             let file = OpenOptions::new()
                                 .read(true)
                                 .open(string_concat!(dpt, "/valid/links.txt"))
@@ -277,7 +277,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 let f = if Path::new("./_db/files").exists() {
                     "./_db/files/"
                 } else {
-                    "../../_db/files/"
+                    "../_db/files/"
                 };
                 let mut dir = tokio::fs::read_dir(f).await.unwrap();
 
@@ -301,7 +301,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 let f = if Path::new("./_db/files").exists() {
                     "./_db/files/"
                 } else {
-                    "../../_db/files/"
+                    "../_db/files/"
                 };
                 tokio::fs::remove_file(string_concat!(f, &input))
                     .await
@@ -329,10 +329,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 let f = if Path::new("./_db/files").exists() {
                     "./_db/files/"
                 } else {
-                    "../../_db/files/"
+                    "../_db/files/"
                 };
-                utils::write_config("target", &string_concat!(f, input.to_string()))
-                    .await;
+                utils::write_config("target", &string_concat!(f, input.to_string())).await;
             }
 
             // list all engines
@@ -341,7 +340,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 let eg = if Path::new("./_db/engines").exists() {
                     "./_db/engines"
                 } else {
-                    "../../_db/engines"
+                    "../_db/engines"
                 };
 
                 let mut dir = tokio::fs::read_dir(eg).await.unwrap();
@@ -517,7 +516,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 let pt = if Path::new("./_db/campaigns").exists() {
                     "./_db/campaigns"
                 } else {
-                    "../../_db/campaigns"
+                    "../_db/campaigns"
                 };
                 let mut dir = tokio::fs::read_dir(pt).await.unwrap();
 

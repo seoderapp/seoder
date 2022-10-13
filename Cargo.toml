@@ -3,7 +3,7 @@ members = [
     "seoder",
     "seoder_lib",
     "seoder_web",
-    "seoder_app/src-tauri",
+    "src-tauri",
     # internal
     "benches"
 ]

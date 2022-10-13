@@ -149,6 +149,11 @@ pub async fn store_fs_io_matching(
         }
     } else {
         let cmp_base = string_concat!("_db/campaigns/", path);
+        let cmp_base = if std::path::Path::new(&cmp_base).exists() {
+            cmp_base
+        } else {
+           string_concat!("../", cmp_base)
+        };
 
         tokio::fs::create_dir(&repb(&cmp_base))
             .await
