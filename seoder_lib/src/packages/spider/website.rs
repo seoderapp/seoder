@@ -118,6 +118,8 @@ impl Website {
             }
         };
 
+        // let proxy = reqwest::Proxy::all("socks5://127.0.0.1:9150").unwrap();
+
         let mut client = Client::builder()
             .default_headers(headers)
             .user_agent(if !&self.configuration.user_agent.is_empty() {
@@ -127,6 +129,7 @@ impl Website {
             })
             .tcp_keepalive(None)
             .pool_max_idle_per_host(0)
+            // .proxy(proxy)
             .brotli(true)
             .gzip(true)
             .use_native_tls()
