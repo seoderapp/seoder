@@ -3,24 +3,23 @@ const socket =
   typeof sock === "undefined" ? new WebSocket("ws://127.0.0.1:8080") : sock;
 
 socket.addEventListener("open", () => {
-  socket.send("list-campaigns");
   socket.send("list-engines");
   socket.send("list-totals");
   socket.send("list-files");
   socket.send("feed");
   socket.send("config");
 
+  setInterval(() => {
+    socket.send("feed");
+  }, 1000);
+
   setTimeout(() => {
     socket.send("list-campaign-stats");
   });
 
   setInterval(() => {
-    socket.send("list-campaigns");
+    socket.send("list-engines");
   }, 3500);
-
-  setInterval(() => {
-    socket.send("feed");
-  }, 1000);
 
   setInterval(() => {
     socket.send("list-campaign-stats");
@@ -39,9 +38,8 @@ const cpua = document.getElementById("cpu-stats-average");
 const netstats = document.getElementById("network-stats");
 const memstats = document.getElementById("memory-stats");
 const logfeed = document.getElementById("feed-log");
+const list = document.getElementById("engine-list");
 
-// campaign paths
-const pathMap = new Map();
 // files for uploading
 const fileMap = new Map();
 // engine map
@@ -87,41 +85,34 @@ socket.addEventListener("message", (event) => {
     return;
   }
 
-  const ptpal = "{" + '"' + "apath" + '"' + ":" + '"';
-
-  if (raw.startsWith(ptpal)) {
-    const np = JSON.parse(raw);
-    const { apath, ploc } = np || {};
-    const path = apath;
-
-    if (pathMap.has(path) && typeof ploc !== "undefined") {
-      const item = pathMap.get(path);
-      const cell = document.getElementById("campaign_" + path);
-
-      item.total = ploc ?? 0;
-      item.valid = np.count ?? item.valid ?? 0;
-
-      if (cell && cell.firstChild && cell.firstChild.firstChild.nextSibling) {
-        cell.firstChild.firstChild.nextSibling.nextSibling.textContent =
-          "( " + item.valid + " / " + item.total + " ) ";
-      }
-    }
-
-    return;
-  }
-
-  const ptp = "{" + '"' + "path" + '"' + ":" + '"';
+  const ptp = "{" + '"' + "pengine" + '"' + ":" + '"';
 
   if (raw.startsWith(ptp)) {
-    const list = document.getElementById("campaign-list");
     const np = JSON.parse(raw);
+    const { pengine, ploc } = np || {};
+    
+    if (engineMap.has(pengine)) {
+      const item = engineMap.get(pengine);
+      item.total = ploc ?? item.total ?? 0;
+      item.valid = item.valid ?? 0;
 
-    const { path, pengine, url } = np || {};
+      const cell = document.getElementById("engine_stats_" + pengine);
 
-    const validPath = pathMap.has(path);
+      if (cell) {
+        cell.textContent =
+          "( " + item.valid + " / " + item.total + " ) ";
+      }
 
-    if (validPath) {
-      const item = pathMap.get(path);
+    }
+    return;
+  }
+  
+  if (raw.startsWith("{" + '"' + "path" + '"' + ":" + '"')) {
+    const np = JSON.parse(raw);
+    const { url, path } = np || {};
+        
+    if (engineMap.has(path)) {
+      const item = engineMap.get(path);
 
       // todo: swap current log
       if (url && item.urls && !item.urls.has(url)) {
@@ -135,79 +126,6 @@ socket.addEventListener("message", (event) => {
         logc.innerText = url;
 
         logfeed.appendChild(logc);
-      }
-    } else {
-      pathMap.set(path, {
-        urls: new Set(),
-      });
-
-      const camp = document.getElementById("campaign_" + path);
-
-      if (!camp) {
-        const cell = document.createElement("li");
-        cell.className = "campaign-item";
-        cell.id = "campaign_" + path;
-
-        const cellContentBlock = document.createElement("div");
-        cellContentBlock.className = "flex center";
-
-        const cellTitle = document.createElement("div");
-        cellTitle.textContent = path;
-
-        const cellEngine = document.createElement("div");
-        cellEngine.textContent = pengine || "engine_default";
-
-        const cellStats = document.createElement("div");
-
-        cellStats.textContent = "( 0/" + 0 + " )";
-
-        const cellBtnBlock = document.createElement("div");
-        cellBtnBlock.className = "row";
-
-        const cellBtnRunButton = document.createElement("button");
-        const cellBtnActiveButton = document.createElement("button");
-        const cellBtnDeleteButton = document.createElement("button");
-
-        cellBtnActiveButton.textContent = "Active";
-        cellBtnActiveButton.className = "active-cell";
-        cellBtnDeleteButton.textContent = "Delete";
-        cellBtnDeleteButton.className = "active-delete";
-        cellBtnRunButton.textContent = "Run";
-
-        cellBtnActiveButton.addEventListener("click", (event) => {
-          window.alert("todo");
-          event.preventDefault();
-        });
-
-        cellBtnRunButton.addEventListener("click", (event) => {
-          if (pathMap.has(path)) {
-            pathMap.delete(path);
-            logfeed.replaceChildren();
-          }
-
-          socket.send("run-campaign " + path);
-          event.preventDefault();
-        });
-
-        cellBtnDeleteButton.addEventListener("click", (event) => {
-          socket.send("delete-campaign " + path);
-          event.preventDefault();
-        });
-
-        // actions
-        cellBtnBlock.appendChild(cellBtnActiveButton);
-        cellBtnBlock.appendChild(cellBtnRunButton);
-        cellBtnBlock.appendChild(cellBtnDeleteButton);
-
-        // content
-        cellContentBlock.appendChild(cellTitle);
-        cellContentBlock.appendChild(cellEngine);
-        cellContentBlock.appendChild(cellStats);
-
-        cell.appendChild(cellContentBlock);
-        cell.appendChild(cellBtnBlock);
-
-        list.appendChild(cell);
       }
     }
     return;
@@ -263,72 +181,68 @@ socket.addEventListener("message", (event) => {
   const ptpe = "{" + '"' + "epath" + '"' + ":" + '"';
 
   if (raw.startsWith(ptpe)) {
-    const list = document.getElementById("engine-list");
     const np = JSON.parse(raw);
     const path = np && np.epath;
-
+    
     if (!engineMap.has(path)) {
-      engineMap.set(path, {});
+      engineMap.set(path, {
+        total: 0,
+        valid: 0,
+        urls: new Set(),
+      });
       const cell = document.createElement("li");
-      cell.className = "engine-item";
-      cell.id = "engine_" + path;
-
       const cellContentPaths = document.createElement("div");
       const cellContentBlock = document.createElement("div");
-      cellContentPaths.className = "row";
-
-      cellContentBlock.className = "flex center";
-
       const cellTitle = document.createElement("div");
-      cellTitle.textContent = path;
+      const cellStats = document.createElement("div");
+      const cellBtnBlock = document.createElement("div");
+      const cellBtnDeleteButton = document.createElement("button");
+      const cellBtnRunButton = document.createElement("button");
 
+      cell.className = "engine-item";
+      cellBtnBlock.className = "row";
+      cellBtnDeleteButton.className = "active-delete";
+
+      cell.id = "engine_" + path;
+      cellStats.id = "engine_stats_" + path;
+
+      cellContentPaths.className = "row";
+      cellContentBlock.className = "flex center";
+      
+      cellTitle.textContent = path;      
       cellContentPaths.textContent = np.paths;
+      cellStats.textContent = "( 0/" + 0 + " )";
+      cellBtnDeleteButton.textContent = "Delete";
+      cellBtnRunButton.textContent = "Run";
 
       cellContentBlock.appendChild(cellTitle);
       cellContentBlock.appendChild(cellContentPaths);
+      cellContentBlock.appendChild(cellStats);
 
-      // engine list item
-      const cellBtnBlock = document.createElement("div");
-      cellBtnBlock.className = "row";
+      cellBtnRunButton.addEventListener("click", (event) => {
+        if (engineMap.has(path)) {
+          logfeed.replaceChildren();
+        }
 
-      const cellBtnDeleteButton = document.createElement("button");
-      cellBtnDeleteButton.textContent = "Delete";
-
-      cellBtnDeleteButton.addEventListener("click", (event) => {
-        socket.send("delete-engine " + path);
+        socket.send("run-campaign " + path);
         event.preventDefault();
       });
 
+      cellBtnDeleteButton.addEventListener("click", (event) => {
+        if (engineMap.has(path)) {
+          engineMap.delete(path);
+          logfeed.replaceChildren();
+        }
+        socket.send("delete-engine " + path);
+        cell.remove();
+        event.preventDefault();
+      });
+
+      cellBtnBlock.appendChild(cellBtnRunButton);
       cellBtnBlock.appendChild(cellBtnDeleteButton);
       cell.appendChild(cellContentBlock);
       cell.appendChild(cellBtnBlock);
       list.appendChild(cell);
-
-      // engine select
-      const engineSelect = document.getElementById("engine-select");
-
-      for (const [key, _] of engineMap) {
-        const kid = "ekeys_" + key;
-        const item = document.getElementById(kid);
-
-        if (!item) {
-          const cellContainer = document.createElement("div");
-          const cellLabel = document.createElement("label");
-          const cellSelect = document.createElement("input");
-
-          cellLabel.htmlFor = kid;
-
-          cellSelect.id = kid;
-          cellSelect.name = "eselect";
-          cellSelect.value = key;
-          cellSelect.type = "radio";
-
-          cellLabel.innerText = key;
-          cellContainer.appendChild(cellLabel);
-          cellContainer.appendChild(cellSelect);
-          engineSelect.appendChild(cellContainer);
-        }
-      }
     }
     return;
   }
@@ -339,31 +253,18 @@ socket.addEventListener("message", (event) => {
     // parse json for now
     const np = JSON.parse(raw);
     const path = np && np.path;
-
-    if (pathMap.has(path)) {
-      const item = pathMap.get(path);
+    
+    if (engineMap.has(path)) {
+      const item = engineMap.get(path);
       item.total = item.total ?? 0;
       item.valid = np.count ?? item.valid ?? 0;
 
-      const cell = document.getElementById("campaign_" + path);
-      if (cell && cell.firstChild && cell.firstChild.firstChild.nextSibling) {
-        cell.firstChild.firstChild.nextSibling.nextSibling.textContent =
+      const cell = document.getElementById("engine_stats_" + path);
+
+      if (cell) {
+        cell.textContent =
           "( " + item.valid + " / " + item.total + " ) ";
       }
-    }
-  }
-
-  const dptc = "{" + '"' + "dcpath" + '"';
-
-  if (raw.startsWith(dptc)) {
-    // parse json for now
-    const np = JSON.parse(raw);
-    const path = np && np.dcpath;
-
-    if (pathMap.has(path)) {
-      const cell = document.getElementById("campaign_" + path);
-      cell.remove();
-      pathMap.delete(path);
     }
   }
 
@@ -421,7 +322,6 @@ socket.addEventListener("message", (event) => {
   }
 });
 
-const cform = document.getElementById("cform");
 const rform = document.getElementById("rform");
 const eform = document.getElementById("eform");
 const uploadform = document.getElementById("uploadform");
@@ -492,32 +392,6 @@ fsform.addEventListener("submit", (event) => {
     window.alert("Please select a list type");
   } else {
     socket.send("set-list " + selected);
-  }
-
-  event.preventDefault();
-});
-
-cform.addEventListener("submit", (event) => {
-  const campaign = cform.querySelector('input[name="cname"]');
-  let cengine = "";
-
-  Array.from(cform.querySelectorAll('input[type="radio"]')).forEach(function (
-    ele
-  ) {
-    if (ele.checked === true) {
-      cengine = ele.value;
-    }
-  });
-
-  if (!cengine) {
-    window.alert("Please select an engine");
-  } else if (!campaign) {
-    window.alert("Please enter a campaign name");
-  } else {
-    socket.send(
-      "create-campaign " +
-        JSON.stringify({ name: campaign.value, engine: cengine })
-    );
   }
 
   event.preventDefault();

@@ -21,12 +21,11 @@ extern crate lazy_static;
 pub use packages::spider::website::Website;
 
 lazy_static! {
-    /// campaigns, engines, files, and the data directory
-    pub static ref ENTRY_PROGRAM: (String, String, String, String) = {
+    /// engines, files, and the data directory
+    pub static ref ENTRY_PROGRAM: (String, String, String) = {
         let data_dir = dirs::data_dir().unwrap().into_os_string().into_string().unwrap();
 
         (
-            string_concat!(data_dir, "/seoder/campaigns/"),
             string_concat!(data_dir, "/seoder/engines/"),
             string_concat!(data_dir, "/seoder/files/"),
             data_dir

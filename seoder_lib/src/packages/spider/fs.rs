@@ -132,7 +132,13 @@ pub async fn store_fs_io_matching(
     } else {
         let cmp_base = string_concat!(ENTRY_PROGRAM.0, path);
 
-        tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
+        match tokio::fs::metadata(&cmp_base).await {
+            Ok(_) => (),
+            _ => {
+                tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
+                ()
+            }
+        }
 
         let cmp_base = string_concat!(&cmp_base, "/valid");
 

@@ -20,7 +20,6 @@ use seoder_lib::packages::spider::utils::{log, logd};
 use seoder_lib::tokio::io::AsyncWriteExt;
 pub use seoder_lib::{serde_json, string_concat, tokio};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 use std::io::Error as IoError;
 use std::path::Path;
@@ -45,6 +44,7 @@ extern crate lazy_static;
 extern crate tera;
 
 mod builder;
+mod controls;
 mod ft;
 mod panel;
 mod utils;
@@ -54,16 +54,13 @@ mod utils;
 enum Action {
     Stats,
     Config,
-    ListCampaigns,
     ListEngines,
     ListFiles,
     ListFileCount,
     ListValidCampaigns,
     RunCampaign,
     RunAllCampaigns,
-    CreateCampaign,
     CreateEngine,
-    RemoveCampaign,
     RemoveEngine,
     RemoveFile,
     SetList,
@@ -130,8 +127,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         unbounded_channel();
 
     let handle = tokio::spawn(async move {
-        use sysinfo::CpuExt;
-        use sysinfo::NetworkExt;
         let mut s = System::new_all();
         // let mut interval = tokio::time::interval(Duration::from_millis(1000));
 
@@ -140,33 +135,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             if st == Action::Stats {
                 s.refresh_all();
-
-                let mut net_total_received = 0;
-                let mut net_total_transmited = 0;
-
-                let networks = s.networks();
-
-                for (_, data) in networks {
-                    net_total_received += data.received();
-                    net_total_transmited += data.transmitted();
-                }
-
-                let v = json!({
-                    "stats": {
-                        // network
-                        "network_received": net_total_received,
-                        "network_transmited": net_total_transmited,
-                        "network_total_transmitted": net_total_received + net_total_transmited,
-                        // cpu
-                        "load_avg_min": s.load_average().one,
-                        "cpu_usage": s.global_cpu_info().cpu_usage(),
-                        // memory
-                        "memory_total": s.total_memory(),
-                        "memory_used": s.used_memory(),
-                        "memory_available": s.available_memory(),
-                        "memory_free": s.free_memory()
-                    }
-                });
+                let v = controls::stats::stats(&s);
 
                 tokio::task::yield_now().await;
 
@@ -174,33 +143,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     .send(Message::Text(v.to_string()))
                     .await
                     .unwrap_or_default();
-            }
-
-            // list all campaigns
-            if st == Action::ListCampaigns {
-                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.0).await.unwrap();
-
-                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
-                    if child.metadata().await.unwrap().is_dir() {
-                        let dpt = child.path().to_str().unwrap().to_owned();
-
-                        if !dpt.ends_with("/valid") {
-                            let mut engine =
-                                get_file_value(&string_concat!(dpt, "/config.txt"), "engine").await;
-
-                            if engine.is_empty() {
-                                engine = String::from("default");
-                            }
-
-                            let v = json!({ "path": dpt.replacen(&ENTRY_PROGRAM.0, "", 1), "pengine": engine });
-
-                            outgoing
-                                .send(Message::Text(v.to_string()))
-                                .await
-                                .unwrap_or_default();
-                        }
-                    }
-                }
             }
 
             // run all campaigns
@@ -251,14 +193,13 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                             if d.starts_with("/") {
                                 d.remove(0);
                             }
-                            
+
                             match file {
                                 Ok(file) => {
                                     let reader = BufReader::new(file);
                                     let mut lines = reader.lines();
 
                                     while let Some(url) = lines.next_line().await.unwrap() {
-
                                         let v = json!({ "url": url, "path": d });
 
                                         outgoing
@@ -285,15 +226,14 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // list all files
             if st == Action::ListFiles {
-                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.2).await.unwrap();
+                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.1).await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
                     if child.metadata().await.unwrap().is_file() {
                         let dpt = child.path().to_str().unwrap().to_owned();
-                        let dpt = dpt.replacen(&ENTRY_PROGRAM.2, "", 1);
+                        let dpt = dpt.replacen(&ENTRY_PROGRAM.1, "", 1);
 
                         if dpt.ends_with(".txt") {
-
                             let v = json!({ "fpath": dpt });
 
                             outgoing
@@ -307,7 +247,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // remoe file todo remove from ui
             if st == Action::RemoveFile {
-                tokio::fs::remove_file(string_concat!(&ENTRY_PROGRAM.2, &input))
+                tokio::fs::remove_file(string_concat!(&ENTRY_PROGRAM.1, &input))
                     .await
                     .unwrap();
 
@@ -330,13 +270,13 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // set selected list item
             if st == Action::SetList {
-                utils::write_config("target", &string_concat!(&ENTRY_PROGRAM.2, &input)).await;
+                utils::write_config("target", &string_concat!(&ENTRY_PROGRAM.1, &input)).await;
             }
 
             // list all engines
             if st == Action::ListEngines {
                 // todo: get the static root paths on app start
-                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.1).await.unwrap();
+                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.0).await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
                     if child.metadata().await.unwrap().is_dir() {
@@ -381,7 +321,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                             _ => {}
                         };
 
-                        let mut d = dpt.replacen(&ENTRY_PROGRAM.1, "", 1);
+                        let mut d = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
 
                         if d.starts_with("/") {
                             d.remove(0);
@@ -406,7 +346,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             // run campaign
             if st == Action::RunCampaign {
                 let cp = input.clone();
-                
+
                 let (pt, pat, target) = builder::engine_builder(crun_input).await;
 
                 let mut website: Website = Website::new(&target);
@@ -432,29 +372,13 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             let d_input = input.clone();
 
-            if st == Action::RemoveCampaign {
-                let eg = string_concat!(&ENTRY_PROGRAM.1, &d_input);
-
-                // target file length
-                match tokio::fs::remove_dir_all(eg).await {
-                    Ok(_) => {}
-                    _ => {}
-                };
-
-                let v = json!({ "dcpath": input });
-                outgoing
-                    .send(Message::Text(v.to_string()))
-                    .await
-                    .unwrap_or_default();
-            }
-
             // delete engine - this does not delete configs attached!
             if st == Action::RemoveEngine {
-                let eg = string_concat!(&*ENTRY_PROGRAM.1, &d_input);
-
+                let eg = string_concat!(&*ENTRY_PROGRAM.0, &d_input);
                 tokio::fs::remove_dir_all(eg).await.unwrap();
 
                 let v = json!({ "depath": input });
+
                 outgoing
                     .send(Message::Text(v.to_string()))
                     .await
@@ -465,7 +389,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 let mut timeout = 50;
                 let mut buffer = 50;
                 let mut proxy = false;
-                let mut target = string_concat!(ENTRY_PROGRAM.2, "/urls-input.txt"); // todo: fix target
+                let mut target = string_concat!(ENTRY_PROGRAM.1, "/urls-input.txt"); // todo: fix target
 
                 let file = OpenOptions::new().read(true).open("config.txt").await;
 
@@ -495,7 +419,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                                     proxy = h1.parse::<bool>().unwrap_or(false);
                                 }
                                 if h0 == "target" {
-                                    let m = ENTRY_PROGRAM.2.replace(" ", "");
+                                    let m = ENTRY_PROGRAM.1.replace(" ", "");
 
                                     if h1.starts_with(&m) {
                                         target = h1.replacen(&m, "", 1);
@@ -532,8 +456,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         if !dpt.ends_with("/valid") {
                             let mut target = get_file_value("./config.txt", "target").await;
 
-                            let mut engine =
-                                get_file_value(&string_concat!(dpt, "/config.txt"), "engine").await;
+                            let mut engine = dpt;
 
                             if target.is_empty() {
                                 target = String::from("urls-input.txt");
@@ -546,7 +469,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                             let mut nml = 0;
 
                             // target file length
-                            match OpenOptions::new().read(true).open(string_concat!(ENTRY_PROGRAM.2, target)).await {
+                            match OpenOptions::new()
+                                .read(true)
+                                .open(string_concat!(ENTRY_PROGRAM.1, target))
+                                .await
+                            {
                                 Ok(file) => {
                                     let reader = BufReader::new(file);
                                     let mut lines = reader.lines();
@@ -557,8 +484,8 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                                 }
                                 _ => {}
                             };
-                            
-                            let v = json!({ "apath": &dpt.replacen(&ENTRY_PROGRAM.0, "", 1), "pengine": engine, "ploc": nml });
+
+                            let v = json!({ "pengine": engine.replacen(&ENTRY_PROGRAM.0, "", 1), "ploc": nml });
 
                             outgoing
                                 .send(Message::Text(v.to_string()))
@@ -610,30 +537,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             if let Err(_) = sender.send((Action::Stats, "".to_string())) {
                 logd("the receiver dropped");
             }
-        }
-        // create new campaign to store crawl results
-        else if c == "create-campaign" {
-            let cf = cc.to_owned();
-            tokio::spawn(async move {
-                let v: Value = serde_json::from_str(&cf).unwrap_or_default();
-
-                let campaign_dir = string_concat!(ENTRY_PROGRAM.0, v["name"].as_str().unwrap());
-
-                create_dir(&campaign_dir).await.unwrap();
-                create_dir(&string_concat!(campaign_dir, "/valid")).await.unwrap();
-
-                let mut file = File::create(string_concat!(campaign_dir, "/config.txt"))
-                    .await
-                    .unwrap();
-
-                let e = string_concat!("engine ", v["engine"].as_str().unwrap_or("default"));
-
-                file.write_all(&e.as_bytes()).await.unwrap();
-
-                if let Err(_) = sender.send((Action::CreateCampaign, "".to_string())) {
-                    logd("the receiver dropped");
-                }
-            });
         } else if c == "config" {
             let campain_name = cc.to_owned();
 
@@ -664,21 +567,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             if let Err(_) = sender.send((Action::SetProxy, list_name)) {
                 logd("receiver dropped");
             }
-        } else if c == "delete-campaign" {
-            let campain_name = cc.to_owned();
-
-            if let Err(_) = sender.send((Action::RemoveCampaign, campain_name)) {
-                logd("receiver dropped");
-            }
         } else if c == "delete-file" {
             let file_name = cc.to_owned();
 
             if let Err(_) = sender.send((Action::RemoveFile, file_name)) {
                 logd("receiver dropped");
-            }
-        } else if c == "list-campaigns" {
-            if let Err(_) = sender.send((Action::ListCampaigns, "".to_string())) {
-                logd("the receiver dropped");
             }
         } else if ms == "run-all-campaigns" {
             if let Err(_) = sender.send((Action::RunAllCampaigns, "".to_string())) {
@@ -709,7 +602,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             let n = v.name;
 
             if n.is_empty() == false {
-                let db_dir = string_concat!(ENTRY_PROGRAM.1, &n);
+                let db_dir = string_concat!(ENTRY_PROGRAM.0, &n);
                 let pt = v.paths;
                 let pat = v.patterns;
 
@@ -718,6 +611,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     let ott = pat.split(',');
 
                     create_dir(&db_dir).await.unwrap();
+                    create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
 
                     let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
                         .await
@@ -797,7 +691,6 @@ pub async fn start() -> Result<(), IoError> {
         Err(_) => {}
     }
 
-    // create folders if not exist todo: move into entry base
     if !Path::new(&ENTRY_PROGRAM.0).is_dir() {
         create_dir_all(&ENTRY_PROGRAM.0).await.unwrap();
     }
@@ -806,11 +699,7 @@ pub async fn start() -> Result<(), IoError> {
         create_dir_all(&ENTRY_PROGRAM.1).await.unwrap();
     }
 
-    if !Path::new(&ENTRY_PROGRAM.2).is_dir() {
-        create_dir_all(&ENTRY_PROGRAM.2).await.unwrap();
-    }
-
-    let bs_url_input = string_concat!(ENTRY_PROGRAM.2, "urls-input.txt");
+    let bs_url_input = string_concat!(ENTRY_PROGRAM.1, "urls-input.txt");
 
     if !Path::new(&bs_url_input).is_file() {
         if Path::new("../urls-input.txt").is_file() {
