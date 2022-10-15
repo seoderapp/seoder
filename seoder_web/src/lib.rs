@@ -758,7 +758,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             let n = v.name;
 
             if n.is_empty() == false {
-                let db_dir = string_concat!("../_db/engines/", n);
+                let db_dir = string_concat!(&*ENTRY_PROGRAM, "_db/engines/",&n);
                 let pt = v.paths;
                 let pat = v.patterns;
 
