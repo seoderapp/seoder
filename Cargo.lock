@@ -3257,6 +3257,7 @@ dependencies = [
 name = "seoder_lib"
 version = "0.1.0"
 dependencies = [
+ "dirs",
  "env_logger",
  "lazy_static",
  "log",

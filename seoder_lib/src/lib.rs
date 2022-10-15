@@ -2,6 +2,7 @@
 
 pub mod packages;
 
+pub extern crate dirs;
 extern crate log;
 extern crate num_cpus;
 extern crate reqwest;
@@ -18,6 +19,20 @@ pub extern crate string_concat;
 extern crate lazy_static;
 
 pub use packages::spider::website::Website;
+
+lazy_static! {
+    /// campaigns, engines, files, and the data directory
+    pub static ref ENTRY_PROGRAM: (String, String, String, String) = {
+        let data_dir = dirs::data_dir().unwrap().into_os_string().into_string().unwrap();
+
+        (
+            string_concat!(data_dir, "/seoder/campaigns/"),
+            string_concat!(data_dir, "/seoder/engines/"),
+            string_concat!(data_dir, "/seoder/files/"),
+            data_dir
+        )
+    };
+}
 
 /// crawl executed with args vec list
 pub async fn crawl(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {

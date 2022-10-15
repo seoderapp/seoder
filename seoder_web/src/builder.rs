@@ -1,6 +1,7 @@
 use crate::string_concat::string_concat;
 use crate::string_concat::string_concat_impl;
 use crate::tokio::io::BufReader;
+use seoder_lib::ENTRY_PROGRAM;
 use seoder_lib::packages::spider::configuration::setup;
 use seoder_lib::packages::spider::utils::log;
 use seoder_lib::tokio;
@@ -12,12 +13,12 @@ pub async fn engine_builder(dptt: String) -> (Vec<String>, Vec<String>, String) 
     let selected_engine = tokio::spawn(async move {
         let mut engine = "".to_string();
 
-        let config = string_concat!("./_db/campaigns/", dptt, "/config.txt");
+        let config = string_concat!(ENTRY_PROGRAM.0, dptt, "/config.txt");
 
         let f = if tokio::fs::metadata(&config).await.is_ok() {
             config
         } else {
-            string_concat!("../_db/campaigns/", dptt, "/config.txt")
+            string_concat!(ENTRY_PROGRAM.0, dptt, "/config.txt")
         };
 
         match File::open(f).await {

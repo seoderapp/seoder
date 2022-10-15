@@ -4,6 +4,7 @@ use crate::packages::spider::website::CONFIG;
 use super::website::Campaign;
 use super::website::Message;
 
+use crate::ENTRY_PROGRAM;
 use regex::RegexSet;
 use scraper::Html;
 use scraper::Selector;
@@ -44,17 +45,11 @@ pub async fn store_fs_io_matching(
 
     task::yield_now().await;
 
-    let eg_c = "./_db/campaigns/";
-
-    if !tokio::fs::metadata(eg_c).await.is_ok() {
-        tokio::fs::create_dir(&eg_c).await.unwrap_or_default();
-    }
-
     let source_match = campaign.source_match;
 
     // if campaign is empty loop through all folders and spawn custom threads
     if path.is_empty() {
-        let mut entries = read_dir(&eg_c).await.unwrap();
+        let mut entries = read_dir(&ENTRY_PROGRAM.0).await.unwrap();
 
         while let Some(entry) = entries.next_entry().await.unwrap() {
             let e = entry.path().to_str().unwrap().to_owned();
@@ -67,8 +62,6 @@ pub async fn store_fs_io_matching(
             } {
                 continue;
             }
-
-            tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
 
             let mut o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
 
@@ -137,14 +130,9 @@ pub async fn store_fs_io_matching(
             }
         }
     } else {
-        let cmp_base = string_concat!("_db/campaigns/", path);
-        let cmp_base = if std::path::Path::new(&cmp_base).exists() {
-            cmp_base
-        } else {
-            string_concat!("../", cmp_base)
-        };
+        let cmp_base = string_concat!(ENTRY_PROGRAM.0, path);
 
-        tokio::fs::create_dir(&&cmp_base).await.unwrap_or_default();
+        tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
 
         let cmp_base = string_concat!(&cmp_base, "/valid");
 
