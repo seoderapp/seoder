@@ -758,7 +758,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             let n = v.name;
 
             if n.is_empty() == false {
-                let db_dir = string_concat!("_db/engines/", n);
+                let db_dir = string_concat!("../_db/engines/", n);
                 let pt = v.paths;
                 let pat = v.patterns;
 
@@ -767,7 +767,10 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     let ott = pat.split(',');
 
                     if !std::path::Path::new(&db_dir).exists() {
-                        tokio::fs::create_dir(&db_dir).await.unwrap();
+                        match tokio::fs::create_dir(&db_dir).await {
+                            Ok(_) => {}
+                            _ => {}
+                        };
                     }
 
                     let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
