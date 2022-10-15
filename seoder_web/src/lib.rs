@@ -330,7 +330,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // list all files
             if st == Action::ListFiles {
-                let f = string_concat!(&ENTRY_PROGRAM, "_db/files");
+                let f = string_concat!(&*ENTRY_PROGRAM, "_db/files");
                 let mut dir = tokio::fs::read_dir(&f).await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
@@ -350,7 +350,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // remoe file todo remove from ui
             if st == Action::RemoveFile {
-                let f = string_concat!(&ENTRY_PROGRAM, "_db/files");
+                let f = string_concat!(&*ENTRY_PROGRAM, "_db/files");
 
                 tokio::fs::remove_file(string_concat!(f, &input))
                     .await
@@ -375,7 +375,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // set selected list item
             if st == Action::SetList {
-                let f = string_concat!(&ENTRY_PROGRAM, "_db/files");
+                let f = string_concat!(&*ENTRY_PROGRAM, "_db/files");
 
                 utils::write_config("target", &string_concat!(f, input.to_string())).await;
             }
@@ -383,7 +383,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             // list all engines
             if st == Action::ListEngines {
                 // todo: get the static root paths on app start
-                let eg = string_concat!(&ENTRY_PROGRAM, "_db/engines");
+                let eg = string_concat!(&*ENTRY_PROGRAM, "_db/engines");
                 let mut dir = tokio::fs::read_dir(&eg).await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
@@ -480,7 +480,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             let d_input = input.clone();
 
             if st == Action::RemoveCampaign {
-                let eg = string_concat!(&ENTRY_PROGRAM, "_db/campaigns/",&d_input);
+                let eg = string_concat!(&*ENTRY_PROGRAM, "_db/campaigns/",&d_input);
 
                 tokio::fs::remove_dir_all(eg)
                     .await
@@ -495,7 +495,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // delete engine - this does not delete configs attached!
             if st == Action::RemoveEngine {
-                let eg = string_concat!(&ENTRY_PROGRAM, "_db/engines/",&d_input);
+                let eg = string_concat!(&*ENTRY_PROGRAM, "_db/engines/",&d_input);
 
                 tokio::fs::remove_dir_all(eg)
                     .await
@@ -846,22 +846,26 @@ pub async fn start() -> Result<(), IoError> {
         .map(|x| x.parse::<u8>().unwrap())
         .collect::<Vec<u8>>();
 
-    // http server
-    tokio::spawn(async move {
-        let port = client_port.parse::<u16>().unwrap_or(3000);
-        // todo allow custom http address
-        let addr = SocketAddr::from(([cad[0], cad[1], cad[2], cad[3]], port));
-
-        let make_svc = make_service_fn(|_conn| async {
-            Ok::<_, Infallible>(service_fn(panel::panel_html::panel_handle))
+    
+    if *ENTRY_PROGRAM == "app" {
+        // http server
+        tokio::spawn(async move {
+            let port = client_port.parse::<u16>().unwrap_or(3000);
+            // todo allow custom http address
+            let addr = SocketAddr::from(([cad[0], cad[1], cad[2], cad[3]], port));
+    
+            let make_svc = make_service_fn(|_conn| async {
+                Ok::<_, Infallible>(service_fn(panel::panel_html::panel_handle))
+            });
+    
+            if let Err(e) = Server::bind(&addr).serve(make_svc).await {
+                eprintln!("server error: {}. Port not found {}", e, port);
+            }
         });
 
-        if let Err(e) = Server::bind(&addr).serve(make_svc).await {
-            eprintln!("server error: {}. Port not found {}", e, port);
-        }
-    });
+        println!("Listening on: {} and 0.0.0.0:3000", &addr);
+    }
 
-    println!("Listening on: {} and 0.0.0.0:3000", &addr);
 
     tokio::spawn(async move { ft::file_server().await });
 
