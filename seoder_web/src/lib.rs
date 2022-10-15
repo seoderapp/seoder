@@ -6,6 +6,7 @@ static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 use crate::string_concat::string_concat;
 use crate::string_concat::string_concat_impl;
+use lazy_static::lazy_static;
 use seoder_lib::tokio::io::AsyncBufReadExt;
 use seoder_lib::tokio::sync::mpsc::unbounded_channel;
 use seoder_lib::Website;
@@ -80,6 +81,28 @@ struct Eng {
     name: String,
     paths: String,
     patterns: String,
+}
+
+lazy_static! {
+    static ref ENTRY_PROGRAM: &'static str = {
+        let mut path_base = "./";
+        let name = "SEODER_PROGRAM";
+
+        match env::var(name) {
+            Ok(v) => {
+                println!("{}: {}", name, v);
+
+                if v == "app" {
+                    path_base = "../"
+                }
+            }
+            Err(e) => {
+                println!("${} is not set ({})", name, e);
+            }
+        }
+
+        path_base
+    };
 }
 
 /// read file to target
@@ -307,17 +330,13 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // list all files
             if st == Action::ListFiles {
-                let f = if Path::new("./_db/files").exists() {
-                    "./_db/files/"
-                } else {
-                    "../_db/files/"
-                };
-                let mut dir = tokio::fs::read_dir(f).await.unwrap();
+                let f = string_concat!(&ENTRY_PROGRAM, "_db/files");
+                let mut dir = tokio::fs::read_dir(&f).await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
                     if child.metadata().await.unwrap().is_file() {
                         let dpt = child.path().to_str().unwrap().to_owned();
-                        let dpt = dpt.replacen(f, "", 1);
+                        let dpt = dpt.replacen(&f, "", 1);
                         if dpt != "README.md" {
                             let v = json!({ "fpath": dpt });
                             outgoing
@@ -331,11 +350,8 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // remoe file todo remove from ui
             if st == Action::RemoveFile {
-                let f = if Path::new("./_db/files").exists() {
-                    "./_db/files/"
-                } else {
-                    "../_db/files/"
-                };
+                let f = string_concat!(&ENTRY_PROGRAM, "_db/files");
+
                 tokio::fs::remove_file(string_concat!(f, &input))
                     .await
                     .unwrap();
@@ -359,24 +375,16 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // set selected list item
             if st == Action::SetList {
-                let f = if Path::new("./_db/files").exists() {
-                    "./_db/files/"
-                } else {
-                    "../_db/files/"
-                };
+                let f = string_concat!(&ENTRY_PROGRAM, "_db/files");
+
                 utils::write_config("target", &string_concat!(f, input.to_string())).await;
             }
 
             // list all engines
             if st == Action::ListEngines {
                 // todo: get the static root paths on app start
-                let eg = if Path::new("./_db/engines").exists() {
-                    "./_db/engines"
-                } else {
-                    "../_db/engines"
-                };
-
-                let mut dir = tokio::fs::read_dir(eg).await.unwrap();
+                let eg = string_concat!(&ENTRY_PROGRAM, "_db/engines");
+                let mut dir = tokio::fs::read_dir(&eg).await.unwrap();
 
                 while let Some(child) = dir.next_entry().await.unwrap_or_default() {
                     if child.metadata().await.unwrap().is_dir() {
@@ -421,7 +429,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                             _ => {}
                         };
 
-                        let mut d = dpt.replacen(eg, "", 1);
+                        let mut d = dpt.replacen(&eg, "", 1);
 
                         if d.starts_with("/") {
                             d.remove(0);
@@ -472,7 +480,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             let d_input = input.clone();
 
             if st == Action::RemoveCampaign {
-                tokio::fs::remove_dir_all(string_concat!("_db/campaigns/", &d_input))
+                let eg = string_concat!(&ENTRY_PROGRAM, "_db/campaigns/",&d_input);
+
+                tokio::fs::remove_dir_all(eg)
                     .await
                     .unwrap();
 
@@ -485,7 +495,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // delete engine - this does not delete configs attached!
             if st == Action::RemoveEngine {
-                tokio::fs::remove_dir_all(string_concat!("_db/engines/", &d_input))
+                let eg = string_concat!(&ENTRY_PROGRAM, "_db/engines/",&d_input);
+
+                tokio::fs::remove_dir_all(eg)
                     .await
                     .unwrap();
 
