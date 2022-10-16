@@ -37,7 +37,7 @@ use crate::tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use hyper::service::{make_service_fn, service_fn};
 use hyper::Server;
 use tokio::fs::OpenOptions;
-use tokio::fs::{create_dir, create_dir_all};
+use tokio::fs::{create_dir};
 use tokio::net::{TcpListener, TcpStream};
 
 extern crate lazy_static;
@@ -691,13 +691,7 @@ pub async fn start() -> Result<(), IoError> {
         Err(_) => {}
     }
 
-    if !Path::new(&ENTRY_PROGRAM.0).is_dir() {
-        create_dir_all(&ENTRY_PROGRAM.0).await.unwrap();
-    }
-
-    if !Path::new(&ENTRY_PROGRAM.1).is_dir() {
-        create_dir_all(&ENTRY_PROGRAM.1).await.unwrap();
-    }
+    seoder_lib::init().await;
 
     let bs_url_input = string_concat!(ENTRY_PROGRAM.1, "urls-input.txt");
 

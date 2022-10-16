@@ -17,6 +17,8 @@ pub extern crate string_concat;
 
 #[macro_use]
 extern crate lazy_static;
+use std::path::Path;
+use tokio::fs::{create_dir_all};
 
 pub use packages::spider::website::Website;
 
@@ -33,9 +35,22 @@ lazy_static! {
     };
 }
 
+/// init entry dirs for prog
+pub async fn init() {
+    if !Path::new(&ENTRY_PROGRAM.0).is_dir() {
+        create_dir_all(&ENTRY_PROGRAM.0).await.unwrap();
+    }
+
+    if !Path::new(&ENTRY_PROGRAM.1).is_dir() {
+        create_dir_all(&ENTRY_PROGRAM.1).await.unwrap();
+    }
+}
+
 /// crawl executed with args vec list
 pub async fn crawl(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
-    // list of file paths to run against
+    // list of file paths to run against make sure it is ready each run
+    init().await;
+
     if args.len() >= 2 {
         let mut iter = args.iter();
         iter.next(); // skip the cargo entry
