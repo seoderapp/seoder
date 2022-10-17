@@ -97,7 +97,7 @@ export async function post({ request }) {
       if (data && data.attributes.status === "ACTIVE") {
         await transport.sendMail({
           from: "support@seoder.io", // sender address
-          to: "jeff@a11ywatch.com, hello@gilbertb.com", // list of receivers
+          to: stripeCustomer.email, // list of receivers
           subject: "Seoder Astro SSR License✔", // Subject line
           text: "License key test", // plain text body
           html: `
