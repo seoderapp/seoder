@@ -695,11 +695,19 @@ pub async fn start() -> Result<(), IoError> {
 
     let bs_url_input = string_concat!(ENTRY_PROGRAM.1, "urls-input.txt");
 
-    if !Path::new(&bs_url_input).is_file() {
-        if Path::new("../urls-input.txt").is_file() {
-            std::fs::copy(&"../urls-input.txt", bs_url_input).unwrap();
-        }
-    }
+    // let validation: serde_json::Value = reqwest::Client::new()
+    // .post("https://api.keygen.sh/v1/accounts/demo/licenses/actions/validate-key")
+    // .header("Content-Type", "application/vnd.api+json")
+    // .header("Accept", "application/vnd.api+json")
+    // .json(&serde_json::json!({
+    //     "meta": {
+    //         "key": "C1B6DE-39A6E3-DE1529-8559A0-4AF593-V3"
+    //     }
+    // }))
+    // .send()
+    // .await?
+    // .json()
+    // .await?;
 
     // start the web server for the client and assets
     if prog != "app" {
