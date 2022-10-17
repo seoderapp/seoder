@@ -6,17 +6,17 @@ static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 use crate::string_concat::string_concat;
 use crate::string_concat::string_concat_impl;
+use crate::tokio::fs::File;
+use futures_util::stream::SplitSink;
+use futures_util::SinkExt;
+use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 use seoder_lib::tokio::io::AsyncBufReadExt;
 use seoder_lib::tokio::sync::mpsc::unbounded_channel;
 use seoder_lib::Website;
 use seoder_lib::ENTRY_PROGRAM;
 use sysinfo::{System, SystemExt};
+use tokio_tungstenite::WebSocketStream;
 use tungstenite::{Message, Result};
-use utils::validate_program;
-
-use futures_util::SinkExt;
-use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
-use crate::tokio::fs::File;
 
 use seoder_lib::packages::spider::utils::{log, logd};
 use seoder_lib::tokio::io::AsyncWriteExt;
@@ -40,6 +40,7 @@ use hyper::Server;
 use tokio::fs::create_dir;
 use tokio::fs::OpenOptions;
 use tokio::net::{TcpListener, TcpStream};
+use utils::validate_program;
 
 extern crate lazy_static;
 extern crate tera;
@@ -72,6 +73,8 @@ enum Action {
 type Tx = futures_channel::mpsc::UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
 type Controller = (Action, String);
+
+pub type OutGoing = SplitSink<WebSocketStream<TcpStream>, Message>;
 
 /// new engine
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -178,38 +181,19 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 outgoing = controls::list::list_valid(outgoing).await;
             }
 
+            // list all engines
+            if st == Action::ListEngines {
+                outgoing = controls::list::list_engines(outgoing).await;
+            }
+
             // list all files
             if st == Action::ListFiles {
-                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.1).await.unwrap();
-
-                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
-                    if child.metadata().await.unwrap().is_file() {
-                        let dpt = child.path().to_str().unwrap().to_owned();
-                        let dpt = dpt.replacen(&ENTRY_PROGRAM.1, "", 1);
-
-                        if dpt.ends_with(".txt") {
-                            let v = json!({ "fpath": dpt });
-
-                            outgoing
-                                .send(Message::Text(v.to_string()))
-                                .await
-                                .unwrap_or_default();
-                        }
-                    }
-                }
+                outgoing = controls::list::list_files(outgoing).await;
             }
 
             // remoe file todo remove from ui
             if st == Action::RemoveFile {
-                tokio::fs::remove_file(string_concat!(&ENTRY_PROGRAM.1, &input))
-                    .await
-                    .unwrap();
-
-                let v = json!({ "dfpath": input });
-                outgoing
-                    .send(Message::Text(v.to_string()))
-                    .await
-                    .unwrap_or_default();
+                outgoing = controls::fs::remove_file(outgoing, &input).await;
             }
 
             // set enable proxies
@@ -225,74 +209,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             // set selected list item
             if st == Action::SetList {
                 utils::write_config("target", &string_concat!(&ENTRY_PROGRAM.1, &input)).await;
-            }
-
-            // list all engines
-            if st == Action::ListEngines {
-                // todo: get the static root paths on app start
-                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.0).await.unwrap();
-
-                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
-                    if child.metadata().await.unwrap().is_dir() {
-                        let dpt = child.path().to_str().unwrap().to_owned();
-
-                        // engine paths
-                        // engine patterns
-                        let file = OpenOptions::new()
-                            .read(true)
-                            .open(string_concat!(dpt, "/paths.txt"))
-                            .await;
-
-                        let mut paths: Vec<String> = vec![];
-                        let mut patterns: Vec<String> = vec![];
-
-                        match file {
-                            Ok(file) => {
-                                let reader = BufReader::new(file);
-                                let mut lines = reader.lines();
-
-                                while let Some(line) = lines.next_line().await.unwrap() {
-                                    paths.push(line)
-                                }
-                            }
-                            _ => {}
-                        };
-
-                        let file = OpenOptions::new()
-                            .read(true)
-                            .open(string_concat!(dpt, "/patterns.txt"))
-                            .await;
-
-                        match file {
-                            Ok(file) => {
-                                let reader = BufReader::new(file);
-                                let mut lines = reader.lines();
-
-                                while let Some(line) = lines.next_line().await.unwrap() {
-                                    patterns.push(line)
-                                }
-                            }
-                            _ => {}
-                        };
-
-                        let mut d = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
-
-                        if d.starts_with("/") {
-                            d.remove(0);
-                        }
-
-                        let v = json!({
-                              "epath": d,
-                              "paths": paths,
-                              "patterns": patterns
-                        });
-
-                        outgoing
-                            .send(Message::Text(v.to_string()))
-                            .await
-                            .unwrap_or_default();
-                    }
-                }
             }
 
             let crun_input = input.clone();
