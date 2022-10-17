@@ -1,11 +1,11 @@
-use crate::tokio;
-use crate::OutGoing;
-use crate::Website;
-use crate::ENTRY_PROGRAM;
 use crate::builder;
 use crate::log;
 use crate::string_concat::string_concat;
 use crate::string_concat::string_concat_impl;
+use crate::tokio;
+use crate::OutGoing;
+use crate::Website;
+use crate::ENTRY_PROGRAM;
 
 /// run all programs
 pub async fn run_all(outgoing: OutGoing) -> OutGoing {
@@ -18,9 +18,9 @@ pub async fn run_all(outgoing: OutGoing) -> OutGoing {
 
             if !dpt.ends_with("/valid") {
                 let (pt, pat, target) = builder::engine_builder(&dpt).await;
-                
+
                 let mut website: Website = Website::new(&target);
-                
+
                 website.engine.campaign.name = dpt;
                 website.engine.campaign.paths = pt;
                 website.engine.campaign.patterns = pat;
@@ -32,7 +32,7 @@ pub async fn run_all(outgoing: OutGoing) -> OutGoing {
             }
         }
     }
-  
+
     outgoing
 }
 

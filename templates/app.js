@@ -1,6 +1,11 @@
 // check if socket already ready
-const socket =
-  typeof sock === "undefined" ? new WebSocket("ws://127.0.0.1:8080") : sock;
+const socket = new WebSocket("ws://127.0.0.1:8080");
+// feed loop
+const socketRuntime = new WebSocket("ws://127.0.0.1:8089");
+
+socketRuntime.addEventListener("open", () => {
+  socketRuntime.send("loop");
+});
 
 socket.addEventListener("open", () => {
   socket.send("list-engines");
@@ -9,27 +14,9 @@ socket.addEventListener("open", () => {
   socket.send("feed");
   socket.send("config");
 
-  setInterval(() => {
-    socket.send("feed");
-  }, 1000);
-
   setTimeout(() => {
     socket.send("list-campaign-stats");
   });
-
-  setInterval(() => {
-    socket.send("list-engines");
-  }, 3500);
-
-  setInterval(() => {
-    socket.send("list-campaign-stats");
-  }, 5000);
-
-  setInterval(() => {
-    socket.send("list-totals");
-    socket.send("list-files");
-    socket.send("config");
-  }, 30000);
 });
 
 const stats = document.getElementById("feed-stats");
@@ -47,7 +34,7 @@ const engineMap = new Map();
 
 let initialTarget = "";
 
-socket.addEventListener("message", (event) => {
+function eventSub(event) {
   const raw = event.data;
 
   if (raw.startsWith("{" + '"' + "stats")) {
@@ -90,7 +77,7 @@ socket.addEventListener("message", (event) => {
   if (raw.startsWith(ptp)) {
     const np = JSON.parse(raw);
     const { pengine, ploc } = np || {};
-    
+
     if (engineMap.has(pengine)) {
       const item = engineMap.get(pengine);
       item.total = ploc ?? item.total ?? 0;
@@ -99,18 +86,16 @@ socket.addEventListener("message", (event) => {
       const cell = document.getElementById("engine_stats_" + pengine);
 
       if (cell) {
-        cell.textContent =
-          "( " + item.valid + " / " + item.total + " ) ";
+        cell.textContent = "( " + item.valid + " / " + item.total + " ) ";
       }
-
     }
     return;
   }
-  
+
   if (raw.startsWith("{" + '"' + "path" + '"' + ":" + '"')) {
     const np = JSON.parse(raw);
     const { url, path } = np || {};
-        
+
     if (engineMap.has(path)) {
       const item = engineMap.get(path);
 
@@ -183,7 +168,7 @@ socket.addEventListener("message", (event) => {
   if (raw.startsWith(ptpe)) {
     const np = JSON.parse(raw);
     const path = np && np.epath;
-    
+
     if (!engineMap.has(path)) {
       engineMap.set(path, {
         total: 0,
@@ -208,8 +193,8 @@ socket.addEventListener("message", (event) => {
 
       cellContentPaths.className = "row";
       cellContentBlock.className = "flex center";
-      
-      cellTitle.textContent = path;      
+
+      cellTitle.textContent = path;
       cellContentPaths.textContent = np.paths;
       cellStats.textContent = "( 0/" + 0 + " )";
       cellBtnDeleteButton.textContent = "Delete";
@@ -253,7 +238,7 @@ socket.addEventListener("message", (event) => {
     // parse json for now
     const np = JSON.parse(raw);
     const path = np && np.path;
-    
+
     if (engineMap.has(path)) {
       const item = engineMap.get(path);
       item.total = item.total ?? 0;
@@ -262,8 +247,7 @@ socket.addEventListener("message", (event) => {
       const cell = document.getElementById("engine_stats_" + path);
 
       if (cell) {
-        cell.textContent =
-          "( " + item.valid + " / " + item.total + " ) ";
+        cell.textContent = "( " + item.valid + " / " + item.total + " ) ";
       }
     }
   }
@@ -320,13 +304,18 @@ socket.addEventListener("message", (event) => {
       engineMap.delete(path);
     }
   }
-});
+}
+
+socket.addEventListener("message", eventSub);
+socketRuntime.addEventListener("message", eventSub);
 
 const rform = document.getElementById("rform");
 const eform = document.getElementById("eform");
+const proxyform = document.getElementById("proxyform");
 const uploadform = document.getElementById("uploadform");
 const fsform = document.getElementById("fsform");
 const bufferform = document.getElementById("bufferform");
+const fsDelete = document.getElementById("fs-delete");
 
 uploadform.addEventListener("submit", (event) => {
   const url = "http://localhost:8001/upload";
@@ -361,8 +350,6 @@ bufferform.addEventListener("submit", (event) => {
   event.preventDefault();
 });
 
-const proxyform = document.getElementById("proxyform");
-
 proxyform.addEventListener("submit", (event) => {
   const prox = proxyform.querySelector('input[name="proxy"]');
 
@@ -370,8 +357,6 @@ proxyform.addEventListener("submit", (event) => {
 
   event.preventDefault();
 });
-
-const fsDelete = document.getElementById("fs-delete");
 
 fsDelete.addEventListener("click", () => {
   const cf = window.confirm("Are, you sure you want to delete this file?");
