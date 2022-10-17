@@ -9,7 +9,8 @@ use seoder_lib::ENTRY_PROGRAM;
 use tokio::fs::File;
 
 /// build a custom engine config from path and target file
-pub async fn engine_builder(selected_engine: String) -> (Vec<String>, Vec<String>, String) {
+pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>, String) {
+    let e = selected_engine.to_string();
     // todo: allow param passing from special configs
     let selected_file = tokio::spawn(async move {
         let mut target = "urls-input.txt".to_string();
@@ -40,12 +41,10 @@ pub async fn engine_builder(selected_engine: String) -> (Vec<String>, Vec<String
     .unwrap();
 
     if !selected_engine.is_empty() {
-        let eselected = selected_engine.clone();
-
         tokio::spawn(async move {
-            let f = string_concat!(ENTRY_PROGRAM.0, eselected, "/paths.txt");
+            let f = string_concat!(ENTRY_PROGRAM.0, &e, "/paths.txt");
             let paths = crate::utils::lines_to_vec(f).await;
-            let f = string_concat!(ENTRY_PROGRAM.0, eselected, "/patterns.txt");
+            let f = string_concat!(ENTRY_PROGRAM.0, &e, "/patterns.txt");
 
             let patterns = crate::utils::lines_to_vec(f).await;
 

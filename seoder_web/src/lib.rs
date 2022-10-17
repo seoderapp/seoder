@@ -149,221 +149,52 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     .unwrap_or_default();
             }
 
-            // run all campaigns
             if st == Action::RunAllCampaigns {
-                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.0).await.unwrap();
-
-                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
-                    if child.metadata().await.unwrap().is_dir() {
-                        // path
-                        let dpt = child.path().to_str().unwrap().to_owned();
-                        if !dpt.ends_with("/valid") {
-                            let dptt = dpt.clone();
-                            let (pt, pat, target) = builder::engine_builder(dptt).await;
-
-                            let mut website: Website = Website::new(&target);
-
-                            website.engine.campaign.name = dpt;
-                            website.engine.campaign.paths = pt;
-                            website.engine.campaign.patterns = pat;
-
-                            tokio::spawn(async move {
-                                website.crawl().await;
-                                log("crawl finished - ", &website.engine.campaign.name)
-                            });
-                        }
-                    }
-                }
+                outgoing = controls::run::run_all(outgoing).await;
             }
 
-            // determine valid count across files
             if st == Action::ListValidCampaigns {
                 outgoing = controls::list::list_valid(outgoing).await;
             }
 
-            // list all engines
             if st == Action::ListEngines {
                 outgoing = controls::list::list_engines(outgoing).await;
             }
 
-            // list all files
+            if st == Action::ListFileCount {
+                outgoing = controls::list::list_file_count(outgoing).await;
+            }
+
             if st == Action::ListFiles {
                 outgoing = controls::list::list_files(outgoing).await;
             }
 
-            // remoe file todo remove from ui
             if st == Action::RemoveFile {
                 outgoing = controls::fs::remove_file(outgoing, &input).await;
             }
 
-            // set enable proxies
+            if st == Action::RunCampaign {
+                outgoing = controls::run::run(outgoing, &input).await;
+            }
+
+            if st == Action::RemoveEngine {
+                outgoing = controls::fs::remove_engine(outgoing, &input).await;
+            }
+
+            if st == Action::Config {
+                outgoing = controls::list::config(outgoing).await;
+            }
+
             if st == Action::SetProxy {
                 utils::write_config("proxy", &input).await;
             }
 
-            // set selected buffer timeout
             if st == Action::SetBuffer {
                 utils::write_config("buffer", &input).await;
             }
 
-            // set selected list item
             if st == Action::SetList {
                 utils::write_config("target", &string_concat!(&ENTRY_PROGRAM.1, &input)).await;
-            }
-
-            let crun_input = input.clone();
-
-            // run campaign
-            if st == Action::RunCampaign {
-                let cp = input.clone();
-
-                let (pt, pat, target) = builder::engine_builder(crun_input).await;
-
-                let mut website: Website = Website::new(&target);
-
-                website.engine.campaign.name = cp;
-                website.engine.campaign.paths = pt;
-                website.engine.campaign.patterns = pat;
-
-                tokio::spawn(async move {
-                    let performance = crate::tokio::time::Instant::now();
-
-                    website.crawl().await;
-
-                    let b = string_concat!(
-                        performance.elapsed().as_secs().to_string(),
-                        "s - ",
-                        website.engine.campaign.name
-                    );
-
-                    log("crawl finished - time elasped: ", &b);
-                });
-            }
-
-            let d_input = input.clone();
-
-            // delete engine - this does not delete configs attached!
-            if st == Action::RemoveEngine {
-                let eg = string_concat!(&*ENTRY_PROGRAM.0, &d_input);
-                tokio::fs::remove_dir_all(eg).await.unwrap();
-
-                let v = json!({ "depath": input });
-
-                outgoing
-                    .send(Message::Text(v.to_string()))
-                    .await
-                    .unwrap_or_default();
-            }
-
-            if st == Action::Config {
-                let mut timeout = 50;
-                let mut buffer = 50;
-                let mut proxy = false;
-                let mut target = string_concat!(ENTRY_PROGRAM.1, "/urls-input.txt"); // todo: fix target
-
-                let file = OpenOptions::new().read(true).open("config.txt").await;
-
-                match file {
-                    Ok(ff) => {
-                        let reader = BufReader::new(ff);
-                        let mut lines = reader.lines();
-
-                        while let Some(line) = lines.next_line().await.unwrap() {
-                            let hh = line.split(" ").collect::<Vec<&str>>();
-
-                            if hh.len() >= 2 {
-                                let h0 = hh[0];
-                                let mut h1 = hh[1].to_string();
-
-                                if hh.len() == 3 {
-                                    h1.push_str(hh[2]);
-                                }
-
-                                if h0 == "timeout" {
-                                    timeout = h1.parse::<u16>().unwrap_or(15);
-                                }
-                                if h0 == "buffer" {
-                                    buffer = h1.parse::<u16>().unwrap_or(50);
-                                }
-                                if h0 == "proxy" {
-                                    proxy = h1.parse::<bool>().unwrap_or(false);
-                                }
-                                if h0 == "target" {
-                                    let m = ENTRY_PROGRAM.1.replace(" ", "");
-
-                                    if h1.starts_with(&m) {
-                                        target = h1.replacen(&m, "", 1);
-                                    } else {
-                                        target = h1.clone();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    _ => {}
-                };
-
-                let sl = json!({
-                   "timeout": timeout,
-                   "buffer": buffer,
-                   "proxy": proxy,
-                   "target": target
-                });
-
-                outgoing
-                    .send(Message::Text(sl.to_string()))
-                    .await
-                    .unwrap_or_default();
-            }
-
-            if st == Action::ListFileCount {
-                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.0).await.unwrap();
-
-                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
-                    if child.metadata().await.unwrap().is_dir() {
-                        let dpt = child.path().to_str().unwrap().to_owned();
-
-                        if !dpt.ends_with("/valid") {
-                            let mut target = get_file_value("./config.txt", "target").await;
-
-                            let mut engine = dpt;
-
-                            if target.is_empty() {
-                                target = String::from("urls-input.txt");
-                            }
-
-                            if engine.is_empty() {
-                                engine = String::from("default");
-                            }
-
-                            let mut nml = 0;
-
-                            // target file length
-                            match OpenOptions::new()
-                                .read(true)
-                                .open(string_concat!(ENTRY_PROGRAM.1, target))
-                                .await
-                            {
-                                Ok(file) => {
-                                    let reader = BufReader::new(file);
-                                    let mut lines = reader.lines();
-
-                                    while let Some(_) = lines.next_line().await.unwrap() {
-                                        nml += 1;
-                                    }
-                                }
-                                _ => {}
-                            };
-
-                            let v = json!({ "pengine": engine.replacen(&ENTRY_PROGRAM.0, "", 1), "ploc": nml });
-
-                            outgoing
-                                .send(Message::Text(v.to_string()))
-                                .await
-                                .unwrap_or_default();
-                        }
-                    }
-                }
             }
         }
     });
