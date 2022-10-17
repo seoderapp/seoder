@@ -1,6 +1,26 @@
 import { transport } from "../../utils/mailer";
 import { stripe } from "../../utils/stripe";
 
+const stripePlanId =
+  typeof process === "undefined"
+    ? import.meta.env.STRIPE_PLAN_ID
+    : process.env.STRIPE_PLAN_ID;
+
+const keygenProductToken =
+  typeof process === "undefined"
+    ? import.meta.env.KEYGEN_PRODUCT_TOKEN
+    : process.env.KEYGEN_PRODUCT_TOKEN;
+
+const keygenAccountId =
+  typeof process === "undefined"
+    ? import.meta.env.KEYGEN_ACCOUNT_ID
+    : process.env.KEYGEN_ACCOUNT_ID;
+
+const keygenPolicyId =
+  typeof process === "undefined"
+    ? import.meta.env.KEYGEN_POLICY_ID
+    : process.env.KEYGEN_POLICY_ID;
+
 export async function post({ request }) {
   const jsonData = await request.json();
   const { stripeEvent } = jsonData ?? { stripeEvent: null };
@@ -30,7 +50,7 @@ export async function post({ request }) {
       const stripeSubscription = await stripe.subscriptions.create(
         {
           customer: stripeCustomer.id,
-          items: [{ price: import.meta.env.STRIPE_PLAN_ID }],
+          items: [{ price: stripePlanId }],
         },
         {
           // Use an idempotency key so that we don't charge a customer more than one
@@ -44,13 +64,11 @@ export async function post({ request }) {
       //    for them. We're pulling the Keygen user's ID from the Stripe customer's
       //    metadata attribute (we stored it there earler).
       const keygenLicense = await fetch(
-        `https://api.keygen.sh/v1/accounts/${
-          import.meta.env.KEYGEN_ACCOUNT_ID
-        }/licenses`,
+        `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${import.meta.env.KEYGEN_PRODUCT_TOKEN}`,
+            Authorization: `Bearer ${keygenProductToken}`,
             "Content-Type": "application/vnd.api+json",
             Accept: "application/vnd.api+json",
           },
@@ -64,7 +82,7 @@ export async function post({ request }) {
                 policy: {
                   data: {
                     type: "policies",
-                    id: import.meta.env.KEYGEN_POLICY_ID,
+                    id: keygenPolicyId,
                   },
                 },
                 user: {

@@ -1,6 +1,16 @@
 // import { transport } from "../../utils/mailer";
 import { stripe } from "../../utils/stripe";
 
+const productToken =
+  typeof process === "undefined"
+    ? import.meta.env.KEYGEN_PRODUCT_TOKEN
+    : process.env.KEYGEN_PRODUCT_TOKEN;
+
+const accountId =
+  typeof process === "undefined"
+    ? import.meta.env.KEYGEN_ACCOUNT_ID
+    : process.env.KEYGEN_ACCOUNT_ID;
+
 export async function post({ request }) {
   const jsonData = await request.json();
   const { data } = jsonData ?? { data: null };
@@ -9,13 +19,11 @@ export async function post({ request }) {
   let statusCode = 200;
 
   const keygenWebhook = await fetch(
-    `https://api.keygen.sh/v1/accounts/${
-      import.meta.env.KEYGEN_ACCOUNT_ID
-    }/webhook-events/${keygenEventId}`,
+    `https://api.keygen.sh/v1/accounts/${accountId}/webhook-events/${keygenEventId}`,
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${import.meta.env.KEYGEN_PRODUCT_TOKEN}`,
+        Authorization: `Bearer ${productToken}`,
         Accept: "application/vnd.api+json",
       },
     }
@@ -58,13 +66,11 @@ export async function post({ request }) {
       // 3. Add the user's Stripe customer ID to the user's metadata attribute so that
       //    we can lookup their Stripe customer account when needed.
       const update = await fetch(
-        `https://api.keygen.sh/v1/accounts/${
-          import.meta.env.KEYGEN_ACCOUNT_ID
-        }/users/${keygenUser.id}`,
+        `https://api.keygen.sh/v1/accounts/${accountId}/users/${keygenUser.id}`,
         {
           method: "PATCH",
           headers: {
-            Authorization: `Bearer ${import.meta.env.KEYGEN_PRODUCT_TOKEN}`,
+            Authorization: `Bearer ${productToken}`,
             "Content-Type": "application/vnd.api+json",
             Accept: "application/vnd.api+json",
           },

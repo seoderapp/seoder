@@ -1,12 +1,15 @@
+const id =
+  typeof process === "undefined"
+    ? import.meta.env.KEYGEN_ACCOUNT_ID
+    : process.env.KEYGEN_ACCOUNT_ID;
+
 export async function post({ request }) {
   const jsonData = await request.json();
 
   let statusCode = 200;
 
   const response = await fetch(
-    `https://api.keygen.sh/v1/accounts/${
-      import.meta.env.KEYGEN_ACCOUNT_ID
-    }/users`,
+    `https://api.keygen.sh/v1/accounts/${id}/users`,
     {
       method: "POST",
       headers: {
