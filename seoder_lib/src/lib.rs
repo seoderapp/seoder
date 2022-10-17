@@ -18,7 +18,7 @@ pub extern crate string_concat;
 #[macro_use]
 extern crate lazy_static;
 use std::path::Path;
-use tokio::fs::{create_dir_all};
+use tokio::fs::create_dir_all;
 
 pub use packages::spider::website::Website;
 
@@ -47,7 +47,7 @@ pub async fn init() {
     // copy files from build step TODO:
     if cfg!(debug_assertions) {
         let bs_url_input = string_concat!(ENTRY_PROGRAM.1, "urls-input.txt");
-    
+
         if !Path::new(&bs_url_input).is_file() {
             if Path::new("../urls-input.txt").is_file() {
                 std::fs::copy(&"../urls-input.txt", bs_url_input).unwrap();

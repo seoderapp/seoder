@@ -12,10 +12,12 @@ use seoder_lib::Website;
 use seoder_lib::ENTRY_PROGRAM;
 use sysinfo::{System, SystemExt};
 use tungstenite::{Message, Result};
+use utils::validate_program;
 
-use crate::tokio::fs::File;
 use futures_util::SinkExt;
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
+use crate::tokio::fs::File;
+
 use seoder_lib::packages::spider::utils::{log, logd};
 use seoder_lib::tokio::io::AsyncWriteExt;
 pub use seoder_lib::{serde_json, string_concat, tokio};
@@ -35,8 +37,8 @@ use crate::tokio::io::BufReader;
 use crate::tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use hyper::service::{make_service_fn, service_fn};
 use hyper::Server;
+use tokio::fs::create_dir;
 use tokio::fs::OpenOptions;
-use tokio::fs::{create_dir};
 use tokio::net::{TcpListener, TcpStream};
 
 extern crate lazy_static;
@@ -173,54 +175,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             // determine valid count across files
             if st == Action::ListValidCampaigns {
-                let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.0).await.unwrap();
-
-                while let Some(child) = dir.next_entry().await.unwrap_or_default() {
-                    if child.metadata().await.unwrap().is_dir() {
-                        let dpt = child.path().to_str().unwrap().to_owned();
-
-                        if !dpt.ends_with("/valid") {
-                            let file = OpenOptions::new()
-                                .read(true)
-                                .open(string_concat!(dpt, "/valid/links.txt"))
-                                .await;
-
-                            let mut lns = 0;
-
-                            let mut d = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
-
-                            if d.starts_with("/") {
-                                d.remove(0);
-                            }
-
-                            match file {
-                                Ok(file) => {
-                                    let reader = BufReader::new(file);
-                                    let mut lines = reader.lines();
-
-                                    while let Some(url) = lines.next_line().await.unwrap() {
-                                        let v = json!({ "url": url, "path": d });
-
-                                        outgoing
-                                            .send(Message::Text(v.to_string()))
-                                            .await
-                                            .unwrap_or_default();
-
-                                        lns += 1;
-                                    }
-                                }
-                                _ => {}
-                            };
-
-                            let v = json!({ "count": lns, "path": d });
-
-                            outgoing
-                                .send(Message::Text(v.to_string()))
-                                .await
-                                .unwrap_or_default();
-                        }
-                    }
-                }
+                outgoing = controls::list::list_valid(outgoing).await;
             }
 
             // list all files
