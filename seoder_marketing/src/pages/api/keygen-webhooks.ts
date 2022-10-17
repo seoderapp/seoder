@@ -1,19 +1,12 @@
-// import { transport } from "../../utils/mailer";
 import { stripe } from "../../utils/stripe";
 
-const productToken =
-  typeof process === "undefined"
-    ? import.meta.env.KEYGEN_PRODUCT_TOKEN
-    : process.env.KEYGEN_PRODUCT_TOKEN;
-
-const accountId =
-  typeof process === "undefined"
-    ? import.meta.env.KEYGEN_ACCOUNT_ID
-    : process.env.KEYGEN_ACCOUNT_ID;
+const productToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
+const accountId = import.meta.env.KEYGEN_ACCOUNT_ID;
 
 export async function post({ request }) {
-  const jsonData = await request.json();
+  const jsonData = await request?.json();
   const { data } = jsonData ?? { data: null };
+
   const keygenEventId = data?.id;
 
   let statusCode = 200;
@@ -37,7 +30,7 @@ export async function post({ request }) {
     });
   }
 
-  switch (keygenEvent.attributes.event) {
+  switch (keygenEvent?.attributes?.event) {
     // 1. Respond to user creation events within your Keygen account. Here, we'll create
     //    a new Stripe customer account for new Keygen users.
     case "user.created":
@@ -100,7 +93,7 @@ export async function post({ request }) {
       statusCode = 200;
   }
 
-  return new Response(JSON.stringify({ core: 123, jsonData }), {
+  return new Response(JSON.stringify({ message: "Success" }), {
     status: statusCode,
     headers: {
       "Content-Type": "application/json",

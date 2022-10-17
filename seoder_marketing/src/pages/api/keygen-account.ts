@@ -1,7 +1,4 @@
-const id =
-  typeof process === "undefined"
-    ? import.meta.env.KEYGEN_ACCOUNT_ID
-    : process.env.KEYGEN_ACCOUNT_ID;
+const id = import.meta.env.KEYGEN_ACCOUNT_ID;
 
 export async function post({ request }) {
   const jsonData = await request.json();

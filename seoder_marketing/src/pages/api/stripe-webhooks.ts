@@ -1,28 +1,14 @@
-import { transport } from "../../utils/mailer";
 import { stripe } from "../../utils/stripe";
+import { transport } from "../../utils/mailer";
 
-const stripePlanId =
-  typeof process === "undefined"
-    ? import.meta.env.STRIPE_PLAN_ID
-    : process.env.STRIPE_PLAN_ID;
+const stripePlanId = import.meta.env.STRIPE_PLAN_ID;
 
-const keygenProductToken =
-  typeof process === "undefined"
-    ? import.meta.env.KEYGEN_PRODUCT_TOKEN
-    : process.env.KEYGEN_PRODUCT_TOKEN;
-
-const keygenAccountId =
-  typeof process === "undefined"
-    ? import.meta.env.KEYGEN_ACCOUNT_ID
-    : process.env.KEYGEN_ACCOUNT_ID;
-
-const keygenPolicyId =
-  typeof process === "undefined"
-    ? import.meta.env.KEYGEN_POLICY_ID
-    : process.env.KEYGEN_POLICY_ID;
+const keygenProductToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
+const keygenAccountId = import.meta.env.KEYGEN_ACCOUNT_ID;
+const keygenPolicyId = import.meta.env.KEYGEN_POLICY_ID;
 
 export async function post({ request }) {
-  const jsonData = await request.json();
+  const jsonData = await request?.json();
   const { stripeEvent } = jsonData ?? { stripeEvent: null };
 
   let statusCode = 200;
