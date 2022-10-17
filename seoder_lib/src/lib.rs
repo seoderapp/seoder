@@ -44,12 +44,14 @@ pub async fn init() {
     if !Path::new(&ENTRY_PROGRAM.1).is_dir() {
         create_dir_all(&ENTRY_PROGRAM.1).await.unwrap();
     }
+    // copy files from build step TODO:
+    if cfg!(debug_assertions) {
+        let bs_url_input = string_concat!(ENTRY_PROGRAM.1, "urls-input.txt");
     
-    let bs_url_input = string_concat!(ENTRY_PROGRAM.1, "urls-input.txt");
-
-    if !Path::new(&bs_url_input).is_file() {
-        if Path::new("../urls-input.txt").is_file() {
-            std::fs::copy(&"../urls-input.txt", bs_url_input).unwrap();
+        if !Path::new(&bs_url_input).is_file() {
+            if Path::new("../urls-input.txt").is_file() {
+                std::fs::copy(&"../urls-input.txt", bs_url_input).unwrap();
+            }
         }
     }
 }

@@ -3,6 +3,8 @@ use std::path::Path;
 use crate::tokio::io::BufReader;
 
 use seoder_lib::packages::spider::utils::log;
+use seoder_lib::string_concat::string_concat;
+use crate::string_concat_impl;
 use seoder_lib::tokio;
 use seoder_lib::tokio::io::AsyncBufReadExt;
 use seoder_lib::tokio::io::AsyncWriteExt;
@@ -87,4 +89,28 @@ target ./urls-input.txt",
         .await
         .unwrap();
     }
+}
+
+
+// validate program 
+pub async fn validate_program(key: &str) -> bool {
+    let endpoint = if cfg!(debug_assertions) {
+        "http://127.0.0.1/api/keygen-validate"
+    } else {
+        "https://seoder.io/api/keygen-validate"
+    };
+
+    use hyper::{Body, Method, Request, Client};
+
+    let req = Request::builder()
+    .method(Method::POST)
+    .uri(endpoint)
+    .header("content-type", "application/json")
+    .body(Body::from(string_concat!(r#"{"key":"#, key, r#""}"#))).unwrap_or_default();
+
+    let client = Client::new();
+
+    let resp = client.request(req).await.unwrap_or_default();
+
+    resp.status() == 200
 }

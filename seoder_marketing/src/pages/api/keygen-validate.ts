@@ -3,8 +3,6 @@ const id = import.meta.env.KEYGEN_ACCOUNT_ID;
 export async function post({ request }) {
   const jsonData = await request.json();
 
-  let statusCode = 200;
-
   const key = jsonData?.key;
 
   const response = await fetch(
@@ -24,7 +22,7 @@ export async function post({ request }) {
   const { meta } = await response.json();
 
   return new Response(JSON.stringify({ valid: meta?.valid }), {
-    status: statusCode,
+    status: meta?.valid ? 200 : 401,
     headers: {
       "Content-Type": "application/json",
     },

@@ -49,7 +49,13 @@ pub async fn store_fs_io_matching(
 
     // if campaign is empty loop through all folders and spawn custom threads
     if path.is_empty() {
-        let mut entries = read_dir(&ENTRY_PROGRAM.0).await.unwrap();
+        let mut entries = match read_dir(&ENTRY_PROGRAM.0).await {
+            Ok(dir) => dir,
+            Err(_) => {
+                // todo: print error
+                return;
+            }
+        };
 
         while let Some(entry) = entries.next_entry().await.unwrap() {
             let e = entry.path().to_str().unwrap().to_owned();
