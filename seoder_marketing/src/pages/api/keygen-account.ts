@@ -21,8 +21,6 @@ export async function post({ request }) {
 
   const res = await response.json();
 
-  console.log(res);
-
   return new Response(JSON.stringify(res), {
     status: statusCode,
     headers: {
