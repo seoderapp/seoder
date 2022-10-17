@@ -2,7 +2,6 @@
 import Layout from "../layouts/Layout.astro";
 
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
-const KEYGEN_ACCOUNT_ID = import.meta.env.PUBLIC_KEYGEN_ACCOUNT_ID;
 ---
 
 <Layout title="Welcome to Payments.">
@@ -56,11 +55,7 @@ const KEYGEN_ACCOUNT_ID = import.meta.env.PUBLIC_KEYGEN_ACCOUNT_ID;
 
   <script src="https://checkout.stripe.com/checkout.js" is:inline></script>
 
-  <script
-    defer
-    is:inline
-    define:vars={{ STRIPE_PUBLISHABLE_KEY, KEYGEN_ACCOUNT_ID }}
-  >
+  <script defer is:inline define:vars={{ STRIPE_PUBLISHABLE_KEY }}>
     const register = document.getElementById("register");
 
     const handler = StripeCheckout.configure({
@@ -75,21 +70,19 @@ const KEYGEN_ACCOUNT_ID = import.meta.env.PUBLIC_KEYGEN_ACCOUNT_ID;
         };
 
         // Create the Keygen user [todo: move to SS]
-        const response = await fetch(
-          `https://api.keygen.sh/v1/accounts/${KEYGEN_ACCOUNT_ID}/users`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/vnd.api+json",
-              Accept: "application/vnd.api+json",
-            },
-            body: JSON.stringify({
-              data: { type: "users", attributes },
-            }),
-          }
-        );
+        const response = await fetch(`/api/keygen-account`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/vnd.api+json",
+            Accept: "application/vnd.api+json",
+          },
+          body: JSON.stringify({
+            data: attributes,
+          }),
+        });
 
         const { data, errors } = await response.json();
+
         if (errors) {
           const message = errors.map((e) => e.detail).toString();
 
