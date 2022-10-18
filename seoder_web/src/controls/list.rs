@@ -217,6 +217,7 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
     let mut buffer = 50;
     let mut proxy = false;
     let mut target = string_concat!(ENTRY_PROGRAM.1, "/urls-input.txt"); // todo: fix target
+    let mut license = String::from("");
 
     let file = OpenOptions::new().read(true).open("config.txt").await;
 
@@ -245,6 +246,11 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
                     if h0 == "proxy" {
                         proxy = h1.parse::<bool>().unwrap_or(false);
                     }
+
+                    if h0 == "license" && h1 != "false" {
+                        license = h1.clone();
+                    }
+
                     if h0 == "target" {
                         let m = ENTRY_PROGRAM.1.replace(" ", "");
 
@@ -264,7 +270,8 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
        "timeout": timeout,
        "buffer": buffer,
        "proxy": proxy,
-       "target": target
+       "target": target,
+       "license": license
     });
 
     outgoing
@@ -273,4 +280,38 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
         .unwrap_or_default();
 
     outgoing
+}
+
+
+/// get license
+pub async fn license() -> String {
+    let mut license = String::from("");
+    let file = OpenOptions::new().read(true).open("config.txt").await;
+
+    match file {
+        Ok(ff) => {
+            let reader = BufReader::new(ff);
+            let mut lines = reader.lines();
+
+            while let Some(line) = lines.next_line().await.unwrap() {
+                let hh = line.split(" ").collect::<Vec<&str>>();
+
+                if hh.len() >= 2 {
+                    let h0 = hh[0];
+                    let mut h1 = hh[1].to_string();
+
+                    if hh.len() == 3 {
+                        h1.push_str(hh[2]);
+                    }
+
+                    if h0 == "license" && h1 != "false" {
+                        license = h1.clone();
+                    }
+                }
+            }
+        }
+        _ => {}
+    };
+
+    license
 }

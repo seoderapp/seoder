@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 use sysinfo::{System, SystemExt};
 use tokio_tungstenite::WebSocketStream;
 use tungstenite::{Message, Result};
+use lazy_static::lazy_static;
 
 use std::io::Error as IoError;
 use std::{
@@ -40,6 +41,7 @@ use tokio::fs::create_dir;
 use tokio::fs::OpenOptions;
 use tokio::net::{TcpListener, TcpStream};
 use utils::validate_program;
+use std::sync::atomic::AtomicBool;
 
 extern crate lazy_static;
 extern crate tera;
@@ -78,6 +80,11 @@ type Tx = futures_channel::mpsc::UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
 
 pub type OutGoing = SplitSink<WebSocketStream<TcpStream>, Message>;
+
+lazy_static! {
+    /// is the license enabled
+    static ref LICENSED: Mutex<bool> = Mutex::new(false);
+}
 
 /// new engine
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -125,6 +132,17 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
     let (sender, mut receiver): (UnboundedSender<Controller>, UnboundedReceiver<Controller>) =
         unbounded_channel();
 
+    // validate license 
+    let stored_license = controls::list::license().await;
+
+    // set valid license in dev mode
+    let mut valid_license = cfg!(debug_assertions) || *LICENSED.lock().unwrap();
+
+    if !stored_license.is_empty() && !valid_license {
+        valid_license = validate_program(&stored_license).await;
+        *LICENSED.lock().unwrap() = valid_license;
+    }
+    
     let handle = tokio::spawn(async move {
         let mut s = System::new_all();
         // let mut interval = tokio::time::interval(Duration::from_millis(1000));
@@ -140,14 +158,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     .send(Message::Text(v.to_string()))
                     .await
                     .unwrap_or_default();
-            }
-
-            if st == Action::SetLicense {
-                utils::write_config("license", &input).await;
-            }
-
-            if st == Action::RunAllCampaigns {
-                outgoing = controls::run::run_all(outgoing).await;
             }
 
             if st == Action::ListValidCampaigns {
@@ -170,7 +180,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 outgoing = controls::fs::remove_file(outgoing, &input).await;
             }
 
-            if st == Action::RunCampaign {
+            if st == Action::RunAllCampaigns && valid_license {
+                outgoing = controls::run::run_all(outgoing).await;
+            }
+
+            if st == Action::RunCampaign && valid_license {
                 outgoing = controls::run::run(outgoing, &input).await;
             }
 
@@ -180,6 +194,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             if st == Action::Config {
                 outgoing = controls::list::config(outgoing).await;
+            }
+
+            if st == Action::SetLicense {
+                utils::write_config("license", &input).await;
+                valid_license = validate_program(&stored_license).await;
             }
 
             if st == Action::SetProxy {
