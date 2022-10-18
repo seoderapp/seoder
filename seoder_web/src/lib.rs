@@ -12,7 +12,6 @@ use futures_util::stream::SplitSink;
 use futures_util::SinkExt;
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 use seoder_lib::packages::spider::utils::{log, logd};
-use seoder_lib::tokio::io::AsyncBufReadExt;
 use seoder_lib::tokio::io::AsyncWriteExt;
 use seoder_lib::tokio::sync::mpsc::unbounded_channel;
 use seoder_lib::Website;
@@ -68,12 +67,15 @@ enum Action {
     SetList,
     SetBuffer,
     SetProxy,
+    SetLicense,
     Loop,
 }
 
+/// action handling
+type Controller = (Action, String);
+
 type Tx = futures_channel::mpsc::UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
-type Controller = (Action, String);
 
 pub type OutGoing = SplitSink<WebSocketStream<TcpStream>, Message>;
 
@@ -83,31 +85,6 @@ struct Eng {
     name: String,
     paths: String,
     patterns: String,
-}
-
-/// read file to target
-async fn get_file_value(path: &str, value: &str) -> String {
-    let mut target = String::from("");
-
-    match OpenOptions::new().read(true).open(&path).await {
-        Ok(file) => {
-            let reader = BufReader::new(file);
-            let mut lines = reader.lines();
-
-            while let Some(line) = lines.next_line().await.unwrap() {
-                let hh = line.split(" ").collect::<Vec<&str>>();
-
-                if hh.len() == 2 {
-                    if hh[0] == value {
-                        target = hh[1].to_string();
-                    }
-                }
-            }
-        }
-        _ => {}
-    };
-
-    target
 }
 
 /// tick status refreshing
@@ -120,8 +97,8 @@ async fn ticker(mut outgoing: OutGoing, s: &System) -> OutGoing {
     outgoing
 }
 
-/// handle async connections to socket
-async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
+/// get ws stream
+async fn build_ws_stream(addr: &SocketAddr, raw_stream: TcpStream) -> WebSocketStream<TcpStream> {
     logd(string_concat::string_concat!(
         "TCP connection from: ",
         &addr.to_string()
@@ -135,6 +112,13 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         "WebSocket connection established: ",
         &addr.to_string()
     ));
+
+    ws_stream
+}
+
+/// handle async connections to socket and run command
+async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
+    let ws_stream = build_ws_stream(&addr, raw_stream).await;
 
     let (mut outgoing, incoming) = ws_stream.split();
 
@@ -152,12 +136,14 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 s.refresh_all();
                 let v = controls::stats::stats(&s);
 
-                tokio::task::yield_now().await;
-
                 outgoing
                     .send(Message::Text(v.to_string()))
                     .await
                     .unwrap_or_default();
+            }
+
+            if st == Action::SetLicense {
+                utils::write_config("license", &input).await;
             }
 
             if st == Action::RunAllCampaigns {
@@ -210,8 +196,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         }
     });
 
-    tokio::task::yield_now().await;
-
     let broadcast_incoming = incoming.try_for_each(|msg| {
         let m = msg.clone();
         let txt = m.to_text().unwrap();
@@ -250,39 +234,31 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 logd("the receiver dropped");
             }
         } else if c == "config" {
-            let campain_name = cc.to_owned();
-
-            if let Err(_) = sender.send((Action::Config, campain_name)) {
+            if let Err(_) = sender.send((Action::Config, cc)) {
                 logd("receiver dropped");
             }
         } else if c == "run-campaign" {
-            let campain_name = cc.to_owned();
-
-            if let Err(_) = sender.send((Action::RunCampaign, campain_name)) {
+            if let Err(_) = sender.send((Action::RunCampaign, cc)) {
                 logd("receiver dropped");
             }
         } else if c == "set-list" {
-            let list_name = cc.to_owned();
-
-            if let Err(_) = sender.send((Action::SetList, list_name)) {
+            if let Err(_) = sender.send((Action::SetList, cc)) {
+                logd("receiver dropped");
+            }
+        } else if c == "set-license" {
+            if let Err(_) = sender.send((Action::SetLicense, cc)) {
                 logd("receiver dropped");
             }
         } else if c == "set-buffer" {
-            let list_name = cc.to_owned();
-
-            if let Err(_) = sender.send((Action::SetBuffer, list_name)) {
+            if let Err(_) = sender.send((Action::SetBuffer, cc)) {
                 logd("receiver dropped");
             }
         } else if c == "set-proxy" {
-            let list_name = cc.to_owned();
-
-            if let Err(_) = sender.send((Action::SetProxy, list_name)) {
+            if let Err(_) = sender.send((Action::SetProxy, cc)) {
                 logd("receiver dropped");
             }
         } else if c == "delete-file" {
-            let file_name = cc.to_owned();
-
-            if let Err(_) = sender.send((Action::RemoveFile, file_name)) {
+            if let Err(_) = sender.send((Action::RemoveFile, cc)) {
                 logd("receiver dropped");
             }
         } else if ms == "run-all-campaigns" {
@@ -308,7 +284,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 }
             });
         } else if c == "create-engine" {
-            let cc = cc.clone();
             let v: Eng = serde_json::from_str(&cc).unwrap_or_default();
 
             let n = v.name;
@@ -349,15 +324,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 }
             }
         } else if c == "delete-engine" {
-            let e_name = cc.to_owned();
-
-            if let Err(_) = sender.send((Action::RemoveEngine, e_name)) {
+            if let Err(_) = sender.send((Action::RemoveEngine, cc)) {
                 logd("receiver dropped");
             }
         } else if c == "list-totals" {
-            let e_name = cc.to_owned();
-
-            if let Err(_) = sender.send((Action::ListFileCount, e_name)) {
+            if let Err(_) = sender.send((Action::ListFileCount, cc)) {
                 logd("receiver dropped");
             }
         }
@@ -378,26 +349,20 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
     handle.await.unwrap();
 }
 
-/// handle async connections to socket
-async fn handle_connection_loop(_peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
-    logd(string_concat::string_concat!(
-        "TCP connection from: ",
-        &addr.to_string()
-    ));
-
-    let ws_stream = tokio_tungstenite::accept_async(raw_stream)
-        .await
-        .expect("Error during the websocket handshake occurred");
-
-    logd(string_concat::string_concat!(
-        "WebSocket connection established loop runtime: ",
-        &addr.to_string()
-    ));
+/// handle async connections to socket loopback
+async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
+    let ws_stream = build_ws_stream(&addr, raw_stream).await;
 
     let (mut outgoing, incoming) = ws_stream.split();
 
     let (sender, mut receiver): (UnboundedSender<Controller>, UnboundedReceiver<Controller>) =
         unbounded_channel();
+
+    let (tx, _rx) = futures_channel::mpsc::unbounded();
+
+    peer_map.lock().unwrap().insert(addr, tx);
+
+    let peer_m = peer_map.clone();
 
     let handle = tokio::spawn(async move {
         let mut s = System::new_all();
@@ -439,16 +404,14 @@ async fn handle_connection_loop(_peer_map: PeerMap, raw_stream: TcpStream, addr:
                 s.refresh_all();
                 interval.tick().await;
 
-                // if peer_map.lock().unwrap().get(&addr).is_none() {
-                //     break;
-                // }
+                if peer_m.lock().unwrap().get(&addr).is_none() {
+                    break;
+                }
             }
         }
     });
 
-    tokio::task::yield_now().await;
-
-    let broadcast_incoming = incoming.try_for_each(|msg| {
+    let broadcast_incoming = incoming.try_for_each(|_| {
         let sender = sender.clone();
 
         if let Err(_) = sender.send((Action::Loop, "".to_string())) {
@@ -462,11 +425,12 @@ async fn handle_connection_loop(_peer_map: PeerMap, raw_stream: TcpStream, addr:
     pin_mut!(broadcast_incoming);
 
     broadcast_incoming.await.unwrap_or_default();
-
     logd(string_concat::string_concat!(
         &addr.to_string(),
         " disconnected"
     ));
+
+    peer_map.lock().unwrap().remove(&addr);
 
     handle.await.unwrap();
 }
@@ -474,20 +438,15 @@ async fn handle_connection_loop(_peer_map: PeerMap, raw_stream: TcpStream, addr:
 pub async fn start() -> Result<(), IoError> {
     env_logger::init();
     utils::init_config().await;
+    seoder_lib::init().await;
     // server peer state
     let state = PeerMap::new(Mutex::new(HashMap::new()));
 
-    let addr = env::args()
-        .nth(1)
-        .unwrap_or_else(|| "127.0.0.1:8080".to_string());
-
-    let try_socket = TcpListener::bind(&addr).await;
-    let listener = try_socket.expect("Failed to bind");
-
     let mut prog = "";
-    let name = "SEODER_PROGRAM";
+    // todo: use custom port
+    let mut addr = String::from("127.0.0.1:8080");
 
-    match env::var(name) {
+    match env::var("SEODER_PROGRAM") {
         Ok(v) => {
             if v == "app" {
                 prog = "app"
@@ -496,7 +455,15 @@ pub async fn start() -> Result<(), IoError> {
         Err(_) => {}
     }
 
-    seoder_lib::init().await;
+    match env::var("SERVER_ADDRESS") {
+        Ok(v) => {
+            addr = v;
+        }
+        Err(_) => {}
+    }
+
+    let try_socket = TcpListener::bind(&addr).await;
+    let listener = try_socket.expect("Failed to bind");
 
     // start the web server for the client and assets
     if prog != "app" {
@@ -528,11 +495,12 @@ pub async fn start() -> Result<(), IoError> {
 
     tokio::spawn(async move { ft::file_server().await });
 
-    let s = state.clone();
     let mut addrl = addr.clone();
     addrl.pop();
     // loop ws
     addrl = string_concat!(addrl, "9");
+
+    let s = state.clone();
 
     tokio::spawn(async move {
         let try_socketl = TcpListener::bind(&addrl).await;

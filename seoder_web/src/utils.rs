@@ -61,6 +61,11 @@ pub async fn write_config(config: &str, input: &String) {
         _ => {}
     };
 
+    // set license handling
+    if config == "license" && !input.is_empty() && !sl.contains(&String::from("license")) {
+        sl.push(string_concat!("license ", input));
+    }
+
     let mut filec = OpenOptions::new()
         .write(true)
         .truncate(true)
@@ -84,6 +89,7 @@ pub async fn init_config() {
             b"timeout 15
 buffer 30
 proxy false
+license false
 target ./urls-input.txt",
         )
         .await
@@ -91,7 +97,7 @@ target ./urls-input.txt",
     }
 }
 
-// validate program
+/// validate program license key external
 pub async fn validate_program(key: &str) -> bool {
     use hyper::{Body, Client, Method, Request};
 
@@ -113,4 +119,29 @@ pub async fn validate_program(key: &str) -> bool {
     let resp = client.request(req).await.unwrap_or_default();
 
     resp.status() == 200
+}
+
+/// read file to target
+pub async fn get_file_value(path: &str, value: &str) -> String {
+    let mut target = String::from("");
+
+    match OpenOptions::new().read(true).open(&path).await {
+        Ok(file) => {
+            let reader = BufReader::new(file);
+            let mut lines = reader.lines();
+
+            while let Some(line) = lines.next_line().await.unwrap() {
+                let hh = line.split(" ").collect::<Vec<&str>>();
+
+                if hh.len() == 2 {
+                    if hh[0] == value {
+                        target = hh[1].to_string();
+                    }
+                }
+            }
+        }
+        _ => {}
+    };
+
+    target
 }
