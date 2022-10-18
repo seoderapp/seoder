@@ -29,7 +29,7 @@ To adjust the client static resources for connecting to the WSS server use the e
 
 Make sure to have `tauri` installed - (ex: cargo install tauri-cli);
 
-If you want to run the native app run `cargo tauri dev`.
+If you want to run the native app run `SEODER_PROGRAM=app RUST_LOG=info cargo tauri dev `.
 
 ## Installation
 
@@ -128,15 +128,3 @@ To run the web server use the command `RUST_LOG=info cargo run --package seoder_
 ### Browser
 
 Navigate to `127.0.0.1:3000` to view the UI panel for the project.
-
-## Todo
-
-1. Add handling of project location path detion instead of the following:
-
-```rust
-let f = if Path::new("./_db/files").exists() {
-        "./_db/files/"
-    } else {
-        "../../_db/files/"
-    };
-```

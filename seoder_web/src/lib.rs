@@ -40,7 +40,7 @@ use hyper::Server;
 use tokio::fs::create_dir;
 use tokio::fs::OpenOptions;
 use tokio::net::{TcpListener, TcpStream};
-use tokio_cron_scheduler::{Job, JobScheduler, JobToRun};
+use tokio_cron_scheduler::{Job, JobScheduler};
 use utils::validate_program;
 
 extern crate lazy_static;
@@ -83,7 +83,9 @@ pub type OutGoing = SplitSink<WebSocketStream<TcpStream>, Message>;
 
 lazy_static! {
     /// is the license enabled
-    static ref LICENSED: Mutex<bool> = Mutex::new(false);
+    pub static ref LICENSED: Mutex<bool> = Mutex::new(false);
+    /// system info
+    pub static ref SYSTEM: Mutex<System> = Mutex::new(System::new_all());
 }
 
 /// new engine
@@ -95,9 +97,9 @@ struct Eng {
 }
 
 /// tick status refreshing
-async fn ticker(mut outgoing: OutGoing, s: &System) -> OutGoing {
+async fn ticker(mut outgoing: OutGoing) -> OutGoing {
     outgoing
-        .send(Message::Text(controls::stats::stats(&s).to_string()))
+        .send(Message::Text(controls::stats::stats().to_string()))
         .await
         .unwrap_or_default();
 
@@ -144,14 +146,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
     }
 
     let handle = tokio::spawn(async move {
-        let mut s = System::new_all();
-
         while let Some(m) = receiver.recv().await {
             let (st, input) = m;
 
             if st == Action::Stats {
-                s.refresh_all();
-                let v = controls::stats::stats(&s);
+                let v = controls::stats::stats();
 
                 outgoing
                     .send(Message::Text(v.to_string()))
@@ -402,7 +401,6 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
     tokio::spawn(scheduler.start());
 
     let handle = tokio::spawn(async move {
-        let mut s = System::new_all();
         let mut interval = tokio::time::interval(Duration::from_millis(1000));
 
         while let Some(_) = receiver.recv().await {
@@ -411,7 +409,7 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
 
             // todo: handle fs tick count skip between
             loop {
-                outgoing = ticker(outgoing, &s).await;
+                outgoing = ticker(outgoing).await;
 
                 if list_config == 0 {
                     outgoing = controls::list::config(outgoing).await;
@@ -438,7 +436,6 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
                     }
                 }
 
-                s.refresh_all();
                 interval.tick().await;
 
                 if peer_m.lock().unwrap().get(&addr).is_none() {

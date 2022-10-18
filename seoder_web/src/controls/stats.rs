@@ -1,13 +1,17 @@
 use crate::serde_json::{json, Value};
 use sysinfo::CpuExt;
 use sysinfo::NetworkExt;
-use sysinfo::{System, SystemExt};
+use sysinfo::{SystemExt};
+use crate::SYSTEM;
 
 /// get the current stats of the system
-pub fn stats(s: &System) -> Value {
+pub fn stats() -> Value {
+    SYSTEM.lock().unwrap().refresh_all();
+
     let mut net_total_received = 0;
     let mut net_total_transmited = 0;
-
+    
+    let s = SYSTEM.lock().unwrap();
     let networks = s.networks();
 
     for (_, data) in networks {
