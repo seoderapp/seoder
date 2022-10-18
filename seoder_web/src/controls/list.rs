@@ -282,7 +282,6 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
     outgoing
 }
 
-
 /// get license
 pub async fn license() -> String {
     let mut license = String::from("");

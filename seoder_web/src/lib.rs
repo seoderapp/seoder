@@ -11,6 +11,7 @@ use crate::tokio::time::Duration;
 use futures_util::stream::SplitSink;
 use futures_util::SinkExt;
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
+use lazy_static::lazy_static;
 use seoder_lib::packages::spider::utils::{log, logd};
 use seoder_lib::tokio::io::AsyncWriteExt;
 use seoder_lib::tokio::sync::mpsc::unbounded_channel;
@@ -21,7 +22,6 @@ use serde::{Deserialize, Serialize};
 use sysinfo::{System, SystemExt};
 use tokio_tungstenite::WebSocketStream;
 use tungstenite::{Message, Result};
-use lazy_static::lazy_static;
 
 use std::io::Error as IoError;
 use std::{
@@ -40,8 +40,8 @@ use hyper::Server;
 use tokio::fs::create_dir;
 use tokio::fs::OpenOptions;
 use tokio::net::{TcpListener, TcpStream};
+use tokio_cron_scheduler::{Job, JobScheduler, JobToRun};
 use utils::validate_program;
-use std::sync::atomic::AtomicBool;
 
 extern crate lazy_static;
 extern crate tera;
@@ -132,7 +132,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
     let (sender, mut receiver): (UnboundedSender<Controller>, UnboundedReceiver<Controller>) =
         unbounded_channel();
 
-    // validate license 
+    // validate license
     let stored_license = controls::list::license().await;
 
     // set valid license in dev mode
@@ -142,10 +142,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         valid_license = validate_program(&stored_license).await;
         *LICENSED.lock().unwrap() = valid_license;
     }
-    
+
     let handle = tokio::spawn(async move {
         let mut s = System::new_all();
-        // let mut interval = tokio::time::interval(Duration::from_millis(1000));
 
         while let Some(m) = receiver.recv().await {
             let (st, input) = m;
@@ -383,6 +382,25 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
 
     let peer_m = peer_map.clone();
 
+    let mut scheduler = JobScheduler::new();
+
+    scheduler
+        .add(
+            Job::new_async("0 0 0 * * 7 *", |_uuid, mut _l| {
+                Box::pin(async {
+                    println!("Checking license");
+                    let stored_license = controls::list::license().await;
+
+                    *LICENSED.lock().unwrap() = validate_program(&stored_license).await;
+
+                })
+            })
+            .expect("defining weekly license"),
+        )
+        .unwrap();
+
+    tokio::spawn(scheduler.start());
+
     let handle = tokio::spawn(async move {
         let mut s = System::new_all();
         let mut interval = tokio::time::interval(Duration::from_millis(1000));
@@ -458,6 +476,7 @@ pub async fn start() -> Result<(), IoError> {
     env_logger::init();
     utils::init_config().await;
     seoder_lib::init().await;
+
     // server peer state
     let state = PeerMap::new(Mutex::new(HashMap::new()));
 
