@@ -128,30 +128,10 @@ h3 {
 }
 
 #engine-list > .engine-item {
-  padding: 0.44rem 0.8rem;
   font-weight: 300;
   font-size: 1.1rem;
   display: flex;
   flex: 1;
-}
-
-#engine-list li.engine-item button:hover {
-  opacity: 0.7;
-}
-
-#engine-list li.engine-item button {
-  min-width: 65px;
-  border: none;
-  border-radius: 0.2rem;
-  margin-left: 0.54rem;
-  font-weight: bold;
-  font-size: 1rem;
-}
-
-#engine-list li.engine-item button:nth-child(1) {
-  border: 1px solid rgb(220 38 38);
-  color: rgb(220 38 38);
-  padding: 0.45rem 0.7rem;
 }
 
 #engine-list > .engine-item:not(:first-child) {
@@ -161,6 +141,18 @@ h3 {
 #engine-list li.engine-item > div:first-of-type {
   font-weight: bold;
   padding-bottom: 0.4rem;
+}
+
+.cell-btn {
+  padding: 0.44rem 0.8rem;
+  width: 100%;
+  border: none;
+  margin: 0;
+  background-color: #fff;
+}
+
+.cell-btn-active {
+  border: 3px solid #25dd58;
 }
 
 .seperator {
@@ -446,10 +438,14 @@ h3 {
 }
 
 .panel-btn {
-  width: 179px;
-  height: 34px;
+  min-width: 179px;
+  min-height: 34px;
   border-radius: 4px;
   border: 0;
+}
+
+.panel-btn-ctn {
+  padding-right: 2px;
 }
 
 .panel {

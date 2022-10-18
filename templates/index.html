@@ -16,28 +16,43 @@
       </div>
       <div class="row hidden" id="appProgram">
         <div class="panel">
-          <div>
-            <div class="flex-row spaceless">
-              <button id="settings-button" class="panel-btn">Settings</button>
-              <button
-                id="new-campaign-button"
-                class="panel-btn button btn-primary full-w"
-              >
-                New Campaign
-              </button>
-            </div>
-            <div class="flex-row spaceless">
-              <button id="settings-button" class="panel-btn">
-                Run Selected
-              </button>
-              <form id="rform">
-                <button type="submit" class="panel-btn">Run All</button>
-              </form>
+          <div class="card">
+            <div class="card-body">
+              <div class="flex-row spaceless full-w">
+                <div class="panel-btn-ctn full-w">
+                  <button id="settings-button" class="panel-btn full-w">
+                    Settings
+                  </button>
+                </div>
+                <div class="panel-btn-ctn full-w">
+                  <button
+                    id="new-campaign-button"
+                    class="panel-btn button btn-primary full-w"
+                  >
+                    New Campaign
+                  </button>
+                </div>
+              </div>
+              <div class="flex-row spaceless">
+                <form id="rsform" class="panel-btn-ctn full-w">
+                  <button
+                    id="run-selected"
+                    class="panel-btn full-w"
+                    type="submit"
+                  >
+                    Run Selected
+                  </button>
+                </form>
+                <form id="rform" class="panel-btn-ctn full-w">
+                  <button type="submit" class="panel-btn full-w">
+                    Run All
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
           <div class="card">
             <div class="card-body">
-              <h3>Engines</h3>
               <ul id="engine-list"></ul>
             </div>
           </div>

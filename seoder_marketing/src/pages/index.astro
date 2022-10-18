@@ -5,50 +5,26 @@ import Card from "../components/Card.astro";
 
 <Layout title="Welcome to Astro.">
   <main>
-    <h1>Welcome to <span class="text-gradient">Astro</span></h1>
+    <h1>Welcome to <span class="text-gradient">Seoder</span></h1>
     <p class="instructions">
-      To get started, open the directory <code>src/pages</code> in your project.<br
-      />
-      <strong>Code Challenge:</strong> Tweak the "Welcome to Astro" message above.
+      The best marketing lead generation tool<br />
     </p>
-    <ul role="list" class="link-card-grid">
-      <Card
-        href="https://docs.astro.build/"
-        title="Documentation"
-        body="Learn how Astro works and explore the official API docs."
-      />
-      <Card
-        href="https://astro.build/integrations/"
-        title="Integrations"
-        body="Supercharge your project with new frameworks and libraries."
-      />
-      <Card
-        href="https://astro.build/themes/"
-        title="Themes"
-        body="Explore a galaxy of community-built starter themes."
-      />
-      <Card
-        href="https://astro.build/chat/"
-        title="Community"
-        body="Come say hi to our amazing Discord community. ❤️"
-      />
-    </ul>
 
     <h2>Purchase License</h2>
     <p>You can purchase a license now to use the product once it is ready.</p>
 
-    <ul role="list" class="link-card-grid">
-      <Card
-        href="/payments"
-        title="Purchase"
-        body="Buy a license to use the product"
-      />
-    </ul>
+    <Card
+      href="/payments"
+      title="Purchase"
+      body="Buy a license to use the product"
+    />
 
     <h3>Downloads</h3>
+
     <p>
       Downloads for other platforms will roll out soon like Linux and Windows
     </p>
+
     <ul role="list" class="link-card-grid">
       <Card
         href="/seoder_build_test_arch64-apple-darwin"
@@ -60,16 +36,6 @@ import Card from "../components/Card.astro";
         title="Download Mac-AMD (Placeholder for DMG)"
         body="Download arch64-apple-darwin"
       />
-      <!-- <Card
-        href="/seoder_build_test_arch64-apple-darwin"
-        title="Download Windows (Placeholder for DMG)"
-        body="Download windowsx64"
-      />
-      <Card
-        href="/seoder_build_test_arch64-apple-darwin"
-        title="Download Linux (Placeholder for DMG)"
-        body="Download linux-darwin"
-      /> -->
     </ul>
   </main>
 </Layout>

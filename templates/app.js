@@ -45,6 +45,7 @@ newCampaignButton.addEventListener("click", () => {
 settingsBtn.addEventListener("click", () => {
   settingsContainer.className = "block";
 });
+
 settingsBtn.addEventListener("click", () => {
   settingsContainer.className = "block";
 });
@@ -52,9 +53,12 @@ settingsBtn.addEventListener("click", () => {
 campaignBtnCls.addEventListener("click", () => {
   campaignCreateForm.className = "hidden";
 });
+
 settingsBtnCls.addEventListener("click", () => {
   settingsContainer.className = "hidden";
 });
+
+let selected = "";
 
 if (localStorage.getItem("authed")) {
   program.className = "row block";
@@ -157,10 +161,6 @@ function eventSub(event) {
       if (url && item.urls && !item.urls.has(url)) {
         item.urls.add(url);
 
-        // if (logfeed.previousElementSibling.innerText !== path) {
-        //   logfeed.previousElementSibling.innerText = path;
-        // }
-
         const logc = document.createElement("li");
         logc.innerText = url;
 
@@ -230,13 +230,19 @@ function eventSub(event) {
         urls: new Set(),
       });
       const cell = document.createElement("li");
-      const cellContentPaths = document.createElement("div");
+
+      const cellButtonWrapper = document.createElement("button");
+
+      const cellBtnBlock = document.createElement("div");
       const cellContentBlock = document.createElement("div");
+      const cellContentPaths = document.createElement("div");
       const cellTitle = document.createElement("div");
       const cellStats = document.createElement("div");
-      const cellBtnBlock = document.createElement("div");
       const cellBtnDeleteButton = document.createElement("button");
+
       const cellBtnRunButton = document.createElement("button");
+
+      cellButtonWrapper.className = "cell-btn";
 
       cell.className = "engine-item";
       cellBtnBlock.className = "row";
@@ -257,6 +263,31 @@ function eventSub(event) {
       cellContentBlock.appendChild(cellTitle);
       cellContentBlock.appendChild(cellContentPaths);
       cellContentBlock.appendChild(cellStats);
+
+      // todo: replace feed
+      cellButtonWrapper.addEventListener("click", (event) => {
+        if (engineMap.has(path)) {
+          // clear on new select
+          if (selected && selected !== path) {
+            logfeed.replaceChildren();
+            // TODO: replace feed with new links
+          }
+        }
+
+        const active = document.getElementsByClassName(
+          "cell-btn cell-btn-active"
+        );
+
+        if (active) {
+          for (let i = 0; i < active.length; i++) {
+            active[i].className = "cell-btn";
+          }
+        }
+        selected = path;
+
+        cellButtonWrapper.className = "cell-btn cell-btn-active";
+        event.preventDefault();
+      });
 
       cellBtnRunButton.addEventListener("click", (event) => {
         if (engineMap.has(path)) {
@@ -279,8 +310,11 @@ function eventSub(event) {
 
       cellBtnBlock.appendChild(cellBtnRunButton);
       cellBtnBlock.appendChild(cellBtnDeleteButton);
-      cell.appendChild(cellContentBlock);
-      cell.appendChild(cellBtnBlock);
+      cellButtonWrapper.appendChild(cellContentBlock);
+      cellButtonWrapper.appendChild(cellBtnBlock);
+
+      // button wrapper
+      cell.appendChild(cellButtonWrapper);
       list.appendChild(cell);
     }
     return;
@@ -363,6 +397,7 @@ function eventSub(event) {
 socket.addEventListener("message", eventSub);
 socketRuntime.addEventListener("message", eventSub);
 
+const rsform = document.getElementById("rsform");
 const rform = document.getElementById("rform");
 const eform = document.getElementById("eform");
 const proxyform = document.getElementById("proxyform");
@@ -387,6 +422,23 @@ uploadform.addEventListener("submit", (event) => {
   };
 
   request.send(new FormData(event.target));
+  event.preventDefault();
+});
+
+rsform.addEventListener("submit", (event) => {
+  if (selected) {
+    if (engineMap.has(selected)) {
+      const e = engineMap.get(selected);
+      e.url = [];
+      // todo: replace it with new selected engine map
+      logfeed.replaceChildren();
+    }
+
+    socket.send("run-campaign " + selected);
+  } else {
+    alert("Please select a campaign");
+  }
+
   event.preventDefault();
 });
 
