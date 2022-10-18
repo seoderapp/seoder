@@ -27,6 +27,16 @@ const memstats = document.getElementById("memory-stats");
 const logfeed = document.getElementById("feed-log");
 const list = document.getElementById("engine-list");
 
+// license control
+const program = document.getElementById("appProgram");
+const elicense = document.getElementById("elicense");
+
+if (localStorage.getItem("authed")) {
+  program.className = "row block";
+} else {
+  elicense.className = "block";
+}
+
 // files for uploading
 const fileMap = new Map();
 // engine map
@@ -34,11 +44,30 @@ const engineMap = new Map();
 
 let initialTarget = "";
 
+// todo toggle license button on main form
+
 function eventSub(event) {
   const raw = event.data;
 
+  // license handling
+  if (raw.startsWith("{" + '"' + "license")) {
+    const data = JSON.parse(raw);
+    const { license } = data || {};
+
+    // set local storage of license enabled and display view
+    if (license) {
+      program.className = "row block";
+      elicense.className = "hidden";
+      localStorage.setItem("authed", true);
+    } else {
+      program.className = "row hidden";
+      elicense.className = "block";
+      localStorage.removeItem("authed");
+    }
+  }
+
   if (raw.startsWith("{" + '"' + "stats")) {
-    const data = JSON.parse(event.data);
+    const data = JSON.parse(raw);
     const {
       cpu_usage,
       load_avg_min,
@@ -398,6 +427,17 @@ eform.addEventListener("submit", (event) => {
     socket.send("list-engines");
   } else {
     window.alert("Please enter a engine name");
+  }
+  event.preventDefault();
+});
+
+elicense.addEventListener("submit", (event) => {
+  const slicense = elicense.querySelector('input[name="license"]');
+
+  if (slicense && slicense.value) {
+    socket.send("set-license " + slicense.value);
+  } else {
+    window.alert("Please enter a license.");
   }
   event.preventDefault();
 });

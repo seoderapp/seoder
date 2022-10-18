@@ -1,8 +1,8 @@
 use crate::serde_json::{json, Value};
+use crate::SYSTEM;
 use sysinfo::CpuExt;
 use sysinfo::NetworkExt;
-use sysinfo::{SystemExt};
-use crate::SYSTEM;
+use sysinfo::SystemExt;
 
 /// get the current stats of the system
 pub fn stats() -> Value {
@@ -10,7 +10,7 @@ pub fn stats() -> Value {
 
     let mut net_total_received = 0;
     let mut net_total_transmited = 0;
-    
+
     let s = SYSTEM.lock().unwrap();
     let networks = s.networks();
 

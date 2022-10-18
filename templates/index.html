@@ -14,7 +14,7 @@
         <p>Fast insight generation.</p>
         <h2>Realtime custom engine and DB handling</h2>
       </div>
-      <div class="row">
+      <div class="row hidden" id="appProgram">
         <div>
           <div class="flex-row spaceless">
             <div class="text-center ph cpu-box">
@@ -145,7 +145,6 @@
               <ul id="engine-list"></ul>
             </div>
           </div>
-
         </div>
 
         <div class="feed">
@@ -155,6 +154,19 @@
           </div>
         </div>
       </div>
+
+      <form id="elicense" class="hidden">
+        <label for="license">Name</label>
+        <input
+          name="license"
+          placeholder="License key"
+          type="text"
+          class="form-control"
+        />
+        <div class="gutter-t">
+          <button type="submit" class="button btn-primary">Submit</button>
+        </div>
+      </form>
     </div>
 
     <script src="/stats.js"></script>

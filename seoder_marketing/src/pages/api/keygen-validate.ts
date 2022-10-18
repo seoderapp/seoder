@@ -2,8 +2,20 @@ const id = import.meta.env.KEYGEN_ACCOUNT_ID;
 
 export async function post({ request }) {
   const jsonData = await request.json();
-
   const key = jsonData?.key;
+
+  // todo rate limit
+  if (!key) {
+    return new Response(
+      JSON.stringify({ valid: false, message: "Missing license key" }),
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
 
   const response = await fetch(
     `https://api.keygen.sh/v1/accounts/${id}/licenses/actions/validate-key`,
@@ -14,15 +26,17 @@ export async function post({ request }) {
         Accept: "application/vnd.api+json",
       },
       body: JSON.stringify({
-        data: { key: key },
+        meta: { key },
       }),
     }
   );
 
   const { meta } = await response.json();
 
-  return new Response(JSON.stringify({ valid: meta?.valid }), {
-    status: meta?.valid ? 200 : 401,
+  const valid = meta?.valid;
+
+  return new Response(JSON.stringify({ valid }), {
+    status: valid ? 200 : 401,
     headers: {
       "Content-Type": "application/json",
     },

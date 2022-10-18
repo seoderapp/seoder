@@ -419,3 +419,11 @@ h3 {
   border-bottom: 1px solid #ccc;
   padding: 0.5rem 1rem;
 }
+
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}

@@ -138,7 +138,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
     let stored_license = controls::list::license().await;
 
     // set valid license in dev mode
-    let mut valid_license = cfg!(debug_assertions) || *LICENSED.lock().unwrap();
+    let mut valid_license = *LICENSED.lock().unwrap() == true;
 
     if !stored_license.is_empty() && !valid_license {
         valid_license = validate_program(&stored_license).await;
@@ -178,12 +178,34 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 outgoing = controls::fs::remove_file(outgoing, &input).await;
             }
 
-            if st == Action::RunAllCampaigns && valid_license {
-                outgoing = controls::run::run_all(outgoing).await;
+            if st == Action::RunAllCampaigns {
+                if valid_license {
+                    outgoing = controls::run::run_all(outgoing).await;
+                } else {
+                    let v = json!({
+                        "license": false
+                    });
+
+                    outgoing
+                        .send(Message::Text(v.to_string()))
+                        .await
+                        .unwrap_or_default();
+                }
             }
 
-            if st == Action::RunCampaign && valid_license {
-                outgoing = controls::run::run(outgoing, &input).await;
+            if st == Action::RunCampaign {
+                if valid_license {
+                    outgoing = controls::run::run(outgoing, &input).await;
+                } else {
+                    let v = json!({
+                        "license": false
+                    });
+
+                    outgoing
+                        .send(Message::Text(v.to_string()))
+                        .await
+                        .unwrap_or_default();
+                }
             }
 
             if st == Action::RemoveEngine {
@@ -195,8 +217,18 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             }
 
             if st == Action::SetLicense {
-                utils::write_config("license", &input).await;
                 valid_license = validate_program(&stored_license).await;
+
+                if valid_license {
+                    utils::write_config("license", &input).await;
+                }
+
+                let v = json!({ "license": valid_license });
+
+                outgoing
+                    .send(Message::Text(v.to_string()))
+                    .await
+                    .unwrap_or_default();
             }
 
             if st == Action::SetProxy {
@@ -391,7 +423,6 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
                     let stored_license = controls::list::license().await;
 
                     *LICENSED.lock().unwrap() = validate_program(&stored_license).await;
-
                 })
             })
             .expect("defining weekly license"),
@@ -406,6 +437,17 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
         while let Some(_) = receiver.recv().await {
             let mut list_ticket = 0;
             let mut list_config = 0;
+
+            if *LICENSED.lock().unwrap() == false {
+                let v = json!({
+                    "license": false
+                });
+
+                outgoing
+                    .send(Message::Text(v.to_string()))
+                    .await
+                    .unwrap_or_default();
+            }
 
             // todo: handle fs tick count skip between
             loop {
