@@ -26,10 +26,21 @@ const netstats = document.getElementById("network-stats");
 const memstats = document.getElementById("memory-stats");
 const logfeed = document.getElementById("feed-log");
 const list = document.getElementById("engine-list");
+const settingsContainer = document.getElementById("settings-container");
+const settingsBtn = document.getElementById("settings-button");
+const settingsBtnCls = document.getElementById("settings-button-close");
 
 // license control
 const program = document.getElementById("appProgram");
 const elicense = document.getElementById("elicense");
+
+settingsBtn.addEventListener("click", () => {
+  settingsContainer.className = "block";
+});
+
+settingsBtnCls.addEventListener("click", () => {
+  settingsContainer.className = "hidden";
+});
 
 if (localStorage.getItem("authed")) {
   program.className = "row block";

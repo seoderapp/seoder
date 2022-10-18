@@ -34,63 +34,79 @@
             </div>
           </div>
 
-          <form id="bufferform" class="ph frame flex-row center-align">
-            <label for="buffer-select">Buffer</label>
-            <div class="ph">
-              <input
-                type="range"
-                name="buffer"
-                id="buffer-select"
-                min="25"
-                max="200"
-              />
-            </div>
-            <div class="flex align-end">
-              <div>
-                <button type="submit" class="button btn-primary">Update</button>
+          <button id="settings-button" class="panel-btn">Settings</button>
+
+          <div id="settings-container" class="hidden">
+            <div class="modal-outer">
+              <div class="modal">
+                <form id="bufferform" class="ph frame flex-row center-align">
+                  <label for="buffer-select">Buffer</label>
+                  <div class="ph">
+                    <input
+                      type="range"
+                      name="buffer"
+                      id="buffer-select"
+                      min="25"
+                      max="200"
+                    />
+                  </div>
+                  <div class="flex align-end">
+                    <div>
+                      <button type="submit" class="button btn-primary">
+                        Update
+                      </button>
+                    </div>
+                  </div>
+                </form>
+
+                <form id="proxyform" class="ph frame flex-row center-align">
+                  <label for="target-select">Proxy</label>
+                  <div class="ph">
+                    <input name="proxy" id="proxy-select" type="checkbox" />
+                  </div>
+                  <div class="flex align-end">
+                    <div>
+                      <button type="submit" class="button btn-primary">
+                        Update
+                      </button>
+                    </div>
+                  </div>
+                </form>
+
+                <form id="fsform" class="ph frame flex-row center-align">
+                  <label for="target-select">Target</label>
+                  <div class="ph">
+                    <select name="target" id="target-select"></select>
+                  </div>
+                  <div class="flex align-end">
+                    <div>
+                      <button type="button" class="button" id="fs-delete">
+                        Delete
+                      </button>
+                      <button type="submit" class="button btn-primary">
+                        Update
+                      </button>
+                    </div>
+                  </div>
+                </form>
+
+                <form
+                  id="uploadform"
+                  class="ph frame flex-row center-align"
+                  enctype="multipart/form-data"
+                  method="post"
+                >
+                  <label for="file">Set crawl list</label>
+                  <div class="ph">
+                    <input type="file" accept="text/plain" name="file" />
+                  </div>
+                  <button class="btn-primary button">Upload</button>
+                </form>
+
+                <button id="settings-button-close">Close</button>
               </div>
             </div>
-          </form>
-
-          <form id="proxyform" class="ph frame flex-row center-align">
-            <label for="target-select">Proxy</label>
-            <div class="ph">
-              <input name="proxy" id="proxy-select" type="checkbox" />
-            </div>
-            <div class="flex align-end">
-              <div>
-                <button type="submit" class="button btn-primary">Update</button>
-              </div>
-            </div>
-          </form>
-
-          <form id="fsform" class="ph frame flex-row center-align">
-            <label for="target-select">Target</label>
-            <div class="ph">
-              <select name="target" id="target-select"></select>
-            </div>
-            <div class="flex align-end">
-              <div>
-                <button type="button" class="button" id="fs-delete">
-                  Delete
-                </button>
-                <button type="submit" class="button btn-primary">Update</button>
-              </div>
-            </div>
-          </form>
-
-          <form
-            id="uploadform"
-            class="ph frame flex-row center-align"
-            enctype="multipart/form-data"
-            method="post"
-          >
-            <label for="file">Set crawl list</label>
-            <div class="ph">
-              <input type="file" accept="text/plain" name="file" />
-            </div>
-            <button class="btn-primary button">Upload</button>
-          </form>
+          </div>
 
           <form id="rform" class="gutter-t full-w">
             <button type="submit" class="button btn-primary full-w">
