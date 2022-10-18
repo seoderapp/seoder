@@ -15,7 +15,38 @@
         <h2>Realtime custom engine and DB handling</h2>
       </div>
       <div class="row hidden" id="appProgram">
-        <div>
+        <div class="panel">
+          <div>
+            <div class="flex-row spaceless">
+              <button id="settings-button" class="panel-btn">Settings</button>
+              <button
+                id="new-campaign-button"
+                class="panel-btn button btn-primary full-w"
+              >
+                New Campaign
+              </button>
+            </div>
+            <div class="flex-row spaceless">
+              <button id="settings-button" class="panel-btn">
+                Run Selected
+              </button>
+              <form id="rform">
+                <button type="submit" class="panel-btn">Run All</button>
+              </form>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h3>Engines</h3>
+              <ul id="engine-list"></ul>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="feed">
+            <ul id="feed-log"></ul>
+          </div>
+
           <div class="flex-row spaceless">
             <div class="text-center ph cpu-box">
               <div class="gutter stats-head">CPU</div>
@@ -33,92 +64,86 @@
               <div id="memory-stats" class="stats-bar"></div>
             </div>
           </div>
-
-          <button id="settings-button" class="panel-btn">Settings</button>
-
-          <div id="settings-container" class="hidden">
-            <div class="modal-outer">
-              <div class="modal">
-                <form id="bufferform" class="ph frame flex-row center-align">
-                  <label for="buffer-select">Buffer</label>
-                  <div class="ph">
-                    <input
-                      type="range"
-                      name="buffer"
-                      id="buffer-select"
-                      min="25"
-                      max="200"
-                    />
-                  </div>
-                  <div class="flex align-end">
-                    <div>
-                      <button type="submit" class="button btn-primary">
-                        Update
-                      </button>
-                    </div>
-                  </div>
-                </form>
-
-                <form id="proxyform" class="ph frame flex-row center-align">
-                  <label for="target-select">Proxy</label>
-                  <div class="ph">
-                    <input name="proxy" id="proxy-select" type="checkbox" />
-                  </div>
-                  <div class="flex align-end">
-                    <div>
-                      <button type="submit" class="button btn-primary">
-                        Update
-                      </button>
-                    </div>
-                  </div>
-                </form>
-
-                <form id="fsform" class="ph frame flex-row center-align">
-                  <label for="target-select">Target</label>
-                  <div class="ph">
-                    <select name="target" id="target-select"></select>
-                  </div>
-                  <div class="flex align-end">
-                    <div>
-                      <button type="button" class="button" id="fs-delete">
-                        Delete
-                      </button>
-                      <button type="submit" class="button btn-primary">
-                        Update
-                      </button>
-                    </div>
-                  </div>
-                </form>
-
-                <form
-                  id="uploadform"
-                  class="ph frame flex-row center-align"
-                  enctype="multipart/form-data"
-                  method="post"
-                >
-                  <label for="file">Set crawl list</label>
-                  <div class="ph">
-                    <input type="file" accept="text/plain" name="file" />
-                  </div>
-                  <button class="btn-primary button">Upload</button>
-                </form>
-
-                <button id="settings-button-close">Close</button>
-              </div>
-            </div>
-          </div>
-
-          <form id="rform" class="gutter-t full-w">
-            <button type="submit" class="button btn-primary full-w">
-              Run Campaigns
-            </button>
-          </form>
         </div>
+      </div>
 
-        <div class="ph">
-          <div class="card">
+      <div id="settings-container" class="hidden">
+        <div class="modal-outer">
+          <div class="modal">
+            <form id="bufferform" class="ph frame flex-row center-align">
+              <label for="buffer-select">Buffer</label>
+              <div class="ph">
+                <input
+                  type="range"
+                  name="buffer"
+                  id="buffer-select"
+                  min="25"
+                  max="200"
+                />
+              </div>
+              <div class="flex align-end">
+                <div>
+                  <button type="submit" class="button btn-primary">
+                    Update
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <form id="proxyform" class="ph frame flex-row center-align">
+              <label for="target-select">Proxy</label>
+              <div class="ph">
+                <input name="proxy" id="proxy-select" type="checkbox" />
+              </div>
+              <div class="flex align-end">
+                <div>
+                  <button type="submit" class="button btn-primary">
+                    Update
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <form id="fsform" class="ph frame flex-row center-align">
+              <label for="target-select">Target</label>
+              <div class="ph">
+                <select name="target" id="target-select"></select>
+              </div>
+              <div class="flex align-end">
+                <div>
+                  <button type="button" class="button" id="fs-delete">
+                    Delete
+                  </button>
+                  <button type="submit" class="button btn-primary">
+                    Update
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <form
+              id="uploadform"
+              class="ph frame flex-row center-align"
+              enctype="multipart/form-data"
+              method="post"
+            >
+              <label for="file">Set crawl list</label>
+              <div class="ph">
+                <input type="file" accept="text/plain" name="file" />
+              </div>
+              <button class="btn-primary button">Upload</button>
+            </form>
+
+            <button id="settings-button-close">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="campaign-create-form" class="card hidden">
+        <div class="modal-outer">
+          <div class="modal">
             <div class="card-body">
-              <h3>Create Engine</h3>
+              <h3>Create Campaign</h3>
               <form id="eform">
                 <label for="ename">Name</label>
                 <input
@@ -150,28 +175,14 @@
                   </button>
                 </div>
               </form>
+
+              <button id="campaign-button-close">Close</button>
             </div>
-          </div>
-
-          <div class="seperator"></div>
-
-          <div class="card">
-            <div class="card-body">
-              <h3>Engines</h3>
-              <ul id="engine-list"></ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="feed">
-          <div class="card-body">
-            <h3 class="feed-log-title" id="feed-title"></h3>
-            <ul id="feed-log"></ul>
           </div>
         </div>
       </div>
 
-      <form id="elicense" class="hidden">
+      <form class="hidden" id="elicense">
         <label for="license">Name</label>
         <input
           name="license"

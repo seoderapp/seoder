@@ -29,15 +29,29 @@ const list = document.getElementById("engine-list");
 const settingsContainer = document.getElementById("settings-container");
 const settingsBtn = document.getElementById("settings-button");
 const settingsBtnCls = document.getElementById("settings-button-close");
+const campaignBtnCls = document.getElementById("campaign-button-close");
+
+const newCampaignButton = document.getElementById("new-campaign-button");
+const campaignCreateForm = document.getElementById("campaign-create-form");
 
 // license control
 const program = document.getElementById("appProgram");
 const elicense = document.getElementById("elicense");
 
+newCampaignButton.addEventListener("click", () => {
+  campaignCreateForm.className = "block";
+});
+
+settingsBtn.addEventListener("click", () => {
+  settingsContainer.className = "block";
+});
 settingsBtn.addEventListener("click", () => {
   settingsContainer.className = "block";
 });
 
+campaignBtnCls.addEventListener("click", () => {
+  campaignCreateForm.className = "hidden";
+});
 settingsBtnCls.addEventListener("click", () => {
   settingsContainer.className = "hidden";
 });
@@ -143,9 +157,9 @@ function eventSub(event) {
       if (url && item.urls && !item.urls.has(url)) {
         item.urls.add(url);
 
-        if (logfeed.previousElementSibling.innerText !== path) {
-          logfeed.previousElementSibling.innerText = path;
-        }
+        // if (logfeed.previousElementSibling.innerText !== path) {
+        //   logfeed.previousElementSibling.innerText = path;
+        // }
 
         const logc = document.createElement("li");
         logc.innerText = url;
