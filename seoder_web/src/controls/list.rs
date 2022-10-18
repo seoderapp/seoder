@@ -167,7 +167,7 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
             let dpt = child.path().to_str().unwrap().to_owned();
 
             if !dpt.ends_with("/valid") {
-                let mut target = get_file_value("./config.txt", "target").await;
+                let mut target = get_file_value(&ENTRY_PROGRAM.2, "target").await;
 
                 let mut engine = dpt;
 
@@ -219,7 +219,7 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
     let mut target = string_concat!(ENTRY_PROGRAM.1, "/urls-input.txt"); // todo: fix target
     let mut license = String::from("");
 
-    let file = OpenOptions::new().read(true).open("config.txt").await;
+    let file = OpenOptions::new().read(true).open(&ENTRY_PROGRAM.2).await;
 
     match file {
         Ok(ff) => {
@@ -285,7 +285,7 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
 /// get license
 pub async fn license() -> String {
     let mut license = String::from("");
-    let file = OpenOptions::new().read(true).open("config.txt").await;
+    let file = OpenOptions::new().read(true).open(&ENTRY_PROGRAM.2).await;
 
     match file {
         Ok(ff) => {

@@ -138,12 +138,21 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
     let stored_license = controls::list::license().await;
 
     // set valid license in dev mode
-    let mut valid_license = *LICENSED.lock().unwrap() == true;
-
+    let mut valid_license = *LICENSED.lock().unwrap();
+    
     if !stored_license.is_empty() && !valid_license {
         valid_license = validate_program(&stored_license).await;
         *LICENSED.lock().unwrap() = valid_license;
     }
+
+    let v = json!({
+        "license": valid_license
+    });
+
+    outgoing
+        .send(Message::Text(v.to_string()))
+        .await
+        .unwrap_or_default();
 
     let handle = tokio::spawn(async move {
         while let Some(m) = receiver.recv().await {
@@ -217,7 +226,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             }
 
             if st == Action::SetLicense {
-                valid_license = validate_program(&stored_license).await;
+                valid_license = validate_program(&input).await;
 
                 if valid_license {
                     utils::write_config("license", &input).await;
@@ -437,17 +446,6 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
         while let Some(_) = receiver.recv().await {
             let mut list_ticket = 0;
             let mut list_config = 0;
-
-            if *LICENSED.lock().unwrap() == false {
-                let v = json!({
-                    "license": false
-                });
-
-                outgoing
-                    .send(Message::Text(v.to_string()))
-                    .await
-                    .unwrap_or_default();
-            }
 
             // todo: handle fs tick count skip between
             loop {

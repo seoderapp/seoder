@@ -94,6 +94,7 @@ config `key` and the right is the `value`.
 ```
 query users
 timeout 15
+license false
 buffer 100
 ```
 

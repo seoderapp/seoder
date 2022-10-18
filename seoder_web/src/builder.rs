@@ -15,7 +15,7 @@ pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>,
     let selected_file = tokio::spawn(async move {
         let mut target = "urls-input.txt".to_string();
 
-        match File::open(string_concat!("./config.txt")).await {
+        match File::open( &ENTRY_PROGRAM.2).await {
             Ok(file) => {
                 let reader = BufReader::new(file);
                 let mut lines = reader.lines();

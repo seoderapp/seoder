@@ -23,13 +23,14 @@ use tokio::fs::create_dir_all;
 pub use packages::spider::website::Website;
 
 lazy_static! {
-    /// engines, files, and the data directory
-    pub static ref ENTRY_PROGRAM: (String, String, String) = {
+    /// engines, files, config.txt, and the data directory
+    pub static ref ENTRY_PROGRAM: (String, String, String, String) = {
         let data_dir = dirs::data_dir().unwrap().into_os_string().into_string().unwrap();
 
         (
             string_concat!(data_dir, "/seoder/engines/"),
             string_concat!(data_dir, "/seoder/files/"),
+            string_concat!(data_dir, "/seoder/config.txt"),
             data_dir
         )
     };

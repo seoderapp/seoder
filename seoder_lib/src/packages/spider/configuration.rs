@@ -1,3 +1,5 @@
+use crate::ENTRY_PROGRAM;
+
 use super::{utils::log, website::Engine};
 
 /// Structure to configure `Website` crawler
@@ -25,16 +27,8 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
     let mut buffer: usize = 100;
     let mut proxy = false;
 
-    let ff = "config.txt";
-
-    let f = if std::fs::metadata(&ff).is_ok() {
-        ff
-    } else {
-        "../config.txt"
-    };
-
     // read through config file cpu bound quickly
-    match File::open(f) {
+    match File::open( &ENTRY_PROGRAM.2) {
         Ok(file) => {
             let reader = BufReader::new(file);
             let lines = reader.lines();

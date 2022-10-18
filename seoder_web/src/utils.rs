@@ -3,6 +3,7 @@ use std::path::Path;
 use crate::tokio::io::BufReader;
 
 use crate::string_concat_impl;
+use seoder_lib::ENTRY_PROGRAM;
 use seoder_lib::packages::spider::utils::log;
 use seoder_lib::string_concat::string_concat;
 use seoder_lib::tokio;
@@ -33,7 +34,7 @@ pub async fn lines_to_vec(pt: String) -> Vec<String> {
 
 /// write to config file
 pub async fn write_config(config: &str, input: &String) {
-    let file = OpenOptions::new().read(true).open("config.txt").await;
+    let file = OpenOptions::new().read(true).open(&ENTRY_PROGRAM.2).await;
 
     let mut sl: Vec<String> = vec![];
 
@@ -61,15 +62,10 @@ pub async fn write_config(config: &str, input: &String) {
         _ => {}
     };
 
-    // set license handling
-    if config == "license" && !input.is_empty() && !sl.contains(&String::from("license")) {
-        sl.push(string_concat!("license ", input));
-    }
-
     let mut filec = OpenOptions::new()
         .write(true)
         .truncate(true)
-        .open("config.txt")
+        .open(&ENTRY_PROGRAM.2)
         .await
         .unwrap();
 
@@ -79,7 +75,7 @@ pub async fn write_config(config: &str, input: &String) {
 
 /// make sure conf is ready
 pub async fn init_config() {
-    let loc = "config.txt";
+    let loc = &ENTRY_PROGRAM.2;
     let conf = Path::new(&loc).is_file();
 
     // setup one time config
