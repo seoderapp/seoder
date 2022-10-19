@@ -158,7 +158,7 @@ function eventSub(event) {
       const cell = document.getElementById("engine_stats_" + pengine);
 
       if (cell) {
-        cell.textContent = "( " + item.valid + " / " + item.total + " ) ";
+        cell.textContent = item.valid + " / " + item.total;
       }
     }
     return;
@@ -248,39 +248,64 @@ function eventSub(event) {
         urls: new Set(),
       });
       const cell = document.createElement("li");
-
+      // click wrapper
       const cellButtonWrapper = document.createElement("button");
+      // inner wrapper
+      const cellInnerContainer = document.createElement("div");
 
       const cellBtnBlock = document.createElement("div");
       const cellContentBlock = document.createElement("div");
       const cellContentPaths = document.createElement("div");
       const cellTitle = document.createElement("div");
       const cellStats = document.createElement("div");
+      // run button
+      const cellBtnRunButton = document.createElement("button");
+      const cellBtnRunText = document.createElement("div");
+      const cellBtnRunImage = document.createElement("img");
+      // delete button
+      const cellBtnDeleteText = document.createElement("div");
+      const cellBtnDeleteRemoveImage = document.createElement("img");
       const cellBtnDeleteButton = document.createElement("button");
 
-      const cellBtnRunButton = document.createElement("button");
-
-      cellButtonWrapper.className = "cell-btn";
+      const cellRightBlock = document.createElement("div");
+      // status code
+      const cellStatus = document.createElement("div");
+      cellStatus.id = "engine_status_" + path;
+      cellStatus.textContent = "Ready";
 
       cell.className = "engine-item";
-      cellBtnBlock.className = "row";
-      cellBtnDeleteButton.className = "active-delete";
+      cellButtonWrapper.className = "cell-btn";
+      cellBtnBlock.className = "row gutter-t";
+      cellInnerContainer.className = "row full-w";
+      cellBtnDeleteButton.className = "btn-base active-delete";
 
       cell.id = "engine_" + path;
       cellStats.id = "engine_stats_" + path;
 
       cellContentPaths.className = "row";
-      cellContentBlock.className = "flex center";
+      cellContentBlock.className = "flex";
+      cellTitle.className = "engine-title";
+      cellStats.className = "engine-stats";
 
       cellTitle.textContent = path;
       cellContentPaths.textContent = np.paths;
-      cellStats.textContent = "( 0/" + 0 + " )";
-      cellBtnDeleteButton.textContent = "Delete";
-      cellBtnRunButton.textContent = "Run";
+      cellStats.textContent = "0 / 0";
 
-      cellContentBlock.appendChild(cellTitle);
-      cellContentBlock.appendChild(cellContentPaths);
-      cellContentBlock.appendChild(cellStats);
+      cellBtnRunText.textContent = "Run";
+      cellBtnRunImage.src = "/assets/unpause.svg";
+      cellBtnRunButton.className = "btn-base";
+
+      cellBtnDeleteText.textContent = "Delete";
+      cellBtnDeleteRemoveImage.src = "/assets/trashcan.svg";
+
+      cellBtnRunButton.addEventListener("click", (event) => {
+        if (engineMap.has(path)) {
+          logfeed.replaceChildren();
+        }
+
+        socket.send("run-campaign " + path);
+        event.preventDefault();
+      });
 
       // todo: replace feed
       cellButtonWrapper.addEventListener("click", (event) => {
@@ -312,15 +337,6 @@ function eventSub(event) {
         event.preventDefault();
       });
 
-      cellBtnRunButton.addEventListener("click", (event) => {
-        if (engineMap.has(path)) {
-          logfeed.replaceChildren();
-        }
-
-        socket.send("run-campaign " + path);
-        event.preventDefault();
-      });
-
       cellBtnDeleteButton.addEventListener("click", (event) => {
         if (engineMap.has(path)) {
           engineMap.delete(path);
@@ -336,11 +352,29 @@ function eventSub(event) {
         event.preventDefault();
       });
 
+      cellBtnRunButton.appendChild(cellBtnRunImage);
+      cellBtnRunButton.appendChild(cellBtnRunText);
+
+      cellBtnDeleteButton.appendChild(cellBtnDeleteRemoveImage);
+      cellBtnDeleteButton.appendChild(cellBtnDeleteText);
+
+      // todo: status block
       cellBtnBlock.appendChild(cellBtnRunButton);
       cellBtnBlock.appendChild(cellBtnDeleteButton);
-      cellButtonWrapper.appendChild(cellContentBlock);
-      cellButtonWrapper.appendChild(cellBtnBlock);
 
+      cellContentBlock.appendChild(cellTitle);
+      cellContentBlock.appendChild(cellStats);
+      cellContentBlock.appendChild(cellContentPaths);
+      cellContentBlock.appendChild(cellBtnBlock);
+
+      cellRightBlock.appendChild(cellStatus);
+
+      // left block
+      cellInnerContainer.appendChild(cellContentBlock);
+      // right block
+      cellInnerContainer.appendChild(cellRightBlock);
+      // inner base
+      cellButtonWrapper.appendChild(cellInnerContainer);
       // button wrapper
       cell.appendChild(cellButtonWrapper);
       list.appendChild(cell);
@@ -363,7 +397,7 @@ function eventSub(event) {
       const cell = document.getElementById("engine_stats_" + path);
 
       if (cell) {
-        cell.textContent = "( " + item.valid + " / " + item.total + " ) ";
+        cell.textContent = item.valid + " / " + item.total;
       }
     }
   }

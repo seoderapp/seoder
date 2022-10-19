@@ -1,5 +1,5 @@
 body {
-  font-family: Inter, system-ui, Helvetica;
+  font-family: "Inter", system-ui, Helvetica;
 }
 
 h2,
@@ -57,21 +57,19 @@ h3 {
   position: relative;
 }
 
-#campaign-list,
 #engine-list {
   list-style: none;
-  padding: 0;
+  padding: 1rem 0rem;
   margin: 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  gap: 4px;
 }
 
-#campaign-list > .campaign-item {
+.cell-btn {
   padding: 0.44rem 0.8rem;
-  font-weight: 300;
-  font-size: 1.1rem;
-  display: flex;
-  flex: 1;
+  width: 100%;
+  margin: 0;
+  background-color: #ebecf2;
+  border: 3px solid #fff;
 }
 
 .active-cell {
@@ -80,34 +78,58 @@ h3 {
   padding: 0.45rem 0.7rem;
 }
 
-.active-delete {
-  border: 1px solid rgb(220 38 38);
-  color: rgb(220 38 38);
-  padding: 0.45rem 0.7rem;
-}
-
 #engine-list > .engine-item {
   font-weight: 300;
   font-size: 1.1rem;
   display: flex;
   flex: 1;
+  min-height: 75px;
 }
 
-#engine-list > .engine-item:not(:first-child) {
-  border-top: 1px solid #ccc;
+.engine-title {
+  height: 17px;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 17px;
+  text-align: left;
+  color: #2f2768;
 }
 
-#engine-list li.engine-item > div:first-of-type {
-  font-weight: bold;
-  padding-bottom: 0.4rem;
+.engine-stats {
+  text-align: left;
+  font-style: 200;
+  color: #2f2768;
 }
 
-.cell-btn {
-  padding: 0.44rem 0.8rem;
-  width: 100%;
-  border: none;
-  margin: 0;
-  background-color: #fff;
+.btn-base {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 4px 10px;
+  gap: 6px;
+  width: 93px;
+  height: 25px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #2f2768;
+  border: 2px solid #2f2768;
+  background-color: transparent;
+}
+
+.active-delete {
+  /* todo: remove margin */
+  margin-left: 2px;
+  border: 0;
+  background: #d7dbf2;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #2f2768;
 }
 
 .cell-btn-active {
@@ -408,6 +430,8 @@ h3 {
   display: flex;
   flex: 1;
   flex-direction: column;
+  padding-right: 2px;
+  padding-left: 2px;
 }
 
 #empty-list {
