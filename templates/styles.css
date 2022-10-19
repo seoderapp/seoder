@@ -78,42 +78,6 @@ h3 {
   flex: 1;
 }
 
-#campaign-list > .campaign-item:not(:first-child) {
-  border-top: 1px solid #ccc;
-}
-
-#campaign-list li.campaign-item > div > div:nth-child(1) {
-  padding-bottom: 0.2rem;
-  font-weight: bold;
-}
-
-#campaign-list li.campaign-item > div > div:nth-child(2) {
-  padding-bottom: 0.3rem;
-}
-
-#campaign-list li.campaign-item > div > div:nth-child(3) {
-  padding-bottom: 0.22rem;
-  font-size: 0.9rem;
-}
-
-#campaign-list li.campaign-item button {
-  min-width: 65px;
-  border: none;
-  border-radius: 0.2rem;
-  margin-left: 0.54rem;
-  font-weight: bold;
-  font-size: 1rem;
-  padding: 0.45rem 0.7rem;
-}
-
-#campaign-list li.campaign-item button:hover {
-  opacity: 0.7;
-}
-
-#campaign-list li.campaign-item button:focus {
-  outline: 0.5px solid #ccc;
-}
-
 .active-cell {
   border: 1px solid #0e1116;
   color: #0e1116;
@@ -407,6 +371,7 @@ h3 {
 }
 
 #feed-log {
+  font-size: 0.7rem;
   text-align: left;
   margin: 0;
   padding-top: 0;
@@ -452,6 +417,8 @@ h3 {
   min-height: 34px;
   border-radius: 4px;
   border: 0;
+  background-color: #ebecf2;
+  color: #2f2768;
 }
 
 .panel-btn-ctn {
@@ -473,4 +440,21 @@ h3 {
 
 .grid-space {
   padding-top: 2rem;
+}
+
+.campaign-button {
+  background-color: #e8c01a;
+  color: rgba(47, 39, 104, 1);
+  width: 100%;
+}
+
+.logo-title {
+  font-size: 1.8rem;
+  color: #2f2768;
+  font-weight: bold;
+}
+
+.center {
+  display: flex;
+  place-content: center;
 }
