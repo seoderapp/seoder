@@ -3265,8 +3265,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "seoder_e"
-version = "0.0.0"
+name = "seoder_app"
+version = "0.0.1"
 dependencies = [
  "seoder_web",
  "serde",
@@ -3308,6 +3308,7 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "hyper",
+ "hyper-tls",
  "jemalloc-sys",
  "jemallocator",
  "lazy_static",
@@ -3812,8 +3813,10 @@ dependencies = [
  "cargo_toml",
  "heck 0.4.0",
  "json-patch",
+ "quote",
  "semver 1.0.14",
  "serde_json",
+ "tauri-codegen",
  "tauri-utils",
  "winres",
 ]

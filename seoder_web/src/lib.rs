@@ -139,15 +139,13 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
     // set valid license in dev mode
     let mut valid_license = *LICENSED.lock().unwrap();
-    
+
     if !stored_license.is_empty() && !valid_license {
         valid_license = validate_program(&stored_license).await;
         *LICENSED.lock().unwrap() = valid_license;
     }
 
-    let v = json!({
-        "license": valid_license
-    });
+    let v = json!({ "license": valid_license });
 
     outgoing
         .send(Message::Text(v.to_string()))
@@ -511,8 +509,8 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
 
 pub async fn start() -> Result<(), IoError> {
     env_logger::init();
-    utils::init_config().await;
     seoder_lib::init().await;
+    utils::init_config().await;
 
     // server peer state
     let state = PeerMap::new(Mutex::new(HashMap::new()));

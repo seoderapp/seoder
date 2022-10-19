@@ -89,6 +89,7 @@ function eventSub(event) {
       elicense.className = "hidden";
       localStorage.setItem("authed", true);
     } else {
+      window.alert("License is invalid");
       program.className = "row hidden";
       elicense.className = "block";
       localStorage.removeItem("authed");

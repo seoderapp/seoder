@@ -3,12 +3,12 @@ use std::path::Path;
 use crate::tokio::io::BufReader;
 
 use crate::string_concat_impl;
-use seoder_lib::ENTRY_PROGRAM;
 use seoder_lib::packages::spider::utils::log;
 use seoder_lib::string_concat::string_concat;
 use seoder_lib::tokio;
 use seoder_lib::tokio::io::AsyncBufReadExt;
 use seoder_lib::tokio::io::AsyncWriteExt;
+use seoder_lib::ENTRY_PROGRAM;
 use tokio::fs::File;
 use tokio::fs::OpenOptions;
 
@@ -81,6 +81,7 @@ pub async fn init_config() {
     // setup one time config
     if !conf {
         let mut file = File::create(&loc).await.unwrap();
+
         file.write_all(
             b"timeout 15
 buffer 30
@@ -97,7 +98,9 @@ target ./urls-input.txt",
 pub async fn validate_program(key: &str) -> bool {
     use hyper::{Body, Client, Method, Request};
 
-    let endpoint = if cfg!(debug_assertions) {
+    let dev = cfg!(debug_assertions);
+
+    let endpoint = if dev {
         "http://127.0.0.1:3000/api/keygen-validate"
     } else {
         "https://seoder.io/api/keygen-validate"
@@ -110,11 +113,19 @@ pub async fn validate_program(key: &str) -> bool {
         .body(Body::from(string_concat!(r#"{"key": ""#, key, r#""}"#)))
         .unwrap_or_default();
 
-    let client = Client::new();
+    let resp = if dev {
+        let client = Client::new();
 
-    let resp = client.request(req).await.unwrap_or_default();
+        client.request(req).await.unwrap_or_default()
+    } else {
+        use hyper_tls::HttpsConnector;
+        let https = HttpsConnector::new();
+        let client = Client::builder().build::<_, hyper::Body>(https);
 
-    resp.status() == 200
+        client.request(req).await.unwrap_or_default()
+    };
+
+    resp.status().is_success() && !resp.headers().is_empty()
 }
 
 /// read file to target

@@ -28,7 +28,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
     let mut proxy = false;
 
     // read through config file cpu bound quickly
-    match File::open( &ENTRY_PROGRAM.2) {
+    match File::open(&ENTRY_PROGRAM.2) {
         Ok(file) => {
             let reader = BufReader::new(file);
             let lines = reader.lines();

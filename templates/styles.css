@@ -17,7 +17,6 @@ h3 {
 
 .container {
   margin: 0;
-  padding-top: 10vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -400,7 +399,9 @@ h3 {
 }
 
 #feed-log {
-  max-height: 60vh;
+  height: 55vh;
+  background-color: #0e1116;
+  color: #ccc;
   overflow: auto;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
@@ -446,6 +447,7 @@ h3 {
 
 .panel-btn-ctn {
   padding-right: 2px;
+  font-size: 1rem;
 }
 
 .panel {
