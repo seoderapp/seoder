@@ -26,17 +26,25 @@ const netstats = document.getElementById("network-stats");
 const memstats = document.getElementById("memory-stats");
 const logfeed = document.getElementById("feed-log");
 const list = document.getElementById("engine-list");
+// settings
 const settingsContainer = document.getElementById("settings-container");
 const settingsBtn = document.getElementById("settings-button");
+// modals
 const settingsBtnCls = document.getElementById("settings-button-close");
 const campaignBtnCls = document.getElementById("campaign-button-close");
-
+// new create
 const newCampaignButton = document.getElementById("new-campaign-button");
 const campaignCreateForm = document.getElementById("campaign-create-form");
+// empty selectors
 const emptyList = document.getElementById("empty-list");
+const feedEmpty = document.getElementById("feed-start");
 
 if (!list.children.length) {
   emptyList.className = "block";
+}
+
+if (!logfeed.children.length) {
+  feedEmpty.className = "block";
 }
 
 // license control
@@ -282,6 +290,10 @@ function eventSub(event) {
             logfeed.replaceChildren();
             // TODO: replace feed with new links
           }
+
+          if (!logfeed.children.length) {
+            feedEmpty.className = "hidden";
+          }
         }
 
         const active = document.getElementsByClassName(
@@ -293,6 +305,7 @@ function eventSub(event) {
             active[i].className = "cell-btn";
           }
         }
+
         selected = path;
 
         cellButtonWrapper.className = "cell-btn cell-btn-active";
