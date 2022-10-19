@@ -12,10 +12,6 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
-      - name: setup node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16
       - name: install Rust stable
         uses: actions-rs/toolchain@v1
         with:
@@ -25,9 +21,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf gcc cmake libc6 openssl libssl-dev npm pkg-config g++ ca-certificates
-      - name: install app dependencies and build it
-        run: cargo && cargo build
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v0.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

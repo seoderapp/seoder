@@ -455,3 +455,9 @@ h3 {
   flex: 1;
   flex-direction: column;
 }
+
+#empty-list {
+  background: rgba(217, 217, 217, 0.4);
+  border-radius: 0.4rem;
+  color: #111111;
+}

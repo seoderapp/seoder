@@ -33,6 +33,11 @@ const campaignBtnCls = document.getElementById("campaign-button-close");
 
 const newCampaignButton = document.getElementById("new-campaign-button");
 const campaignCreateForm = document.getElementById("campaign-create-form");
+const emptyList = document.getElementById("empty-list");
+
+if (!list.children.length) {
+  emptyList.className = "block";
+}
 
 // license control
 const program = document.getElementById("appProgram");
@@ -225,6 +230,10 @@ function eventSub(event) {
     const path = np && np.epath;
 
     if (!engineMap.has(path)) {
+      if (!list.children.length) {
+        emptyList.className = "hidden";
+      }
+
       engineMap.set(path, {
         total: 0,
         valid: 0,
@@ -304,6 +313,11 @@ function eventSub(event) {
           engineMap.delete(path);
           logfeed.replaceChildren();
         }
+
+        if (!list.children.length) {
+          emptyList.className = "block";
+        }
+
         socket.send("delete-engine " + path);
         cell.remove();
         event.preventDefault();
@@ -500,6 +514,10 @@ eform.addEventListener("submit", (event) => {
       paths: epaths.value,
       patterns: epatterns.value,
     });
+
+    if (!list.children.length) {
+      emptyList.className = "hidden";
+    }
 
     socket.send("create-engine " + m);
     socket.send("list-engines");

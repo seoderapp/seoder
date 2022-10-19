@@ -1,55 +1,73 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Card from "../components/Card.astro";
+import Back from "../components/Back.astro";
+import Apple from "../components/Logos/Apple.astro";
+import Linux from "../components/Logos/Linux.astro";
+import Windows from "../components/Logos/Windows.astro";
 ---
 
 <Layout title="Seoder - The marketing lead generation tool">
   <main>
-    <h1>Welcome to <span class="text-gradient">Seoder</span></h1>
-    <p class="instructions">
-      The best marketing lead generation tool<br />
-    </p>
+    <div class="prog">
+      <h1>Welcome to <span class="text-gradient">Seoder</span></h1>
+      <p class="instructions">
+        The best marketing lead generation tool<br />
+      </p>
+      <h2>Purchase License</h2>
+      <p>You can purchase a license now to use the product once it is ready.</p>
 
-    <h2>Purchase License</h2>
-    <p>You can purchase a license now to use the product once it is ready.</p>
-
-    <Card
-      href="/payments"
-      title="Purchase"
-      body="Buy a license to use the product"
-    />
-
-    <h3>Downloads</h3>
-
-    <p>
-      Downloads for other platforms will roll out soon like Linux and Windows
-    </p>
-
-    <ul role="list" class="link-card-grid">
       <Card
-        href="/seoder_app_0.0.1_aarch64.dmg"
-        title="Download Mac-Intel"
-        body="Pre-release arch64 M1 chips"
+        href="/payments"
+        title="Purchase"
+        body="Buy a license to use the product"
       />
-      <Card
-        href="/seoder_app_0.0.1_universal.dmg"
-        title="Download Mac Universal"
-        body="Pre-release universal"
-      />
-      <!-- <Card
-        href="/seoder_build_test_arch64-apple-darwin"
-        title="Download Mac-AMD (Placeholder for DMG)"
-        body="Download arch64-apple-darwin"
-      /> -->
-    </ul>
+
+      <h3>Downloads</h3>
+
+      <p>Download and install the program on your platform</p>
+
+      <ul role="list" class="link-card-grid">
+        <Card
+          href="/seoder_app_0.0.1_aarch64.dmg"
+          title="Desktop Mac-Intel"
+          body="Pre-release arch64 M1 chips"
+        >
+          <Apple />
+        </Card>
+        <Card
+          href="/seoder_app_0.0.1_universal.dmg"
+          title="Desktop Mac Universal"
+          body="Pre-release mac universal"
+        >
+          <Apple />
+        </Card>
+        <Card
+          href="/seoder_app.app.tar.gz"
+          title="Desktop Linux"
+          body="Pre-release linux"
+        >
+          <Linux />
+        </Card>
+        <Card
+          href="/seoder_app_0.0.1_x64_en-US.msi"
+          title="Desktop Windows"
+          body="Pre-release windows"
+        >
+          <Windows />
+        </Card>
+      </ul>
+    </div>
   </main>
 </Layout>
 
 <style>
   main {
     margin: auto;
-    padding: 1.5rem;
     max-width: 60ch;
+    position: relative;
+    z-index: 2;
+    padding-top: 10%;
   }
   h1 {
     font-size: 3rem;
@@ -87,5 +105,11 @@ import Card from "../components/Card.astro";
     grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
     gap: 1rem;
     padding: 0;
+  }
+  .prog {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    border: 3px solid black;
   }
 </style>
