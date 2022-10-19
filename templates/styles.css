@@ -1,5 +1,5 @@
 body {
-  font-family: system-ui, Helvetica;
+  font-family: Inter, system-ui, Helvetica;
 }
 
 h2,
@@ -17,6 +17,7 @@ h3 {
 
 .container {
   margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -54,11 +55,6 @@ h3 {
   min-height: 100px;
   min-width: 0;
   position: relative;
-}
-
-.card-body {
-  color: var(--bs-card-color);
-  padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
 }
 
 #campaign-list,
@@ -227,7 +223,6 @@ h3 {
 
 .row {
   display: flex;
-  padding: 0.5rem;
   flex-direction: row;
   flex-wrap: wrap;
 }
@@ -254,7 +249,7 @@ h3 {
 }
 
 .center {
-  place-content: center;
+  place-items: center;
 }
 
 .form-w {
@@ -345,23 +340,6 @@ h3 {
   font-weight: 400;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-}
-
 .feed {
   color: #ccc;
   height: 55vh;
@@ -446,15 +424,36 @@ h3 {
   background-color: #e8c01a;
   color: rgba(47, 39, 104, 1);
   width: 100%;
+  min-height: 56px;
+  font-size: 16px;
+  gap: 8px;
 }
 
 .logo-title {
   font-size: 1.8rem;
   color: #2f2768;
   font-weight: bold;
+  text-align: left;
 }
 
 .center {
   display: flex;
   place-content: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #2f2f2f;
+  }
+
+  a:hover {
+    color: #24c8db;
+  }
+
+  input,
+  button {
+    color: #ffffff;
+    background-color: #0f0f0f98;
+  }
 }
