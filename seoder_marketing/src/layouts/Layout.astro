@@ -20,7 +20,9 @@ const { title } = Astro.props;
     <script src="https://metrics.seoder.io/script.js" data-site="JAYJESFT" defer
     ></script>
     <footer>
-      <a href="https://usefathom.com/ref/IRZNZG">Analytics</a>
+      <a href="https://usefathom.com/ref/IRZNZG" rel="noopener" target="_blank"
+        >Analytics</a
+      >
       <a href="mailto:support@seoder.io">Support Team</a>
     </footer>
     <style is:global>
@@ -42,6 +44,9 @@ const { title } = Astro.props;
           DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
       }
       footer {
+        margin: auto;
+        padding: 1.5rem;
+        max-width: 60ch;
         padding: 2rem;
       }
     </style>
