@@ -129,3 +129,7 @@ To run the web server use the command `RUST_LOG=info cargo run --package seoder_
 ### Browser
 
 Navigate to `127.0.0.1:3000` to view the UI panel for the project.
+
+## Releases
+
+We use the `publish.yml` config to release on Github actions across all platforms.
