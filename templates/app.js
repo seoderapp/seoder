@@ -98,6 +98,7 @@ const ptpe = "{" + '"' + "epath" + '"' + ":" + '"'; // engine created
 const ptc = "{" + '"' + "count" + '"'; // file count
 const dfpath = "{" + '"' + "dfpath" + '"'; // deleted file
 const deptc = "{" + '"' + "depath" + '"'; // deleted campaign
+const cfin = "{" + '"' + "finished" + '"'; // crawl finished
 
 // defaults for program entry
 let defaultOptionSet = false;
@@ -156,6 +157,18 @@ function eventSub(event) {
       slowBytes(memory_total);
 
     return;
+  }
+
+  if (cfin) {
+    const data = JSON.parse(raw);
+    const { finished, time } = data || {};
+
+    const cmp = document.getElementById("engine_status_" + finished);
+
+    // set local storage of license enabled and display view
+    if (cmp) {
+      cmp.textContent = "Finished";
+    }
   }
 
   if (raw.startsWith(ptp)) {
@@ -454,10 +467,6 @@ function eventSub(event) {
       engineMap.delete(path);
     }
   }
-
-  // todo: if finished get campaign and set status to finished and unset active run button to disabled
-
-  // const cmp = document.getElementById("engine_status_" + selected)
 }
 
 socket.addEventListener("message", eventSub);
