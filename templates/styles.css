@@ -419,6 +419,7 @@ h3 {
   border: 0;
   background-color: #ebecf2;
   color: #2f2768;
+  gap: 8px;
 }
 
 .panel-btn-ctn {
@@ -463,6 +464,14 @@ h3 {
 .center {
   display: flex;
   place-content: center;
+}
+
+.right-align {
+  place-content: end;
+}
+
+.transparent {
+  background-color: transparent;
 }
 
 @media (prefers-color-scheme: dark) {
