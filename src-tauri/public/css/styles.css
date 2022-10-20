@@ -488,6 +488,23 @@ h3 {
   border: 1px solid #ebecf2;
 }
 
+.engine-status {
+  font-family: "SF Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: right;
+  color: #e06e31;
+}
+
+.engine-status-active {
+  color: #37b85b;
+}
+
+.engine-status-finished {
+  color: #2f2768;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;

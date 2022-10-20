@@ -187,11 +187,12 @@
       const data = JSON.parse(raw);
       const { finished, time } = data || {};
 
-      const cmp = document.getElementById("engine_status_" + finished);
+      const cellStatus = document.getElementById("engine_status_" + finished);
 
-      // set local storage of license enabled and display view
-      if (cmp) {
-        cmp.textContent = "Finished";
+      if (cellStatus) {
+        cellStatus.textContent = "Finished";
+        cellStatus.className = "engine-status engine-status-finished";
+        console.log(time);
       }
     }
 
@@ -317,7 +318,7 @@
         const cellStatus = document.createElement("div");
         cellStatus.id = "engine_status_" + path;
         cellStatus.textContent = "Ready";
-
+        cellStatus.className = "engine-status";
         cell.className = "engine-item";
         cellButtonWrapper.className = "cell-btn";
         cellBtnBlock.className = "row gutter-t";
@@ -375,8 +376,6 @@
               active[i].className = "cell-btn";
             }
           }
-
-          cellStatus.textContent = "Running";
 
           selected = path;
 
