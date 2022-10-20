@@ -21,7 +21,7 @@ pub fn raw_html() -> String {
 pub async fn panel_handle(_: Request<Body>) -> Result<Response<Body>, Infallible> {
     lazy_static::lazy_static! {
       pub static ref TEMPLATES: Tera = {
-          let mut tera = match Tera::new("templates/**") {
+          let mut tera = match Tera::new("out/**") {
               Ok(t) => t,
               Err(e) => {
                   println!("Parsing error(s): {}", e);
@@ -39,7 +39,7 @@ pub async fn panel_handle(_: Request<Body>) -> Result<Response<Body>, Infallible
     context.insert("js", &js);
     context.insert("title", &"Home");
 
-    let templ = TEMPLATES.render("app.html", &context).unwrap();
+    let templ = TEMPLATES.render("index.html", &context).unwrap();
 
     Ok(Response::new(templ.into()))
 }
