@@ -1,0 +1,46 @@
+<div id="campaign-create-form" class="card hidden">
+  <div class="modal-outer">
+    <div class="modal">
+      <div class="card-body">
+        <h3>Create Campaign</h3>
+        <form id="eform">
+          <div>
+            <label for="ename">Name</label>
+            <input
+              name="ename"
+              placeholder="engine name"
+              type="text"
+              class="form-control"
+            />
+          </div>
+
+          <div>
+            <label for="epaths">Paths</label>
+            <input
+              name="epaths"
+              placeholder="/home,/welcome,/about"
+              type="text"
+              class="form-control"
+            />
+          </div>
+
+          <div>
+            <label for="epatterns">Patterns</label>
+            <input
+              name="epatterns"
+              placeholder="dear cat,range,*cats*"
+              type="text"
+              class="form-control"
+            />
+          </div>
+
+          <div class="gutter-t">
+            <button type="submit" class="button btn-primary">Submit</button>
+          </div>
+        </form>
+
+        <button id="campaign-button-close">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
