@@ -21,7 +21,6 @@ socket.addEventListener("open", () => {
 
 const stats = document.getElementById("feed-stats");
 const cpu = document.getElementById("cpu-stats");
-const cpua = document.getElementById("cpu-stats-average");
 const netstats = document.getElementById("network-stats");
 const memstats = document.getElementById("memory-stats");
 const logfeed = document.getElementById("feed-log");
@@ -128,20 +127,17 @@ function eventSub(event) {
     const data = JSON.parse(raw);
     const {
       cpu_usage,
-      load_avg_min,
+      // load_avg_min,
       network_received,
       network_transmited,
       network_total_transmitted,
       memory_free,
-      memory_used,
+      // memory_used,
       memory_total,
     } = data.stats;
 
     setProgress(cpu_usage);
-
-    if (cpua.innerHTML !== "1 min avg " + load_avg_min.toFixed(2) + "%") {
-      cpua.innerHTML = "1 min avg " + load_avg_min.toFixed(2) + "%";
-    }
+    setMemProgress((memory_free / memory_total) * 100);
 
     netstats.innerHTML =
       slowBytes(network_received) +
@@ -149,12 +145,6 @@ function eventSub(event) {
       slowBytes(network_transmited) +
       " | " +
       slowBytes(network_total_transmitted);
-    memstats.innerHTML =
-      slowBytes(memory_free) +
-      " | " +
-      slowBytes(memory_used) +
-      " | " +
-      slowBytes(memory_total);
 
     return;
   }

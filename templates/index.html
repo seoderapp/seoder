@@ -15,7 +15,7 @@
         <h2>Realtime custom engine and DB handling</h2>
       </div>
       <div class="row hidden" id="appProgram">
-        <div class="panel">
+        <div class="panel panel-left">
           <div class="card">
             <div class="card-body">
               <div class="flex-row spaceless full-w center">
@@ -85,21 +85,19 @@
           </div>
 
           <div class="grid-space">
-            <div class="flex-row spaceless">
+            <div class="flex-row spaceless stats">
               <div class="text-center ph cpu-box">
                 <div class="gutter stats-head">CPU</div>
                 <canvas id="cpu-stats" width="200" height="200"></canvas>
-                <div id="cpu-stats-average" class="center flex-col ph"></div>
               </div>
-
+              <div class="text-center ph cpu-box">
+                <div class="gutter stats-head">Memory</div>
+                <canvas id="memory-stats" width="200" height="200"></canvas>
+              </div>
               <div class="stats-box ph">
                 <div class="gutter stats-head">Network</div>
                 <div class="tild">Received, Transmited, Total Transmited</div>
                 <div id="network-stats" class="stats-bar gutter"></div>
-                <div class="seperator gutter"></div>
-                <div class="gutter stats-head">Memory</div>
-                <div class="tild">Used, Free, Total</div>
-                <div id="memory-stats" class="stats-bar"></div>
               </div>
             </div>
           </div>
@@ -220,8 +218,7 @@
           </div>
         </div>
       </div>
-
-      <form class="hidden" id="elicense">
+      <form id="elicense" class="hidden">
         <label for="license">Name</label>
         <input
           name="license"

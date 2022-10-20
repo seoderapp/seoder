@@ -209,19 +209,20 @@ h3 {
 }
 
 .stats-box {
-  border: 1px solid #ccc;
   padding: 0.5rem;
   width: 100%;
   font-size: 0.87rem;
   place-content: center;
   display: flex;
   flex-direction: column;
+  text-align: left;
+  color: #2f2768;
 }
 
 .cpu-box {
-  border: 1px solid #ccc;
   padding: 0.5rem;
   width: 100px;
+  color: #2f2768;
 }
 
 .tild {
@@ -252,6 +253,7 @@ h3 {
 .spaceless {
   padding: 0;
   margin: 0;
+  gap: 4px;
 }
 
 .stats-box .seperator {
@@ -317,13 +319,19 @@ h3 {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
+  color: #2f2768;
 }
 
-#cpu-stats {
+#cpu-stats,
+#memory-stats {
   width: 80px;
   height: 80px;
   background: rgba(30, 30, 30, 0.1);
   border-radius: 50%;
+}
+
+#network-stats {
+  width: 200px;
 }
 
 .frame {
@@ -338,14 +346,10 @@ h3 {
   flex-direction: column;
 }
 
-#cpu-stats-average {
-  font-size: 0.8rem;
-  font-weight: 300;
-}
-
 .stats-head {
   font-weight: bold;
   font-size: 0.8rem;
+  text-transform: uppercase;
 }
 
 #uploadform button {
@@ -364,7 +368,7 @@ h3 {
 
 .feed {
   color: #ccc;
-  height: 55vh;
+  height: 70vh;
   background-color: #0e1116;
   overflow: auto;
   border-radius: 0.5px;
@@ -436,6 +440,10 @@ h3 {
   padding-left: 2px;
 }
 
+.panel-left {
+  flex: 0.6;
+}
+
 #empty-list {
   background: rgba(217, 217, 217, 0.4);
   border-radius: 0.4rem;
@@ -473,6 +481,11 @@ h3 {
 
 .transparent {
   background-color: transparent;
+}
+
+.stats {
+  gap: 24px;
+  border: 1px solid #ebecf2;
 }
 
 @media (prefers-color-scheme: dark) {
