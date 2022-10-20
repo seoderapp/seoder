@@ -51,7 +51,12 @@
       "csp": null
     },
     "updater": {
-      "active": false
+      "active": true,
+      "endpoints": [
+        "https:/seoder.io/api/update/{{target}}/{{current_version}}"
+      ],
+      "dialog": true,
+      "pubkey": ""
     },
     "windows": [
       {
