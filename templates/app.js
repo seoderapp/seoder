@@ -88,6 +88,20 @@ let initialTarget = "";
 
 // todo toggle license button on main form
 
+/*
+ * List of web socket matchers * special for high performance
+ */
+const bftc = "{" + '"' + "buffer" + '"'; // buffer
+const ptp = "{" + '"' + "pengine" + '"' + ":" + '"'; // engine
+const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"'; // selected file
+const ptpe = "{" + '"' + "epath" + '"' + ":" + '"'; // engine created
+const ptc = "{" + '"' + "count" + '"'; // file count
+const dfpath = "{" + '"' + "dfpath" + '"'; // deleted file
+const deptc = "{" + '"' + "depath" + '"'; // deleted campaign
+
+// defaults for program entry
+let defaultOptionSet = false;
+
 function eventSub(event) {
   const raw = event.data;
 
@@ -144,8 +158,6 @@ function eventSub(event) {
     return;
   }
 
-  const ptp = "{" + '"' + "pengine" + '"' + ":" + '"';
-
   if (raw.startsWith(ptp)) {
     const np = JSON.parse(raw);
     const { pengine, ploc } = np || {};
@@ -183,8 +195,6 @@ function eventSub(event) {
     }
     return;
   }
-
-  const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"';
 
   if (raw.startsWith(selectFile)) {
     const np = JSON.parse(raw);
@@ -230,8 +240,6 @@ function eventSub(event) {
     }
     return;
   }
-
-  const ptpe = "{" + '"' + "epath" + '"' + ":" + '"';
 
   if (raw.startsWith(ptpe)) {
     const np = JSON.parse(raw);
@@ -331,6 +339,8 @@ function eventSub(event) {
           }
         }
 
+        cellStatus.textContent = "Running";
+
         selected = path;
 
         cellButtonWrapper.className = "cell-btn cell-btn-active";
@@ -382,8 +392,6 @@ function eventSub(event) {
     return;
   }
 
-  const ptc = "{" + '"' + "count" + '"';
-
   if (raw.startsWith(ptc)) {
     // parse json for now
     const np = JSON.parse(raw);
@@ -402,8 +410,6 @@ function eventSub(event) {
     }
   }
 
-  const dfpath = "{" + '"' + "dfpath" + '"';
-
   if (raw.startsWith(dfpath)) {
     // parse json for now
     const np = JSON.parse(raw);
@@ -418,10 +424,6 @@ function eventSub(event) {
       fileMap.delete(path);
     }
   }
-
-  const bftc = "{" + '"' + "buffer" + '"';
-
-  let defaultOptionSet = false;
 
   if (raw.startsWith(bftc)) {
     // parse json for now
@@ -438,8 +440,6 @@ function eventSub(event) {
     }
   }
 
-  const deptc = "{" + '"' + "depath" + '"';
-
   if (raw.startsWith(deptc)) {
     // parse json for now
     const np = JSON.parse(raw);
@@ -454,6 +454,10 @@ function eventSub(event) {
       engineMap.delete(path);
     }
   }
+
+  // todo: if finished get campaign and set status to finished and unset active run button to disabled
+
+  // const cmp = document.getElementById("engine_status_" + selected)
 }
 
 socket.addEventListener("message", eventSub);
@@ -495,6 +499,9 @@ rsform.addEventListener("submit", (event) => {
       // todo: replace it with new selected engine map
       logfeed.replaceChildren();
     }
+
+    const cmp = document.getElementById("engine_status_" + selected);
+    cmp.textContent = "Running";
 
     socket.send("run-campaign " + selected);
   } else {
