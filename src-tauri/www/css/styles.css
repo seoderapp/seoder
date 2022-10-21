@@ -69,7 +69,7 @@ h3 {
   width: 100%;
   margin: 0;
   background-color: #ebecf2;
-  border: 3px solid #fff;
+  border: 3px solid transparent;
 }
 
 .active-cell {
@@ -137,11 +137,13 @@ h3 {
 }
 
 .cell-btn-active {
-  border: 3px solid #25dd58;
+  background: #daddf2;
+  border: 3px solid #2f2768;
 }
 
 .cell-btn-running {
   background-color: #c6f7d4;
+  border: 3px solid transparent;
 }
 
 .button {
