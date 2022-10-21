@@ -140,9 +140,8 @@ h3 {
   border: 3px solid #25dd58;
 }
 
-.seperator {
-  height: 0.5px;
-  background-color: #d4d4d4;
+.cell-btn-running {
+  background-color: #c6f7d4;
 }
 
 .button {
@@ -258,10 +257,6 @@ h3 {
   padding: 0;
   margin: 0;
   gap: 4px;
-}
-
-.stats-box .seperator {
-  padding-bottom: 0.1rem;
 }
 
 .flex {
@@ -436,18 +431,6 @@ h3 {
   font-size: 1rem;
 }
 
-.panel {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  padding-right: 2px;
-  padding-left: 2px;
-}
-
-.panel-left {
-  flex: 0.6;
-}
-
 #empty-list {
   background: rgba(217, 217, 217, 0.4);
   border-radius: 0.4rem;
@@ -465,13 +448,6 @@ h3 {
   min-height: 56px;
   font-size: 16px;
   gap: 8px;
-}
-
-.logo-title {
-  font-size: 1.8rem;
-  color: #2f2768;
-  font-weight: bold;
-  text-align: left;
 }
 
 .center {
