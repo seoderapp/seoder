@@ -159,20 +159,23 @@
       // set local storage of license enabled and display view
       if (license) {
         if (program) {
-          program.className = "row block";
+          program.className = "row";
         }
         if (elicense) {
-          elicense.className = "hidden";
+          elicense.className = "row hidden";
         }
         localStorage.setItem("authed", "true");
       } else {
         window.alert("License is invalid");
+
         if (program) {
           program.className = "row hidden";
         }
+
         if (elicense) {
-          elicense.className = "block";
+          elicense.className = "row";
         }
+
         localStorage.removeItem("authed");
       }
     }
@@ -720,6 +723,21 @@
 
   elicense?.addEventListener("submit", (event) => {
     const slicense: HTMLInputElement = elicense.querySelector(
+      'input[name="license"]'
+    );
+
+    if (slicense && slicense.value) {
+      socket.send("set-license " + slicense.value);
+    } else {
+      window.alert("Please enter a license.");
+    }
+    event.preventDefault();
+  });
+
+  const ulicense = document.getElementById("ulicense");
+
+  ulicense?.addEventListener("submit", (event) => {
+    const slicense: HTMLInputElement = ulicense.querySelector(
       'input[name="license"]'
     );
 
