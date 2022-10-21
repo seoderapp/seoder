@@ -47,7 +47,7 @@ pub type Message = (String, (String, ResponseOutFileType), bool);
 
 lazy_static! {
     /// application global configurations
-    pub static ref CONFIG: (String, Duration, usize, bool, Engine) = setup(false);
+    pub static ref CONFIG: (String, Duration, usize, (bool, bool), Engine) = setup(false);
 }
 
 #[derive(Debug, Default, Clone)]
@@ -118,8 +118,6 @@ impl Website {
             }
         };
 
-        // let proxy = reqwest::Proxy::all("socks5://127.0.0.1:9150").unwrap();
-
         let mut client = Client::builder()
             .default_headers(headers)
             .user_agent(if !&self.configuration.user_agent.is_empty() {
@@ -137,8 +135,14 @@ impl Website {
             .connect_timeout(CONFIG.1.div_f32(1.8))
             .timeout(CONFIG.1);
 
-        // if proxy enabled build proxies
-        if CONFIG.3 {
+        let (proxy, tor) = CONFIG.3;
+
+        if tor {
+            let proxy = reqwest::Proxy::all("socks5://127.0.0.1:9150").unwrap();
+            client = client.proxy(proxy);
+        }
+
+        if proxy {
             match File::open("proxies.txt").await {
                 Ok(file) => {
                     let reader = BufReader::new(file);

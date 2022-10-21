@@ -216,9 +216,9 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
     let mut timeout = 50;
     let mut buffer = 50;
     let mut proxy = false;
+    let mut tor = false;
     let mut target = string_concat!(ENTRY_PROGRAM.1, "/urls-input.txt"); // todo: fix target
     let mut license = String::from("");
-
     let file = OpenOptions::new().read(true).open(&ENTRY_PROGRAM.2).await;
 
     match file {
@@ -243,8 +243,13 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
                     if h0 == "buffer" {
                         buffer = h1.parse::<u16>().unwrap_or(50);
                     }
+
                     if h0 == "proxy" {
                         proxy = h1.parse::<bool>().unwrap_or(false);
+                    }
+
+                    if h0 == "tor" {
+                        tor = h1.parse::<bool>().unwrap_or(false);
                     }
 
                     if h0 == "license" && h1 != "false" {
@@ -270,6 +275,7 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
        "timeout": timeout,
        "buffer": buffer,
        "proxy": proxy,
+       "tor": tor,
        "target": target,
        "license": license
     });

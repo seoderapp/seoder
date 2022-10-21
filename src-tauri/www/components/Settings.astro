@@ -1,6 +1,16 @@
+---
+import Close from "./Svgs/Close.astro";
+---
+
 <div id="settings-container" class="hidden">
   <div class="modal-outer">
     <div class="modal">
+      <div class="settings-bar">
+        <div>Settings</div>
+        <button id="settings-button-close">
+          <Close />
+        </button>
+      </div>
       <form id="bufferform" class="ph frame flex-row center-align">
         <label for="buffer-select">Buffer</label>
         <div class="ph">
@@ -14,7 +24,7 @@
         </div>
         <div class="flex align-end">
           <div>
-            <button type="submit" class="button btn-primary"> Update</button>
+            <button type="submit" class="button btn-primary">Update</button>
           </div>
         </div>
       </form>
@@ -26,7 +36,19 @@
         </div>
         <div class="flex align-end">
           <div>
-            <button type="submit" class="button btn-primary"> Update</button>
+            <button type="submit" class="button btn-primary">Update</button>
+          </div>
+        </div>
+      </form>
+
+      <form id="torform" class="ph frame flex-row center-align">
+        <label for="tor-select">Tor</label>
+        <div class="ph">
+          <input name="proxy" id="tor-select" type="checkbox" />
+        </div>
+        <div class="flex align-end">
+          <div>
+            <button type="submit" class="button btn-primary">Update</button>
           </div>
         </div>
       </form>
@@ -38,8 +60,8 @@
         </div>
         <div class="flex align-end">
           <div>
-            <button type="button" class="button" id="fs-delete"> Delete</button>
-            <button type="submit" class="button btn-primary"> Update</button>
+            <button type="button" class="button" id="fs-delete">Delete</button>
+            <button type="submit" class="button btn-primary">Update</button>
           </div>
         </div>
       </form>
@@ -69,8 +91,23 @@
         </div>
         <button class="btn-primary button">Set License</button>
       </form>
-
-      <button id="settings-button-close">Close</button>
     </div>
   </div>
 </div>
+
+<style>
+  .settings-bar {
+    display: flex;
+    place-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid rgba(47, 39, 104, 0.1);
+    font-style: normal;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #2f2768;
+  }
+  #settings-button-close {
+    background-color: transparent;
+  }
+</style>

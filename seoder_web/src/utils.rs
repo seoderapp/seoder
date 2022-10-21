@@ -38,6 +38,8 @@ pub async fn write_config(config: &str, input: &String) {
 
     let mut sl: Vec<String> = vec![];
 
+    let mut found_match = false;
+
     match file {
         Ok(ff) => {
             let reader = BufReader::new(ff);
@@ -52,6 +54,7 @@ pub async fn write_config(config: &str, input: &String) {
                     slots[0] = hh[0].to_string();
                     if hh[0] == config {
                         slots[1] = input.to_string();
+                        found_match = true;
                     } else {
                         slots[1] = hh[1].to_string();
                     }
@@ -61,6 +64,10 @@ pub async fn write_config(config: &str, input: &String) {
         }
         _ => {}
     };
+
+    if !found_match && !config.is_empty() && !input.is_empty() {
+        sl.push(string_concat!(&config, " ", &input));
+    }
 
     let mut filec = OpenOptions::new()
         .write(true)
@@ -86,6 +93,7 @@ pub async fn init_config() {
             b"timeout 15
 buffer 30
 proxy false
+tor false
 license false
 target ./urls-input.txt",
         )

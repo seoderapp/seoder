@@ -69,6 +69,7 @@ enum Action {
     SetList,
     SetBuffer,
     SetProxy,
+    SetTor,
     SetLicense,
     Loop,
 }
@@ -225,10 +226,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             if st == Action::SetLicense {
                 valid_license = validate_program(&input).await;
-
-                if valid_license {
-                    utils::write_config("license", &input).await;
-                }
+                utils::write_config("license", &input).await;
 
                 let v = json!({ "license": valid_license });
 
@@ -240,6 +238,10 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             if st == Action::SetProxy {
                 utils::write_config("proxy", &input).await;
+            }
+
+            if st == Action::SetTor {
+                utils::write_config("tor", &input).await;
             }
 
             if st == Action::SetBuffer {
@@ -311,6 +313,10 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             }
         } else if c == "set-proxy" {
             if let Err(_) = sender.send((Action::SetProxy, cc)) {
+                logd("receiver dropped");
+            }
+        } else if c == "set-tor" {
+            if let Err(_) = sender.send((Action::SetTor, cc)) {
                 logd("receiver dropped");
             }
         } else if c == "delete-file" {

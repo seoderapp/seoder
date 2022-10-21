@@ -569,11 +569,18 @@
           "proxy-select"
         ) as HTMLInputElement;
 
+        const torSelect = document.getElementById(
+          "tor-select"
+        ) as HTMLInputElement;
+
         if (buffer) {
           buffer.value = np.buffer;
         }
         if (proxyform) {
           proxyform.checked = np.proxy;
+        }
+        if (torSelect) {
+          torSelect.checked = np.tor;
         }
       }
     }
@@ -601,6 +608,7 @@
   const rform = document.getElementById("rform");
   const eform = document.getElementById("eform");
   const proxyform = document.getElementById("proxyform");
+  const torform = document.getElementById("torform");
   const uploadform = document.getElementById("uploadform");
   const fsform = document.getElementById("fsform");
   const bufferform = document.getElementById("bufferform");
@@ -660,6 +668,14 @@
     const selected = buffer.value;
 
     socket.send("set-buffer " + selected);
+
+    event.preventDefault();
+  });
+
+  torform?.addEventListener("submit", (event) => {
+    const prox: HTMLInputElement = torform.querySelector('input[name="proxy"]');
+
+    socket.send("set-tor " + prox.checked);
 
     event.preventDefault();
   });

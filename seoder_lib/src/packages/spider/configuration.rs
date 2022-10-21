@@ -15,8 +15,8 @@ pub struct Configuration {
     pub user_agent: String,
 }
 
-/// configure application program api path, timeout, channel buffer, and proxy
-pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
+/// configure application program api path, timeout, channel buffer, (proxy, tor), and engine
+pub fn setup(eg: bool) -> (String, std::time::Duration, usize, (bool, bool), Engine) {
     use std::fs::File;
     use std::io::prelude::*;
     use std::io::BufReader;
@@ -26,6 +26,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
     let mut timeout: u64 = 15;
     let mut buffer: usize = 100;
     let mut proxy = false;
+    let mut tor = false;
 
     // read through config file cpu bound quickly
     match File::open(&ENTRY_PROGRAM.2) {
@@ -45,16 +46,15 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
                         if cf == "timeout" && !v.is_empty() {
                             timeout = v.parse::<u64>().unwrap_or(15);
                         }
-
                         if cf == "buffer" && !v.is_empty() {
                             buffer = v.parse::<usize>().unwrap_or(100);
                         }
-
                         if cf == "proxy" && !v.is_empty() {
                             proxy = v.parse::<bool>().unwrap_or(false);
                         }
-
-                        // todo add base path extending
+                        if cf == "tor" && !v.is_empty() {
+                            tor = v.parse::<bool>().unwrap_or(false);
+                        }
                     }
                 }
             }
@@ -68,11 +68,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
 
     // get paths * patterns
     if eg_enabled {
-        let f = if std::fs::metadata(&"_db/engines/paths.txt").is_ok() {
-            "_db/engines/paths.txt"
-        } else {
-            "../_db/engines/paths.txt"
-        };
+        let f = string_concat!(ENTRY_PROGRAM.0, "paths.txt");
 
         // build file paths
         match File::open(f) {
@@ -92,11 +88,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
             }
         };
 
-        let f = if std::fs::metadata(&"_db/engines/patterns.txt").is_ok() {
-            "./_db/engines/patterns.txt"
-        } else {
-            "../_db/engines/patterns.txt"
-        };
+        let f = string_concat!(ENTRY_PROGRAM.0, "patterns.txt");
 
         match File::open(f) {
             Ok(file) => {
@@ -120,7 +112,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, bool, Engine) {
         "".to_string(),
         std::time::Duration::new(timeout, 0),
         buffer,
-        proxy,
+        (proxy, tor),
         engine,
     )
 }
