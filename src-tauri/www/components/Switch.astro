@@ -7,7 +7,7 @@ const { id } = Astro.props;
 ---
 
 <label class="switch">
-  <input name="proxy" id={id} type="checkbox" />
+  <input name="proxy" id={id} type="checkbox" role="switch" />
   <span class="slider"></span>
 </label>
 
@@ -46,6 +46,13 @@ const { id } = Astro.props;
     background-color: #ccc;
     transition: transform 0.3s;
     border-radius: 50%;
+
+    @media (--motionOK) {
+      & {
+        transition: transform var(--thumb-transition-duration) ease,
+          box-shadow 0.25s ease;
+      }
+    }
   }
 
   input:checked + .slider {

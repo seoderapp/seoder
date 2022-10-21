@@ -405,7 +405,7 @@ button {
 }
 
 .modal {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -419,8 +419,7 @@ button {
   left: 0;
   bottom: 0;
   right: 0;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
-  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .panel-btn {
