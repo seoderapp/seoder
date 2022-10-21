@@ -1,6 +1,11 @@
 <script>
-  let ctx = document.getElementById("cpu-stats").getContext("2d");
-  let ctx2 = document.getElementById("memory-stats").getContext("2d");
+  const cpuCanvas = document.getElementById("cpu-stats") as HTMLCanvasElement;
+  const memCanvas = document.getElementById(
+    "memory-stats"
+  ) as HTMLCanvasElement;
+
+  const ctx = cpuCanvas.getContext("2d");
+  const ctx2 = memCanvas.getContext("2d");
 
   function createCanv(r) {
     r.font = "2rem SF Mono";
@@ -247,9 +252,11 @@
           const kid = "fskeys_" + initialTarget;
           const item = document.getElementById(kid);
           if (!item) {
-            const cellSelect = document.createElement("option");
+            const cellSelect: HTMLOptionElement =
+              document.createElement("option");
 
             cellSelect.id = kid;
+            // @ts-ignore
             cellSelect.name = "fsselect";
             cellSelect.value = initialTarget;
             cellSelect.innerText = initialTarget;
@@ -264,9 +271,11 @@
             const item = document.getElementById(kid);
 
             if (!item) {
-              const cellSelect = document.createElement("option");
+              const cellSelect: HTMLOptionElement =
+                document.createElement("option");
 
               cellSelect.id = kid;
+              // @ts-ignore
               cellSelect.name = "fsselect";
               cellSelect.value = key;
               cellSelect.innerText = key;
@@ -447,7 +456,6 @@
     }
 
     if (raw.startsWith(dfpath)) {
-      // parse json for now
       const np = JSON.parse(raw);
       const path = np && np.dfpath;
 
@@ -468,8 +476,12 @@
       if (!defaultOptionSet) {
         defaultOptionSet = true;
         initialTarget = np.target;
-        const buffer = document.getElementById("buffer-select");
-        const proxyform = document.getElementById("proxy-select");
+        const buffer = document.getElementById(
+          "buffer-select"
+        ) as HTMLOptionElement;
+        const proxyform = document.getElementById(
+          "proxy-select"
+        ) as HTMLInputElement;
 
         buffer.value = np.buffer;
         proxyform.checked = np.proxy;
@@ -519,7 +531,7 @@
       // request failed
     };
 
-    request.send(new FormData(event.target));
+    request.send(new FormData(event.target as HTMLFormElement));
     event.preventDefault();
   });
 
@@ -549,7 +561,9 @@
   });
 
   bufferform.addEventListener("submit", (event) => {
-    const buffer = bufferform.querySelector('input[name="buffer"]');
+    const buffer: HTMLInputElement = bufferform.querySelector(
+      'input[name="buffer"]'
+    );
     const selected = buffer.value;
 
     socket.send("set-buffer " + selected);
@@ -558,7 +572,9 @@
   });
 
   proxyform.addEventListener("submit", (event) => {
-    const prox = proxyform.querySelector('input[name="proxy"]');
+    const prox: HTMLInputElement = proxyform.querySelector(
+      'input[name="proxy"]'
+    );
 
     socket.send("set-proxy " + prox.checked);
 
@@ -569,7 +585,9 @@
     const cf = window.confirm("Are, you sure you want to delete this file?");
 
     if (cf) {
-      const campaign = fsform.querySelector('select[name="target"]');
+      const campaign: HTMLInputElement = fsform.querySelector(
+        'select[name="target"]'
+      );
       const selected = campaign.value;
 
       socket.send("delete-file " + selected);
@@ -577,7 +595,9 @@
   });
 
   fsform.addEventListener("submit", (event) => {
-    const campaign = fsform.querySelector('select[name="target"]');
+    const campaign: HTMLInputElement = fsform.querySelector(
+      'select[name="target"]'
+    );
     const selected = campaign.value;
 
     if (!selected) {
@@ -590,9 +610,13 @@
   });
 
   eform.addEventListener("submit", (event) => {
-    const engine = eform.querySelector('input[name="ename"]');
-    const epaths = eform.querySelector('input[name="epaths"]');
-    const epatterns = eform.querySelector('input[name="epatterns"]');
+    const engine: HTMLInputElement = eform.querySelector('input[name="ename"]');
+    const epaths: HTMLInputElement = eform.querySelector(
+      'input[name="epaths"]'
+    );
+    const epatterns: HTMLInputElement = eform.querySelector(
+      'input[name="epatterns"]'
+    );
 
     if (engine && engine.value) {
       const m = JSON.stringify({
@@ -614,7 +638,9 @@
   });
 
   elicense.addEventListener("submit", (event) => {
-    const slicense = elicense.querySelector('input[name="license"]');
+    const slicense: HTMLInputElement = elicense.querySelector(
+      'input[name="license"]'
+    );
 
     if (slicense && slicense.value) {
       socket.send("set-license " + slicense.value);

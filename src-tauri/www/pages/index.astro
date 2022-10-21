@@ -1,115 +1,35 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Main from "../components/Main.astro";
+import MainJS from "../components/MainJS.astro";
 import License from "../components/License.astro";
 import CampaignCreate from "../components/CampaignCreate.astro";
 import Settings from "../components/Settings.astro";
+import Stats from "../components/Stats.astro";
+import Campaign from "../components/Campaign.astro";
+import Menu from "../components/Menu.astro";
+import Log from "../components/Log.astro";
+import Intro from "../components/Intro.astro";
+import Program from "../components/Program.astro";
 ---
 
 <Layout title="Seoder - The marketing lead generation tool">
-  <main>
-    <div class="container">
-      <div class="box sr-only">
-        <h1>Spider Panel Management</h1>
-        <p>Fast insight generation.</p>
-        <h2>Realtime custom engine and DB handling</h2>
-      </div>
-      <div class="row hidden" id="appProgram">
-        <div class="panel panel-left">
-          <div class="card">
-            <div class="card-body">
-              <div class="flex-row spaceless full-w center">
-                <div class="panel-btn-ctn full-w logo-title">Seoder</div>
-                <div class="panel-btn-ctn full-w">
-                  <button
-                    id="settings-button"
-                    class="panel-btn full-w center right-align transparent"
-                  >
-                    <img src="/assets/settings.svg" alt="" />
-                    <div>Settings</div>
-                  </button>
-                </div>
-              </div>
-              <div class="flex-row spaceless full-w">
-                <div class="panel-btn-ctn full-w">
-                  <button
-                    id="new-campaign-button"
-                    class="panel-btn button btn-primary full-w campaign-button center"
-                  >
-                    <img src="/assets/new.svg" alt="" />
-                    <div>New Campaign</div>
-                  </button>
-                </div>
-              </div>
-
-              <div class="flex-row spaceless">
-                <form id="rsform" class="panel-btn-ctn full-w">
-                  <button
-                    id="run-selected"
-                    class="panel-btn full-w center"
-                    type="submit"
-                  >
-                    <img src="/assets/run.svg" alt="" />
-                    <div>Run Selected</div>
-                  </button>
-                </form>
-                <form id="rform" class="panel-btn-ctn full-w">
-                  <button type="submit" class="panel-btn full-w center">
-                    <img src="/assets/run-all.svg" alt="" />
-                    <div>Run All</div>
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-body">
-              <ul id="engine-list"></ul>
-              <div id="empty-list" class="hidden">
-                <div>No Campaigns yet</div>
-                <div>To get started start a new campaign</div>
-                <button
-                  id="new-campaign-button"
-                  class="panel-btn button btn-primary full-w"
-                >
-                  Add Campaign
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="feed">
-            <ul id="feed-log"></ul>
-            <div id="feed-start" class="hidden">Ready to run</div>
-          </div>
-
-          <div class="grid-space">
-            <div class="flex-row spaceless stats">
-              <div class="text-center ph cpu-box">
-                <div class="gutter stats-head">CPU</div>
-                <canvas id="cpu-stats" width="200" height="200"></canvas>
-              </div>
-              <div class="text-center ph cpu-box">
-                <div class="gutter stats-head">Memory</div>
-                <canvas id="memory-stats" width="200" height="200"></canvas>
-              </div>
-              <div class="stats-box ph">
-                <div class="gutter stats-head">Network</div>
-                <div class="tild">Received, Transmited, Total Transmited</div>
-                <div id="network-stats" class="stats-bar gutter"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Settings />
-      <CampaignCreate />
-      <License />
-    </div>
+  <main class="container">
+    <Intro />
+    <Program>
+      <Fragment slot="left">
+        <Menu />
+        <Campaign />
+      </Fragment>
+      <Fragment slot="right">
+        <Log />
+        <Stats />
+      </Fragment>
+    </Program>
+    <Settings />
+    <CampaignCreate />
+    <License />
   </main>
-  <Main />
+  <MainJS />
 </Layout>
 
 <style>
