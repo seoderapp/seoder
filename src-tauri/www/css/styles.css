@@ -102,6 +102,10 @@ h3 {
   color: #2f2768;
 }
 
+#elicense {
+  height: 100%;
+}
+
 .btn-base {
   box-sizing: border-box;
   display: flex;
@@ -505,19 +509,7 @@ h3 {
   color: #2f2768;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
+.full {
+  height: 100%;
+  justify-content: flex-start;
 }

@@ -4,8 +4,8 @@
     "memory-stats"
   ) as HTMLCanvasElement;
 
-  const ctx = cpuCanvas.getContext("2d");
-  const ctx2 = memCanvas.getContext("2d");
+  const ctx = cpuCanvas?.getContext("2d");
+  const ctx2 = memCanvas?.getContext("2d");
 
   function createCanv(r) {
     r.font = "2rem SF Mono";
@@ -16,8 +16,12 @@
     r.textAlign = "center";
   }
 
-  createCanv(ctx);
-  createCanv(ctx2);
+  if (ctx) {
+    createCanv(ctx);
+  }
+  if (ctx2) {
+    createCanv(ctx2);
+  }
 
   function setProgress(ele, diff) {
     let cw = ele.canvas.width;
@@ -77,11 +81,11 @@
   const emptyList = document.getElementById("empty-list");
   const feedEmpty = document.getElementById("feed-start");
 
-  if (!list.children.length) {
+  if (list && !list.children.length) {
     emptyList.className = "block";
   }
 
-  if (!logfeed.children.length) {
+  if (logfeed && !logfeed.children.length) {
     feedEmpty.className = "block";
   }
 
@@ -89,32 +93,32 @@
   const program = document.getElementById("appProgram");
   const elicense = document.getElementById("elicense");
 
-  newCampaignButton.addEventListener("click", () => {
+  newCampaignButton?.addEventListener("click", () => {
     campaignCreateForm.className = "block";
   });
 
-  settingsBtn.addEventListener("click", () => {
+  settingsBtn?.addEventListener("click", () => {
     settingsContainer.className = "block";
   });
 
-  settingsBtn.addEventListener("click", () => {
+  settingsBtn?.addEventListener("click", () => {
     settingsContainer.className = "block";
   });
 
-  campaignBtnCls.addEventListener("click", () => {
+  campaignBtnCls?.addEventListener("click", () => {
     campaignCreateForm.className = "hidden";
   });
 
-  settingsBtnCls.addEventListener("click", () => {
+  settingsBtnCls?.addEventListener("click", () => {
     settingsContainer.className = "hidden";
   });
 
   let selected = "";
 
-  if (localStorage.getItem("authed")) {
+  if (program && localStorage.getItem("authed")) {
     program.className = "row block";
-  } else {
-    elicense.className = "block";
+  } else if (elicense) {
+    elicense.className = "row block";
   }
 
   // files for uploading
@@ -148,16 +152,23 @@
     if (raw.startsWith("{" + '"' + "license")) {
       const data = JSON.parse(raw);
       const { license } = data || {};
-
       // set local storage of license enabled and display view
       if (license) {
-        program.className = "row block";
-        elicense.className = "hidden";
+        if (program) {
+          program.className = "row block";
+        }
+        if (elicense) {
+          elicense.className = "hidden";
+        }
         localStorage.setItem("authed", "true");
       } else {
         window.alert("License is invalid");
-        program.className = "row hidden";
-        elicense.className = "block";
+        if (program) {
+          program.className = "row hidden";
+        }
+        if (elicense) {
+          elicense.className = "block";
+        }
         localStorage.removeItem("authed");
       }
     }
@@ -175,15 +186,21 @@
         memory_total,
       } = data.stats;
 
-      setProgress(ctx, cpu_usage);
-      setProgress(ctx2, (memory_free / memory_total) * 100);
+      if (ctx) {
+        setProgress(ctx, cpu_usage);
+      }
+      if (ctx2) {
+        setProgress(ctx2, (memory_free / memory_total) * 100);
+      }
 
-      netstats.innerHTML =
-        slowBytes(network_received) +
-        " | " +
-        slowBytes(network_transmited) +
-        " | " +
-        slowBytes(network_total_transmitted);
+      if (netstats) {
+        netstats.innerHTML =
+          slowBytes(network_received) +
+          " | " +
+          slowBytes(network_transmited) +
+          " | " +
+          slowBytes(network_total_transmitted);
+      }
 
       return;
     }
@@ -230,10 +247,12 @@
         if (url && item.urls && !item.urls.has(url)) {
           item.urls.add(url);
 
-          const logc = document.createElement("li");
-          logc.innerText = url;
+          if (logfeed) {
+            const logc = document.createElement("li");
+            logc.innerText = url;
 
-          logfeed.appendChild(logc);
+            logfeed.appendChild(logc);
+          }
         }
       }
       return;
@@ -248,28 +267,10 @@
         // file select
         const fileSelect = document.getElementById("target-select");
 
-        if (initialTarget) {
-          const kid = "fskeys_" + initialTarget;
-          const item = document.getElementById(kid);
-          if (!item) {
-            const cellSelect: HTMLOptionElement =
-              document.createElement("option");
-
-            cellSelect.id = kid;
-            // @ts-ignore
-            cellSelect.name = "fsselect";
-            cellSelect.value = initialTarget;
-            cellSelect.innerText = initialTarget;
-
-            fileSelect.appendChild(cellSelect);
-          }
-        }
-
-        for (const [key, _] of fileMap) {
-          if (key !== initialTarget) {
-            const kid = "fskeys_" + key;
+        if (fileSelect) {
+          if (initialTarget) {
+            const kid = "fskeys_" + initialTarget;
             const item = document.getElementById(kid);
-
             if (!item) {
               const cellSelect: HTMLOptionElement =
                 document.createElement("option");
@@ -277,10 +278,30 @@
               cellSelect.id = kid;
               // @ts-ignore
               cellSelect.name = "fsselect";
-              cellSelect.value = key;
-              cellSelect.innerText = key;
+              cellSelect.value = initialTarget;
+              cellSelect.innerText = initialTarget;
 
               fileSelect.appendChild(cellSelect);
+            }
+          }
+
+          for (const [key, _] of fileMap) {
+            if (key !== initialTarget) {
+              const kid = "fskeys_" + key;
+              const item = document.getElementById(kid);
+
+              if (!item) {
+                const cellSelect: HTMLOptionElement =
+                  document.createElement("option");
+
+                cellSelect.id = kid;
+                // @ts-ignore
+                cellSelect.name = "fsselect";
+                cellSelect.value = key;
+                cellSelect.innerText = key;
+
+                fileSelect.appendChild(cellSelect);
+              }
             }
           }
         }
@@ -293,7 +314,7 @@
       const path = np && np.epath;
 
       if (!engineMap.has(path)) {
-        if (!list.children.length) {
+        if (list && !list.children.length) {
           emptyList.className = "hidden";
         }
 
@@ -302,6 +323,12 @@
           valid: 0,
           urls: new Set(),
         });
+
+        // exit if list does not exist
+        if (!list) {
+          return;
+        }
+
         const cell = document.createElement("li");
         // click wrapper
         const cellButtonWrapper = document.createElement("button");
@@ -483,8 +510,12 @@
           "proxy-select"
         ) as HTMLInputElement;
 
-        buffer.value = np.buffer;
-        proxyform.checked = np.proxy;
+        if (buffer) {
+          buffer.value = np.buffer;
+        }
+        if (proxyform) {
+          proxyform.checked = np.proxy;
+        }
       }
     }
 
@@ -497,8 +528,8 @@
         const cell = document.getElementById("engine_" + path);
         const kitem = document.getElementById("ekeys_" + path);
 
-        cell.remove();
-        kitem.remove();
+        cell?.remove();
+        kitem?.remove();
         engineMap.delete(path);
       }
     }
@@ -516,7 +547,7 @@
   const bufferform = document.getElementById("bufferform");
   const fsDelete = document.getElementById("fs-delete");
 
-  uploadform.addEventListener("submit", (event) => {
+  uploadform?.addEventListener("submit", (event) => {
     const url = "http://localhost:8001/upload";
     const request = new XMLHttpRequest();
 
@@ -535,7 +566,7 @@
     event.preventDefault();
   });
 
-  rsform.addEventListener("submit", (event) => {
+  rsform?.addEventListener("submit", (event) => {
     if (selected) {
       if (engineMap.has(selected)) {
         const e = engineMap.get(selected);
@@ -545,7 +576,10 @@
       }
 
       const cmp = document.getElementById("engine_status_" + selected);
-      cmp.textContent = "Running";
+
+      if (cmp) {
+        cmp.textContent = "Running";
+      }
 
       socket.send("run-campaign " + selected);
     } else {
@@ -555,12 +589,12 @@
     event.preventDefault();
   });
 
-  rform.addEventListener("submit", (event) => {
+  rform?.addEventListener("submit", (event) => {
     socket.send("run-all-campaigns");
     event.preventDefault();
   });
 
-  bufferform.addEventListener("submit", (event) => {
+  bufferform?.addEventListener("submit", (event) => {
     const buffer: HTMLInputElement = bufferform.querySelector(
       'input[name="buffer"]'
     );
@@ -571,7 +605,7 @@
     event.preventDefault();
   });
 
-  proxyform.addEventListener("submit", (event) => {
+  proxyform?.addEventListener("submit", (event) => {
     const prox: HTMLInputElement = proxyform.querySelector(
       'input[name="proxy"]'
     );
@@ -581,7 +615,7 @@
     event.preventDefault();
   });
 
-  fsDelete.addEventListener("click", () => {
+  fsDelete?.addEventListener("click", () => {
     const cf = window.confirm("Are, you sure you want to delete this file?");
 
     if (cf) {
@@ -594,7 +628,7 @@
     }
   });
 
-  fsform.addEventListener("submit", (event) => {
+  fsform?.addEventListener("submit", (event) => {
     const campaign: HTMLInputElement = fsform.querySelector(
       'select[name="target"]'
     );
@@ -609,7 +643,7 @@
     event.preventDefault();
   });
 
-  eform.addEventListener("submit", (event) => {
+  eform?.addEventListener("submit", (event) => {
     const engine: HTMLInputElement = eform.querySelector('input[name="ename"]');
     const epaths: HTMLInputElement = eform.querySelector(
       'input[name="epaths"]'
@@ -637,7 +671,7 @@
     event.preventDefault();
   });
 
-  elicense.addEventListener("submit", (event) => {
+  elicense?.addEventListener("submit", (event) => {
     const slicense: HTMLInputElement = elicense.querySelector(
       'input[name="license"]'
     );
