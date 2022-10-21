@@ -107,13 +107,13 @@ h3 {
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 4px 10px;
-  gap: 6px;
-  width: 93px;
+  padding: 0.2rem 0.4rem;
+  gap: 0.3rem;
+  min-width: 93px;
   height: 25px;
-  border-radius: 4px;
+  border-radius: 0.2rem;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 1rem;
   color: #2f2768;
   border: 2px solid #2f2768;
   background-color: transparent;
@@ -277,6 +277,10 @@ h3 {
 
 .full-w {
   width: 100%;
+}
+
+.full-w-120 {
+  width: 120%;
 }
 
 .align-end {

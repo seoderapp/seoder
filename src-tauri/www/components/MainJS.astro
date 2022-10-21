@@ -344,6 +344,10 @@
         const cellBtnRunButton = document.createElement("button");
         const cellBtnRunText = document.createElement("div");
         const cellBtnRunImage = document.createElement("img");
+        // export button
+        const cellBtnExportButton = document.createElement("button");
+        const cellBtnExportText = document.createElement("div");
+        const cellBtnExportImage = document.createElement("img");
         // delete button
         const cellBtnDeleteText = document.createElement("div");
         const cellBtnDeleteRemoveImage = document.createElement("img");
@@ -357,7 +361,7 @@
         cellStatus.className = "engine-status";
         cell.className = "engine-item";
         cellButtonWrapper.className = "cell-btn";
-        cellBtnBlock.className = "row gutter-t";
+        cellBtnBlock.className = "row gutter-t full-w-120";
         cellInnerContainer.className = "row full-w";
         cellBtnDeleteButton.className = "btn-base active-delete";
 
@@ -377,8 +381,18 @@
         cellBtnRunImage.src = "/assets/unpause.svg";
         cellBtnRunButton.className = "btn-base";
 
+        cellBtnExportText.textContent = "Export csv";
+        cellBtnExportImage.src = "/assets/export.svg";
+        cellBtnExportButton.className = "btn-base";
+
         cellBtnDeleteText.textContent = "Delete";
         cellBtnDeleteRemoveImage.src = "/assets/trashcan.svg";
+
+        cellBtnExportButton.addEventListener("click", (event) => {
+          // todo: file upload path to csv download
+          alert("todo export");
+          event.preventDefault();
+        });
 
         cellBtnRunButton.addEventListener("click", (event) => {
           if (engineMap.has(path)) {
@@ -437,11 +451,15 @@
         cellBtnRunButton.appendChild(cellBtnRunImage);
         cellBtnRunButton.appendChild(cellBtnRunText);
 
+        cellBtnExportButton.appendChild(cellBtnExportImage);
+        cellBtnExportButton.appendChild(cellBtnExportText);
+
         cellBtnDeleteButton.appendChild(cellBtnDeleteRemoveImage);
         cellBtnDeleteButton.appendChild(cellBtnDeleteText);
 
         // todo: status block
         cellBtnBlock.appendChild(cellBtnRunButton);
+        cellBtnBlock.appendChild(cellBtnExportButton);
         cellBtnBlock.appendChild(cellBtnDeleteButton);
 
         cellContentBlock.appendChild(cellTitle);
