@@ -1,5 +1,5 @@
 const VERSION = "0.0.1"; // todo: env
-const APP = "seoder_app_";
+const APP = "Seoder_";
 
 const LINUX = "_linux.app.tar.gz";
 const WINDOWS = "_x64_en-US.msi";
