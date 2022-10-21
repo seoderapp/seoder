@@ -4,7 +4,7 @@
     "beforeDevCommand": "yarn dev",
     "devPath": "http://localhost:3001",
     "distDir": "../out",
-    "withGlobalTauri": false
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "Seoder",

@@ -47,12 +47,11 @@ pub async fn run_all(mut outgoing: OutGoing) -> OutGoing {
                     );
 
                     log("crawl finished - time elasped: ", &b);
-                    
+
                     if let Err(_) = sender.send((website.engine.campaign.name, b)) {
                         logd("the receiver dropped");
                     }
                 });
-
             }
         }
     }

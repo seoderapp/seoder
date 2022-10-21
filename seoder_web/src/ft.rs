@@ -9,19 +9,24 @@ use warp::{
 };
 
 use crate::string_concat_impl;
-use seoder_lib::{string_concat::string_concat, tokio};
+use seoder_lib::{string_concat::string_concat, tokio, ENTRY_PROGRAM};
 
 /// file server basic server init
 pub async fn file_server() {
+    let cors = warp::cors().allow_any_origin();
     let upload_route = warp::path("upload")
         .and(warp::post())
         .and(warp::multipart::form().max_length(5_000_000))
-        .and_then(upload);
-    let download_route = warp::path("_db").and(warp::fs::dir("./_db/files/"));
+        .and_then(upload)
+        .with(&cors);
 
+    let download_route = warp::path("download")
+        .and(warp::fs::dir(ENTRY_PROGRAM.0.to_string()))
+        .with(&cors);
     let router = upload_route.or(download_route).recover(handle_rejection);
-    println!("Server started at localhost:8001");
-    warp::serve(router).run(([0, 0, 0, 0], 8001)).await;
+
+    println!("Server started at localhost:7050");
+    warp::serve(router).run(([0, 0, 0, 0], 7050)).await;
 }
 
 async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
