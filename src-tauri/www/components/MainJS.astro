@@ -84,6 +84,11 @@
   // empty selectors
   const emptyList = document.getElementById("empty-list");
   const feedEmpty = document.getElementById("feed-start");
+  // tor
+  const torSelect = document.getElementById("tor-select") as HTMLInputElement;
+  const proxySelect = document.getElementById(
+    "proxy-select"
+  ) as HTMLInputElement;
 
   if (list && !list.children.length) {
     emptyList.className = "block";
@@ -569,10 +574,6 @@
           "proxy-select"
         ) as HTMLInputElement;
 
-        const torSelect = document.getElementById(
-          "tor-select"
-        ) as HTMLInputElement;
-
         if (buffer) {
           buffer.value = np.buffer;
         }
@@ -607,8 +608,6 @@
   const rsform = document.getElementById("rsform");
   const rform = document.getElementById("rform");
   const eform = document.getElementById("eform");
-  const proxyform = document.getElementById("proxyform");
-  const torform = document.getElementById("torform");
   const uploadform = document.getElementById("uploadform");
   const fsform = document.getElementById("fsform");
   const bufferform = document.getElementById("bufferform");
@@ -672,21 +671,13 @@
     event.preventDefault();
   });
 
-  torform?.addEventListener("submit", (event) => {
-    const prox: HTMLInputElement = torform.querySelector('input[name="proxy"]');
-
-    socket.send("set-tor " + prox.checked);
-
+  torSelect?.addEventListener("change", function (event) {
+    socket.send("set-tor " + this.checked);
     event.preventDefault();
   });
 
-  proxyform?.addEventListener("submit", (event) => {
-    const prox: HTMLInputElement = proxyform.querySelector(
-      'input[name="proxy"]'
-    );
-
-    socket.send("set-proxy " + prox.checked);
-
+  proxySelect?.addEventListener("change", function (event) {
+    socket.send("set-proxy " + this.checked);
     event.preventDefault();
   });
 

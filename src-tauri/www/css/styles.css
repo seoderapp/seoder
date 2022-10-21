@@ -340,10 +340,11 @@ button {
 }
 
 .frame {
-  border: 1px solid #ccc;
-  border-radius: 2px;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+  height: 3rem;
+  place-items: center;
+  display: flex;
 }
 
 .flex-col {
@@ -408,7 +409,7 @@ button {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #ffffff;
+  background: #fff;
   border-radius: 8px;
 }
 

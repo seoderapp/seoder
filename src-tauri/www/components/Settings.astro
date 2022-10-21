@@ -1,5 +1,6 @@
 ---
 import Close from "./Svgs/Close.astro";
+import Switch from "./Switch.astro";
 ---
 
 <div id="settings-container" class="hidden">
@@ -29,29 +30,15 @@ import Close from "./Svgs/Close.astro";
         </div>
       </form>
 
-      <form id="proxyform" class="ph frame flex-row center-align">
-        <label for="target-select">Proxy</label>
-        <div class="ph">
-          <input name="proxy" id="proxy-select" type="checkbox" />
-        </div>
-        <div class="flex align-end">
-          <div>
-            <button type="submit" class="button btn-primary">Update</button>
-          </div>
-        </div>
-      </form>
+      <div id="proxyform" class="ph frame flex-row center-align gap">
+        <label for="proxy-select">Use Proxy</label>
+        <Switch id="proxy-select" />
+      </div>
 
-      <form id="torform" class="ph frame flex-row center-align">
-        <label for="tor-select">Tor</label>
-        <div class="ph">
-          <input name="proxy" id="tor-select" type="checkbox" />
-        </div>
-        <div class="flex align-end">
-          <div>
-            <button type="submit" class="button btn-primary">Update</button>
-          </div>
-        </div>
-      </form>
+      <div id="torform" class="ph frame flex-row center-align gap">
+        <label for="tor-select">Use Tor</label>
+        <Switch id="tor-select" />
+      </div>
 
       <form id="fsform" class="ph frame flex-row center-align">
         <label for="target-select">Target</label>
@@ -72,7 +59,7 @@ import Close from "./Svgs/Close.astro";
         enctype="multipart/form-data"
         method="post"
       >
-        <label for="file">Set crawl list</label>
+        <label for="file">Crawl list</label>
         <div class="ph">
           <input type="file" accept="text/plain" name="file" />
         </div>
@@ -80,7 +67,7 @@ import Close from "./Svgs/Close.astro";
       </form>
 
       <form id="ulicense" class="ph frame flex-row center-align">
-        <label for="license">license</label>
+        <label for="license">License Key</label>
         <div class="ph">
           <input
             name="license"
@@ -96,6 +83,9 @@ import Close from "./Svgs/Close.astro";
 </div>
 
 <style>
+  #settings-container {
+    -webkit-backface-visibility: hidden;
+  }
   .settings-bar {
     display: flex;
     place-items: center;
@@ -107,7 +97,22 @@ import Close from "./Svgs/Close.astro";
     font-size: 1rem;
     color: #2f2768;
   }
+
   #settings-button-close {
     background-color: transparent;
+  }
+
+  label:not(.switch) {
+    font-style: normal;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #2f2768;
+    padding-left: 1rem;
+    min-width: 7rem;
+    text-align: left;
+  }
+
+  .gap {
+    gap: 1rem;
   }
 </style>
