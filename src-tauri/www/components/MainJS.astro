@@ -3,6 +3,16 @@
     var __TAURI__: any;
   }
 
+  // license control [determine screens] quickly
+  const program = document.getElementById("appProgram");
+  const elicense = document.getElementById("elicense");
+
+  if (program && localStorage.getItem("authed")) {
+    program.className = "row block";
+  } else if (elicense) {
+    elicense.className = "row block";
+  }
+
   const cpuCanvas = document.getElementById("cpu-stats") as HTMLCanvasElement;
   const memCanvas = document.getElementById(
     "memory-stats"
@@ -78,9 +88,9 @@
   // settings
   const settingsContainer = document.getElementById("settings-container");
   const settingsBtn = document.getElementById("settings-button");
-  // modals
-  const settingsBtnCls = document.getElementById("settings-button-close");
-  const campaignBtnCls = document.getElementById("campaign-button-close");
+  // modals first button adds close event
+  const settingsBtnCls = document.querySelectorAll(".settings-bar button");
+
   // new create
   const newCampaignButton = document.getElementById("new-campaign-button");
   const campaignCreateForm = document.getElementById("campaign-create-form");
@@ -107,10 +117,6 @@
     feedEmpty.className = "block";
   }
 
-  // license control
-  const program = document.getElementById("appProgram");
-  const elicense = document.getElementById("elicense");
-
   newCampaignButton?.addEventListener("click", () => {
     campaignCreateForm.className = "block";
   });
@@ -123,21 +129,15 @@
     settingsContainer.className = "block";
   });
 
-  campaignBtnCls?.addEventListener("click", () => {
-    campaignCreateForm.className = "hidden";
-  });
-
-  settingsBtnCls?.addEventListener("click", () => {
-    settingsContainer.className = "hidden";
-  });
+  // set all close buttons to close menu
+  for (let i = 0; i < settingsBtnCls.length; i++) {
+    settingsBtnCls[i].addEventListener("click", function () {
+      settingsContainer.className = "hidden";
+      campaignCreateForm.className = "hidden";
+    });
+  }
 
   let selected = "";
-
-  if (program && localStorage.getItem("authed")) {
-    program.className = "row block";
-  } else if (elicense) {
-    elicense.className = "row block";
-  }
 
   // files for uploading
   const fileMap = new Map();

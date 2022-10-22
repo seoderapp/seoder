@@ -1,18 +1,13 @@
 ---
 import LicenseInput from "./LicenseInput";
-import Close from "./Svgs/Close.astro";
+import SettingsBar from "./SettingsBar.astro";
 import Switch from "./Switch.astro";
 ---
 
 <div id="settings-container" class="hidden">
   <div class="modal-outer">
     <div class="modal">
-      <div class="settings-bar">
-        <div>Settings</div>
-        <button id="settings-button-close">
-          <Close />
-        </button>
-      </div>
+      <SettingsBar title={"Settings"} />
 
       <div id="proxyform" class="ph frame flex-row center-align gap">
         <label for="proxy-select">Use Proxy</label>
@@ -62,10 +57,6 @@ import Switch from "./Switch.astro";
 </div>
 
 <style>
-  #settings-container {
-    -webkit-backface-visibility: hidden;
-  }
-
   .button {
     border-radius: 4px;
     border: 0;
@@ -73,22 +64,6 @@ import Switch from "./Switch.astro";
     color: #2f2768;
     gap: 8px;
     font-weight: 600;
-  }
-
-  .settings-bar {
-    display: flex;
-    place-items: center;
-    justify-content: space-between;
-    padding: 0.8rem 1.2rem;
-    border: 1px solid rgba(47, 39, 104, 0.1);
-    font-style: normal;
-    font-weight: 600;
-    font-size: 1rem;
-    color: #2f2768;
-  }
-
-  #settings-button-close {
-    background-color: transparent;
   }
 
   label:not(.switch) {

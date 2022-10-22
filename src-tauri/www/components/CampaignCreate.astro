@@ -1,46 +1,90 @@
-<div id="campaign-create-form" class="card hidden">
+---
+import SettingsBar from "./SettingsBar.astro";
+---
+
+<div id="campaign-create-form" class="hidden">
   <div class="modal-outer">
     <div class="modal">
-      <div class="card-body">
-        <h3>Create Campaign</h3>
+      <SettingsBar title={"New Campaign"} />
+
+      <div>
         <form id="eform">
-          <div>
-            <label for="ename">Name</label>
-            <input
-              name="ename"
-              placeholder="engine name"
-              type="text"
-              class="form-control"
-            />
+          <div class="form-container">
+            <div>
+              <label for="ename">Name</label>
+              <input
+                name="ename"
+                placeholder="engine name"
+                type="text"
+                class="form-control"
+              />
+            </div>
+            <div>
+              <label for="epaths">Paths</label>
+              <input
+                name="epaths"
+                placeholder="/home, /welcome, /about"
+                type="text"
+                class="form-control"
+              />
+            </div>
+            <div>
+              <label for="epatterns">Patterns</label>
+              <input
+                name="epatterns"
+                placeholder="bitcoin, motorcycles, *cats*"
+                type="text"
+                class="form-control"
+              />
+            </div>
           </div>
-
-          <div>
-            <label for="epaths">Paths</label>
-            <input
-              name="epaths"
-              placeholder="/home,/welcome,/about"
-              type="text"
-              class="form-control"
-            />
-          </div>
-
-          <div>
-            <label for="epatterns">Patterns</label>
-            <input
-              name="epatterns"
-              placeholder="dear cat,range,*cats*"
-              type="text"
-              class="form-control"
-            />
-          </div>
-
           <div class="gutter-t">
-            <button type="submit" class="button btn-primary">Submit</button>
+            <button type="submit" class="button btn-primary full-w"
+              >Add Campaign</button
+            >
           </div>
         </form>
-
-        <button id="campaign-button-close">Close</button>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  .modal {
+    min-width: 20rem;
+    text-align: left;
+  }
+
+  .form-container {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .button {
+    border: 0;
+    background-color: #ebecf2;
+    color: #2f2768;
+    gap: 8px;
+    font-weight: 600;
+    padding: 0.7rem;
+  }
+
+  label {
+    font-style: normal;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #2f2768;
+    text-align: left;
+    display: block;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .gap {
+    gap: 1rem;
+  }
+
+  .form-control {
+    width: 90%;
+  }
+</style>
