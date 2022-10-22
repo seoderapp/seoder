@@ -30,6 +30,10 @@ button {
   text-align: center;
 }
 
+#appProgram {
+  height: 100%;
+}
+
 .gutter {
   padding-bottom: 0.25rem;
 }
@@ -318,21 +322,8 @@ button {
   padding-right: 0.5rem;
 }
 
-.stats-bar {
-  font-size: 0.8rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
-  color: #2f2768;
-}
-
-#cpu-stats,
-#memory-stats {
-  width: 80px;
-  height: 80px;
-  background: rgba(30, 30, 30, 0.1);
-  border-radius: 50%;
+.relative {
+  position: relative;
 }
 
 .frame {
@@ -348,12 +339,6 @@ button {
   flex-direction: column;
 }
 
-.stats-head {
-  font-weight: bold;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-}
-
 #uploadform button {
   background-color: transparent;
   border: 1px solid #0e1116;
@@ -366,30 +351,6 @@ button {
 
 .thin {
   font-weight: 400;
-}
-
-.feed {
-  color: #ccc;
-  height: 70vh;
-  background-color: #0e1116;
-  overflow: auto;
-  border-radius: 0.5px;
-}
-
-#feed-log {
-  font-size: 0.7rem;
-  text-align: left;
-  margin: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  color: #ccc;
-  padding: 0.25rem 0.9rem;
-  list-style-type: none;
-  font-family: "SF Mono";
-}
-
-#feed-log li {
-  padding: 0.2rem 0;
 }
 
 .hidden {
@@ -466,11 +427,6 @@ button {
   background-color: transparent;
 }
 
-.stats {
-  gap: 24px;
-  border: 1px solid #ebecf2;
-}
-
 .engine-status {
   font-family: "SF Mono";
   font-style: normal;
@@ -506,4 +462,8 @@ button {
   border: 0;
   color: #2f2768;
   font-size: 1rem;
+}
+
+#feed-log li {
+  padding: 0.2rem 0;
 }

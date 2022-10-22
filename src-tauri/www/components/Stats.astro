@@ -3,14 +3,14 @@ import ArrowDown from "./Svgs/ArrowDown.astro";
 import ArrowUp from "./Svgs/ArrowUp.astro";
 ---
 
-<div class="grid-space">
+<div class="container">
   <div class="flex-row spaceless stats">
-    <div class="text-center ph cpu-box">
-      <div class="gutter stats-head">CPU</div>
+    <div class="text-center ph cpu-box relative">
+      <div class="gutter stats-head absolute">CPU</div>
       <canvas id="cpu-stats" width="200" height="200"></canvas>
     </div>
-    <div class="text-center ph cpu-box">
-      <div class="gutter stats-head">Memory</div>
+    <div class="text-center ph cpu-box relative">
+      <div class="gutter stats-head absolute">Memory</div>
       <canvas id="memory-stats" width="200" height="200"></canvas>
     </div>
     <div class="stats-box ph">
@@ -36,6 +36,27 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
 </div>
 
 <style>
+  .container {
+    flex: 0.2;
+    padding-top: 0.2rem;
+  }
+  .stats {
+    gap: 1rem;
+    border: 1px solid #ebecf2;
+    padding-bottom: 0.5rem;
+    align-items: center;
+    display: flex;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .stats-bar {
+    font-size: 0.7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    color: #2f2768;
+  }
   .net-row {
     display: flex;
     flex-direction: row;
@@ -44,10 +65,25 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
   }
   .net-cell div {
     width: 3.5rem;
-    font-size: 0.72rem;
     text-overflow: ellipsis;
     text-align: left;
     overflow: hidden;
+  }
+  #cpu-stats,
+  #memory-stats {
+    width: 80px;
+    height: 80px;
+    background: rgba(30, 30, 30, 0.1);
+    border-radius: 50%;
+  }
+  .stats-head {
+    font-weight: bold;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+  }
+  .absolute {
+    position: relative;
+    top: 1.6rem;
   }
   .space {
     gap: 1rem;
