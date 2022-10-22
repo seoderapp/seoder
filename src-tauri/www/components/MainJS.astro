@@ -1,7 +1,11 @@
+---
+declare global {
+  var __TAURI__: any;
+}
+---
+
 <script>
-  declare global {
-    var __TAURI__: any;
-  }
+  // import { profile } from "../stores/profile";
 
   // license control [determine screens] quickly
   const program = document.getElementById("appProgram");
