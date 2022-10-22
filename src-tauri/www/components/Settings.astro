@@ -1,5 +1,5 @@
 ---
-import LicenseInput from "./LicenseInput.astro";
+import LicenseInput from "./LicenseInput";
 import Close from "./Svgs/Close.astro";
 import Switch from "./Switch.astro";
 ---
@@ -55,7 +55,7 @@ import Switch from "./Switch.astro";
       </form>
 
       <form id="ulicense" class="ph">
-        <LicenseInput />
+        <LicenseInput client:visible />
       </form>
     </div>
   </div>

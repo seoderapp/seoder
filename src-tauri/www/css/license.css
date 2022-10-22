@@ -1,0 +1,24 @@
+.license-form {
+  padding: 1.5rem 1.2rem;
+  background: #ffffff;
+  border-radius: 4px;
+  color: #2f2768;
+  place-content: center;
+  order: 3;
+  gap: 7px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.license-input {
+  box-sizing: border-box;
+  width: 319px;
+  height: 44px;
+  background: #ffffff;
+  border: 2px solid #e8c01a;
+  border-radius: 4px;
+  padding: 0.5rem 0.7rem;
+}
+label {
+  font-weight: 700;
+}

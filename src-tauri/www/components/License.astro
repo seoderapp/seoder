@@ -1,6 +1,6 @@
 ---
 import SettingsButton from "./Buttons/SettingsButton.astro";
-import LicenseInput from "./LicenseInput.astro";
+import LicenseInput from "./LicenseInput";
 import Logo from "./Logos/Logo.astro";
 import AppDetails from "./Svgs/AppDetails.astro";
 ---
@@ -17,7 +17,7 @@ import AppDetails from "./Svgs/AppDetails.astro";
       <p class="panel-subtitle">
         Please enter the license key that was emailed to you
       </p>
-      <LicenseInput />
+      <LicenseInput client:visible />
     </div>
   </div>
 </form>
