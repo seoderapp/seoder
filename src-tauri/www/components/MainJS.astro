@@ -92,6 +92,9 @@
   const lowpowerSelect = document.getElementById(
     "lowpower-select"
   ) as HTMLInputElement;
+  const fileSelect = document.getElementById(
+    "target-select"
+  ) as HTMLInputElement;
 
   if (list && !list.children.length) {
     emptyList.className = "block";
@@ -289,7 +292,6 @@
       if (!fileMap.has(path)) {
         fileMap.set(path, {});
         // file select
-        const fileSelect = document.getElementById("target-select");
 
         if (fileSelect) {
           if (initialTarget) {
@@ -605,7 +607,6 @@
   const rform = document.getElementById("rform");
   const eform = document.getElementById("eform");
   const uploadform = document.getElementById("uploadform");
-  const fsform = document.getElementById("fsform");
   const bufferform = document.getElementById("bufferform");
   const fsDelete = document.getElementById("fs-delete");
 
@@ -667,6 +668,12 @@
     event.preventDefault();
   });
 
+  fileSelect?.addEventListener("change", function (event) {
+    console.log(this.value);
+    socket.send("set-list " + this.value);
+    event.preventDefault();
+  });
+
   torSelect?.addEventListener("change", function (event) {
     socket.send("set-tor " + this.checked);
     event.preventDefault();
@@ -686,28 +693,13 @@
     const cf = window.confirm("Are, you sure you want to delete this file?");
 
     if (cf) {
-      const campaign: HTMLInputElement = fsform.querySelector(
+      const campaign: HTMLInputElement = fileSelect.querySelector(
         'select[name="target"]'
       );
       const selected = campaign.value;
 
       socket.send("delete-file " + selected);
     }
-  });
-
-  fsform?.addEventListener("submit", (event) => {
-    const campaign: HTMLInputElement = fsform.querySelector(
-      'select[name="target"]'
-    );
-    const selected = campaign.value;
-
-    if (!selected) {
-      window.alert("Please select a list type");
-    } else {
-      socket.send("set-list " + selected);
-    }
-
-    event.preventDefault();
   });
 
   eform?.addEventListener("submit", (event) => {

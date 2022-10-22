@@ -340,9 +340,9 @@ button {
 }
 
 .frame {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  height: 3rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  min-height: 3rem;
   place-items: center;
   display: flex;
 }
@@ -414,7 +414,7 @@ button {
 }
 
 .modal-outer {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   bottom: 0;

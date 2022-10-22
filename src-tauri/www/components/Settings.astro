@@ -1,4 +1,5 @@
 ---
+import LicenseInput from "./LicenseInput.astro";
 import Close from "./Svgs/Close.astro";
 import Switch from "./Switch.astro";
 ---
@@ -28,7 +29,7 @@ import Switch from "./Switch.astro";
         <Switch id="lowpower-select" name={"proxy"} />
       </div>
 
-      <form id="fsform" class="ph frame flex-row center-align">
+      <form class="ph frame flex-row center-align">
         <label for="target-select">Target</label>
         <div class="ph">
           <select name="target" id="target-select"></select>
@@ -36,7 +37,6 @@ import Switch from "./Switch.astro";
         <div class="flex align-end">
           <div>
             <button type="button" class="button" id="fs-delete">Delete</button>
-            <button type="submit" class="button btn-primary">Update</button>
           </div>
         </div>
       </form>
@@ -54,17 +54,8 @@ import Switch from "./Switch.astro";
         <button class="btn-primary button">Upload</button>
       </form>
 
-      <form id="ulicense" class="ph frame flex-row center-align">
-        <label for="license">License Key</label>
-        <div class="ph">
-          <input
-            name="license"
-            placeholder="XXXX-XXXX-XXXXX-XXXXX-XXXXXX"
-            type="text"
-            class="license-input"
-          />
-        </div>
-        <button class="btn-primary button">Set License</button>
+      <form id="ulicense" class="ph">
+        <LicenseInput />
       </form>
     </div>
   </div>
@@ -74,6 +65,16 @@ import Switch from "./Switch.astro";
   #settings-container {
     -webkit-backface-visibility: hidden;
   }
+
+  .button {
+    border-radius: 4px;
+    border: 0;
+    background-color: #ebecf2;
+    color: #2f2768;
+    gap: 8px;
+    font-weight: 600;
+  }
+
   .settings-bar {
     display: flex;
     place-items: center;
