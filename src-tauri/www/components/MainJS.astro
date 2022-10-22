@@ -89,6 +89,9 @@
   const proxySelect = document.getElementById(
     "proxy-select"
   ) as HTMLInputElement;
+  const lowpowerSelect = document.getElementById(
+    "lowpower-select"
+  ) as HTMLInputElement;
 
   if (list && !list.children.length) {
     emptyList.className = "block";
@@ -529,7 +532,6 @@
     }
 
     if (raw.startsWith(ptc)) {
-      // parse json for now
       const np = JSON.parse(raw);
       const path = np && np.path;
 
@@ -561,25 +563,19 @@
     }
 
     if (raw.startsWith(bftc)) {
-      // parse json for now
       const np = JSON.parse(raw);
 
       if (!defaultOptionSet) {
         defaultOptionSet = true;
         initialTarget = np.target;
-        const buffer = document.getElementById(
-          "buffer-select"
-        ) as HTMLOptionElement;
-        const proxyform = document.getElementById(
-          "proxy-select"
-        ) as HTMLInputElement;
 
-        if (buffer) {
-          buffer.value = np.buffer;
+        if (proxySelect) {
+          proxySelect.checked = np.proxy;
         }
-        if (proxyform) {
-          proxyform.checked = np.proxy;
+        if (lowpowerSelect) {
+          lowpowerSelect.checked = !!np.buffer;
         }
+
         if (torSelect) {
           torSelect.checked = np.tor;
         }
@@ -678,6 +674,11 @@
 
   proxySelect?.addEventListener("change", function (event) {
     socket.send("set-proxy " + this.checked);
+    event.preventDefault();
+  });
+
+  lowpowerSelect?.addEventListener("change", function (event) {
+    socket.send("set-buffer " + this.checked);
     event.preventDefault();
   });
 

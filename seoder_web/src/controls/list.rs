@@ -214,7 +214,7 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
 /// get config
 pub async fn config(mut outgoing: OutGoing) -> OutGoing {
     let mut timeout = 50;
-    let mut buffer = 50;
+    let mut buffer = false;
     let mut proxy = false;
     let mut tor = false;
     let mut target = string_concat!(ENTRY_PROGRAM.1, "/urls-input.txt"); // todo: fix target
@@ -241,7 +241,7 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
                         timeout = h1.parse::<u16>().unwrap_or(15);
                     }
                     if h0 == "buffer" {
-                        buffer = h1.parse::<u16>().unwrap_or(50);
+                        buffer = h1.parse::<bool>().unwrap_or(false);
                     }
 
                     if h0 == "proxy" {

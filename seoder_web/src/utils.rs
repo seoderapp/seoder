@@ -91,7 +91,7 @@ pub async fn init_config() {
 
         file.write_all(
             b"timeout 15
-buffer 30
+buffer false
 proxy false
 tor false
 license false

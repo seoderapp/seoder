@@ -28,16 +28,6 @@ pub struct Website {
     pub configuration: Configuration,
     /// Path to list of files.
     pub path: String,
-    /// Path to jsonl output.
-    pub jsonl_output_path: String,
-    /// Path to ok txt output.
-    pub ok_txt_output_path: String,
-    /// Path to ok txt invalid output.
-    pub okv_txt_output_path: String,
-    /// Path to connection error txt output.
-    pub cr_txt_output_path: String,
-    /// Path to all other outputs.
-    pub al_txt_output_path: String,
     /// custom engine to run
     pub engine: Engine,
 }
@@ -47,7 +37,7 @@ pub type Message = (String, (String, ResponseOutFileType), bool);
 
 lazy_static! {
     /// application global configurations
-    pub static ref CONFIG: (String, Duration, usize, (bool, bool), Engine) = setup(false);
+    pub static ref CONFIG: (String, Duration, bool, (bool, bool), Engine) = setup(false);
 }
 
 #[derive(Debug, Default, Clone)]
@@ -80,11 +70,6 @@ impl Website {
             } else {
                 "urls-input.txt".to_string()
             },
-            jsonl_output_path: "output.jsonl".to_string(),
-            ok_txt_output_path: "ok-valid_json.txt".to_string(),
-            okv_txt_output_path: "ok-not_valid_json.txt".to_string(),
-            cr_txt_output_path: "connection_error.txt".to_string(),
-            al_txt_output_path: "all-others.txt".to_string(),
             engine: Engine::default(),
         }
     }
@@ -177,7 +162,12 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
-        let spawn_limit = CONFIG.2 * num_cpus::get();
+        let spawn_limit = if !CONFIG.2 {
+            num_cpus::get() / 2
+        } else {
+            // todo: use custom stats to determine number
+            33 * num_cpus::get()
+        };
 
         // hard main spawn limit
         let global_thread_count = Arc::new(Mutex::new(0));

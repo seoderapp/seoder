@@ -16,7 +16,7 @@ pub struct Configuration {
 }
 
 /// configure application program api path, timeout, channel buffer, (proxy, tor), and engine
-pub fn setup(eg: bool) -> (String, std::time::Duration, usize, (bool, bool), Engine) {
+pub fn setup(eg: bool) -> (String, std::time::Duration, bool, (bool, bool), Engine) {
     use std::fs::File;
     use std::io::prelude::*;
     use std::io::BufReader;
@@ -24,7 +24,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, (bool, bool), Eng
     let eg_enabled = std::env::var("ENGINE_FD").is_ok() || eg;
 
     let mut timeout: u64 = 15;
-    let mut buffer: usize = 100;
+    let mut buffer = false;
     let mut proxy = false;
     let mut tor = false;
 
@@ -47,7 +47,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, usize, (bool, bool), Eng
                             timeout = v.parse::<u64>().unwrap_or(15);
                         }
                         if cf == "buffer" && !v.is_empty() {
-                            buffer = v.parse::<usize>().unwrap_or(100);
+                            buffer = v.parse::<bool>().unwrap_or(false);
                         }
                         if cf == "proxy" && !v.is_empty() {
                             proxy = v.parse::<bool>().unwrap_or(false);
