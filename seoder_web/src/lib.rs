@@ -250,7 +250,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             }
 
             if st == Action::SetList {
-                utils::write_config("target", &string_concat!(&ENTRY_PROGRAM.1, &input)).await;
+                if !input.is_empty() {
+                    utils::write_config("target", &string_concat!(&ENTRY_PROGRAM.1, &input)).await;
+                }
             }
         }
     });

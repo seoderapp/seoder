@@ -35,10 +35,14 @@ pub async fn lines_to_vec(pt: String) -> Vec<String> {
 
 /// write to config file
 pub async fn write_config(config: &str, input: &String) {
+    // exit if empty input
+    if input.is_empty() {
+        return;
+    }
+
     let file = OpenOptions::new().read(true).open(&ENTRY_PROGRAM.2).await;
 
     let mut sl: Vec<String> = vec![];
-
     let mut found_match = false;
 
     match file {
@@ -89,17 +93,19 @@ pub async fn init_config() {
     // setup one time config
     if !conf {
         let mut file = File::create(&loc).await.unwrap();
+        let target = string_concat!("target ", ENTRY_PROGRAM.1, "urls-input.txt");
 
-        file.write_all(
+        file.write(
             b"timeout 15
 buffer false
 proxy false
 tor false
-license false
-target ./urls-input.txt",
+license false\n",
         )
         .await
         .unwrap();
+
+        file.write(&target.as_bytes()).await.unwrap();
     }
 }
 
@@ -138,7 +144,7 @@ pub async fn validate_program(key: &str) -> bool {
 /// download latest free public proxies
 pub async fn download_proxies() -> bool {
     use hyper::body::HttpBody;
-    let endpoint = "https://raw.githubusercontent.com/shiftytr/proxy-list/master/proxy.txt";
+    let endpoint = "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all";
     let req = Request::builder()
         .method(Method::GET)
         .uri(endpoint)

@@ -384,11 +384,11 @@ button {
   color: #2f2768;
   gap: 8px;
   font-weight: 600;
+  font-size: 1rem;
 }
 
 .panel-btn-ctn {
   padding-right: 2px;
-  font-size: 1rem;
 }
 
 #empty-list {
@@ -399,15 +399,6 @@ button {
 
 .grid-space {
   padding-top: 2rem;
-}
-
-.campaign-button {
-  background-color: #e8c01a;
-  color: rgba(47, 39, 104, 1);
-  width: 100%;
-  min-height: 56px;
-  font-size: 16px;
-  gap: 8px;
 }
 
 .center {

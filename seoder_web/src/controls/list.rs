@@ -20,46 +20,69 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
         if child.metadata().await.unwrap().is_dir() {
             let dpt = child.path().to_str().unwrap().to_owned();
 
-            if !dpt.ends_with("/valid") {
-                let file = OpenOptions::new()
-                    .read(true)
-                    .open(string_concat!(dpt, "/valid/links.txt"))
-                    .await;
+            let file = OpenOptions::new()
+                .read(true)
+                .open(string_concat!(dpt, "/valid/links.txt"))
+                .await;
 
-                let mut lns = 0;
+            let invalid_file = OpenOptions::new()
+                .read(true)
+                .open(string_concat!(dpt, "/invalid/links.txt"))
+                .await;
 
-                let mut d = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
+            let mut d = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
 
-                if d.starts_with("/") {
-                    d.remove(0);
-                }
-
-                match file {
-                    Ok(file) => {
-                        let reader = BufReader::new(file);
-                        let mut lines = reader.lines();
-
-                        while let Some(url) = lines.next_line().await.unwrap() {
-                            let v = json!({ "url": url, "path": d });
-
-                            outgoing
-                                .send(Message::Text(v.to_string()))
-                                .await
-                                .unwrap_or_default();
-
-                            lns += 1;
-                        }
-                    }
-                    _ => {}
-                };
-
-                let v = json!({ "count": lns, "path": d });
-
-                outgoing
-                    .send(Message::Text(v.to_string()))
-                    .await
-                    .unwrap_or_default();
+            if d.starts_with("/") {
+                d.remove(0);
             }
+
+            let mut lns = 0;
+            let mut ilns = 0;
+
+            match file {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let mut lines = reader.lines();
+
+                    while let Some(url) = lines.next_line().await.unwrap() {
+                        let v = json!({ "url": url, "path": d });
+
+                        outgoing
+                            .send(Message::Text(v.to_string()))
+                            .await
+                            .unwrap_or_default();
+
+                        lns += 1;
+                    }
+                }
+                _ => {}
+            };
+
+            match invalid_file {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let mut lines = reader.lines();
+
+                    while let Some(url) = lines.next_line().await.unwrap() {
+                        let v = json!({ "invalid_url": url, "invalid_path": d });
+
+                        outgoing
+                            .send(Message::Text(v.to_string()))
+                            .await
+                            .unwrap_or_default();
+
+                        ilns += 1;
+                    }
+                }
+                _ => {}
+            };
+
+            let v = json!({ "count": lns, "ecount": ilns, "path": d });
+
+            outgoing
+                .send(Message::Text(v.to_string()))
+                .await
+                .unwrap_or_default();
         }
     }
 
@@ -264,7 +287,11 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
                         let path = std::path::Path::new(&h1);
                         let filename = path.file_name().unwrap();
 
-                        target = filename.to_str().unwrap_or_default().to_string();
+                        let f = filename.to_str().unwrap_or_default().to_string();
+
+                        if !f.is_empty() {
+                            target = f;
+                        }
                     }
                 }
             }

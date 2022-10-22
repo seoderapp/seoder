@@ -1,4 +1,7 @@
 ---
+import NewCampaignButton from "./Buttons/NewCampaignButton.astro";
+import RunAllButton from "./Buttons/RunAllButton.astro";
+import { RunSelectedButton } from "./Buttons/RunSelectedButton";
 import SettingsButton from "./Buttons/SettingsButton.astro";
 import LogoLight from "./Logos/LogoLight.astro";
 ---
@@ -14,28 +17,12 @@ import LogoLight from "./Logos/LogoLight.astro";
   </div>
   <div class="flex-row spaceless full-w">
     <div class="panel-btn-ctn full-w gutter">
-      <button
-        id="new-campaign-button"
-        class="panel-btn button btn-primary full-w campaign-button center"
-      >
-        <img src="/assets/new.svg" alt="" />
-        <div>New Campaign</div>
-      </button>
+      <NewCampaignButton />
     </div>
   </div>
 
   <div class="flex-row spaceless">
-    <form id="rsform" class="panel-btn-ctn full-w">
-      <button id="run-selected" class="panel-btn full-w center" type="submit">
-        <img src="/assets/run.svg" alt="" />
-        <div>Run Selected</div>
-      </button>
-    </form>
-    <form id="rform" class="panel-btn-ctn full-w">
-      <button type="submit" class="panel-btn full-w center">
-        <img src="/assets/run-all.svg" alt="" />
-        <div>Run All</div>
-      </button>
-    </form>
+    <RunSelectedButton client:load />
+    <RunAllButton />
   </div>
 </div>

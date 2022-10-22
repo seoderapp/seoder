@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@astrojs/react": "^1.2.0",
+    "@nanostores/react": "^0.4.0",
     "astro": "^1.5.0",
     "nanostores": "^0.7.0",
     "react": "^18.2.0",

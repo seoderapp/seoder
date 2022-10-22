@@ -6,6 +6,7 @@ declare global {
 
 <script>
   // import { profile } from "../stores/profile";
+  import { selectAction } from "../stores/engine";
 
   // license control [determine screens] quickly
   const program = document.getElementById("appProgram");
@@ -87,7 +88,9 @@ declare global {
   const netstatsUp = document.getElementById("network-stats-up");
   const netstatsTotal = document.getElementById("network-stats-total");
 
-  const logfeed = document.getElementById("feed-log");
+  const logfeed = document.getElementById("feed-log"); // valid feed log
+  const invalidLogfeed = document.getElementById("error-log"); // invalid log
+
   const list = document.getElementById("engine-list");
   // settings
   const settingsContainer = document.getElementById("settings-container");
@@ -100,7 +103,9 @@ declare global {
   const campaignCreateForm = document.getElementById("campaign-create-form");
   // empty selectors
   const emptyList = document.getElementById("empty-list");
-  const feedEmpty = document.getElementById("feed-start");
+  const feedEmpty = document.getElementById("feed-start"); // feed log empty
+  const errorEmpty = document.getElementById("error-start"); // feed log empty
+
   // tor
   const torSelect = document.getElementById("tor-select") as HTMLInputElement;
   const proxySelect = document.getElementById(
@@ -152,8 +157,6 @@ declare global {
 
   let initialTarget = "";
 
-  // todo toggle license button on main form
-
   /*
    * List of web socket matchers * special for high performance
    */
@@ -165,17 +168,19 @@ declare global {
   const dfpath = "{" + '"' + "dfpath" + '"'; // deleted file
   const deptc = "{" + '"' + "depath" + '"'; // deleted campaign
   const cfin = "{" + '"' + "finished" + '"'; // crawl finished
+  const vpaths = "{" + '"' + "path" + '"' + ":" + '"'; // valid paths
+  const ipaths = "{" + '"' + "invalid_path" + '"' + ":" + '"'; // invalid paths
+  const vlicense = "{" + '"' + "license"; // valid license;
 
   // defaults for program entry
   let defaultOptionSet = false;
-
   let firstCheck = false;
 
   function eventSub(event) {
     const raw = event.data;
 
     // license handling
-    if (raw.startsWith("{" + '"' + "license")) {
+    if (raw.startsWith(vlicense)) {
       const data = JSON.parse(raw);
       const { license } = data || {};
 
@@ -275,7 +280,33 @@ declare global {
       return;
     }
 
-    if (raw.startsWith("{" + '"' + "path" + '"' + ":" + '"')) {
+    if (raw.startsWith(ipaths)) {
+      const np = JSON.parse(raw);
+      const { invalid_url: url, invalid_path: path } = np || {};
+
+      if (engineMap.has(path)) {
+        const item = engineMap.get(path);
+
+        if (errorEmpty && !invalidLogfeed.children.length) {
+          errorEmpty.className = "hidden";
+        }
+
+        // todo: swap current log
+        if (url && item.invalidUrls && !item.invalidUrls.has(url)) {
+          item.invalidUrls.add(url);
+
+          if (invalidLogfeed) {
+            const logc = document.createElement("li");
+            logc.innerText = url;
+
+            invalidLogfeed.appendChild(logc);
+          }
+        }
+      }
+      return;
+    }
+
+    if (raw.startsWith(vpaths)) {
       const np = JSON.parse(raw);
       const { url, path } = np || {};
 
@@ -364,6 +395,7 @@ declare global {
           total: 0,
           valid: 0,
           urls: new Set(),
+          invalidUrls: new Set(),
         });
 
         // exit if list does not exist
@@ -468,8 +500,10 @@ declare global {
 
         cellBtnRunButton.addEventListener("click", (event) => {
           event.preventDefault();
+
           if (engineMap.has(path)) {
             logfeed.replaceChildren();
+            invalidLogfeed.replaceChildren();
           }
 
           cellStatus.textContent = "Running";
@@ -479,32 +513,37 @@ declare global {
 
         // todo: replace feed
         cellButtonWrapper.addEventListener("click", (event) => {
-          if (engineMap.has(path)) {
-            // clear on new select
-            if (selected && selected !== path) {
-              logfeed.replaceChildren();
-              // TODO: replace feed with new links
-            }
+          event.preventDefault();
+          const ac = selectAction(path);
 
-            if (feedEmpty && !logfeed.children.length) {
-              feedEmpty.className = "hidden";
-            }
+          // clear on new select
+          if (selected && selected !== path) {
+            logfeed.replaceChildren();
+            // TODO: replace feed with new links
+          }
+
+          if (feedEmpty && !logfeed.children.length) {
+            feedEmpty.className = "hidden";
           }
 
           const active = document.getElementsByClassName(
             "cell-btn cell-btn-active"
           );
 
-          if (active) {
+          if (!ac && active) {
             for (let i = 0; i < active.length; i++) {
-              active[i].className = "cell-btn";
+              if (active[i].className === "cell-btn cell-btn-active") {
+                active[i].className = "cell-btn";
+              }
             }
           }
 
-          selected = path;
+          if (ac) {
+            cellButtonWrapper.className = "cell-btn cell-btn-active";
+          }
 
-          cellButtonWrapper.className = "cell-btn cell-btn-active";
-          event.preventDefault();
+          // todo: remove extra selected var
+          selected = path;
         });
 
         cellBtnDeleteButton.addEventListener("click", (event) => {
@@ -654,6 +693,8 @@ declare global {
       if (engineMap.has(selected)) {
         const e = engineMap.get(selected);
         e.url = [];
+        e.invalidUrls = [];
+
         // todo: replace it with new selected engine map
         logfeed.replaceChildren();
       }

@@ -58,6 +58,7 @@ pub async fn store_fs_io_matching(
         while let Some(entry) = entries.next_entry().await.unwrap() {
             let e = entry.path().to_str().unwrap().to_owned();
             let cmp_base = string_concat!(&e, "/valid");
+            let cmp_invalid = string_concat!(&e, "/invalid");
 
             // only iterate through directory contents
             if !match tokio::fs::metadata(&cmp_base).await {
@@ -68,6 +69,7 @@ pub async fn store_fs_io_matching(
             }
 
             let mut o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
+            let mut oo = create_file(&string_concat!(&cmp_invalid, "/links.txt")).await;
 
             while let Some(i) = rx.recv().await {
                 let (link, jor, spawned) = i;
@@ -78,18 +80,14 @@ pub async fn store_fs_io_matching(
                 }
 
                 let error = response.starts_with("- error ");
-                let link = if error {
-                    string_concat!(response.replacen("- error ", "", 1), "\n")
-                } else {
-                    string_concat!(link, "\n")
-                };
+                let link = string_concat!(link, "\n");
 
                 if response == "" || error {
+                    oo.write(&link.as_bytes()).await.unwrap();
                     continue;
                 }
 
                 let response = response.clone();
-
                 let rgx = rgx.clone();
 
                 if source_match {
@@ -132,21 +130,26 @@ pub async fn store_fs_io_matching(
             }
         }
     } else {
-        let cmp_base = string_concat!(ENTRY_PROGRAM.0, path);
+        let cmp = string_concat!(ENTRY_PROGRAM.0, path);
 
-        match tokio::fs::metadata(&cmp_base).await {
+        match tokio::fs::metadata(&cmp).await {
             Ok(_) => (),
             _ => {
-                tokio::fs::create_dir(&cmp_base).await.unwrap_or_default();
+                tokio::fs::create_dir(&cmp).await.unwrap_or_default();
                 ()
             }
         }
 
-        let cmp_base = string_concat!(&cmp_base, "/valid");
+        let cmp_base = string_concat!(&cmp, "/valid");
+        let cmp_invalid = string_concat!(&cmp, "/invalid");
 
         tokio::fs::create_dir(&&cmp_base).await.unwrap_or_default();
+        tokio::fs::create_dir(&&cmp_invalid)
+            .await
+            .unwrap_or_default();
 
         let mut o = create_file(&&string_concat!(&cmp_base, "/links.txt")).await;
+        let mut oo = create_file(&&string_concat!(&cmp_invalid, "/links.txt")).await;
 
         while let Some(i) = rx.recv().await {
             let (link, jor, spawned) = i;
@@ -157,12 +160,12 @@ pub async fn store_fs_io_matching(
             }
 
             let error = response.starts_with("- error ");
+            let link = string_concat!(&link, "\n");
 
             if response == "" || error {
+                oo.write(&link.as_bytes()).await.unwrap();
                 continue;
             }
-
-            let link = string_concat!(link, "\n");
 
             if source_match {
                 let result = rgx.is_match(&response);

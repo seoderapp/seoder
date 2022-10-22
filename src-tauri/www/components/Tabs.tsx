@@ -51,7 +51,7 @@ export const Tabs = () => {
         role="tabpanel"
         aria-labelledby="tab-console"
       >
-        <Log id={"feed-errors"} emptyId={"feed-errors"} />
+        <Log id={"error-log"} emptyId={"error-start"} />
       </div>
     </div>
   );

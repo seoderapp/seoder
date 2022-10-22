@@ -101,9 +101,15 @@ impl Website {
                 }
             }
             Err(_) => {
-                log("headers.txt file does not exist", "");
+                log("create a headers.txt file to add headers to request", "");
             }
         };
+
+        let (proxy, tor) = CONFIG.3;
+
+        let delay_timout = proxy || tor;
+
+        let delay = if delay_timout { CONFIG.1 * 2 } else { CONFIG.1 };
 
         let mut client = Client::builder()
             .default_headers(headers)
@@ -114,22 +120,20 @@ impl Website {
             })
             .tcp_keepalive(None)
             .pool_max_idle_per_host(0)
-            // .proxy(proxy)
             .brotli(true)
             .gzip(true)
             .use_native_tls()
             .tcp_nodelay(false)
-            .connect_timeout(CONFIG.1.div_f32(1.8))
-            .timeout(CONFIG.1);
-
-        let (proxy, tor) = CONFIG.3;
+            .connect_timeout(delay.div_f32(1.8))
+            .timeout(delay);
 
         if tor {
             let proxy = reqwest::Proxy::all("socks5://127.0.0.1:9150").unwrap();
             client = client.proxy(proxy);
         }
 
-        if proxy {
+        // tor cannot be enabled
+        if proxy && !tor {
             match File::open(string_concat!(&ENTRY_PROGRAM.3, "proxies.txt")).await {
                 Ok(file) => {
                     let reader = BufReader::new(file);
@@ -137,7 +141,10 @@ impl Website {
 
                     while let Some(proxy) = lines.next_line().await.unwrap() {
                         if !proxy.is_empty() {
-                            client = client.proxy(reqwest::Proxy::http::<&str>(&proxy).unwrap());
+                            let prox =
+                                reqwest::Proxy::http::<String>(string_concat!(&"http://", &proxy))
+                                    .unwrap();
+                            client = client.proxy(prox);
                         }
                     }
                 }
@@ -212,7 +219,9 @@ impl Website {
                 let path = path.clone();
                 let path1 = path.clone();
 
-                let f = File::open(string_concat!(&ENTRY_PROGRAM.1, &p)).await.unwrap();
+                let f = File::open(string_concat!(&ENTRY_PROGRAM.1, &p))
+                    .await
+                    .unwrap();
 
                 task::spawn(async move {
                     let reader = BufReader::new(f);

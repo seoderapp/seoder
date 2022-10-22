@@ -45,7 +45,6 @@ pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>,
             let f = string_concat!(ENTRY_PROGRAM.0, &e, "/paths.txt");
             let paths = crate::utils::lines_to_vec(f).await;
             let f = string_concat!(ENTRY_PROGRAM.0, &e, "/patterns.txt");
-
             let patterns = crate::utils::lines_to_vec(f).await;
 
             (paths, patterns, selected_file)
