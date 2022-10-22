@@ -70,6 +70,9 @@
   });
 
   const netstats = document.getElementById("network-stats");
+  const netstatsUp = document.getElementById("network-stats-up");
+  const netstatsTotal = document.getElementById("network-stats-total");
+
   const logfeed = document.getElementById("feed-log");
   const list = document.getElementById("engine-list");
   // settings
@@ -221,12 +224,15 @@
       }
 
       if (netstats) {
-        netstats.innerHTML =
-          slowBytes(network_received) +
-          " | " +
-          slowBytes(network_transmited) +
-          " | " +
-          slowBytes(network_total_transmitted);
+        netstats.innerHTML = `${slowBytes(network_received)} / s`;
+      }
+
+      if (netstatsUp) {
+        netstatsUp.innerHTML = `${slowBytes(network_transmited)} / s`;
+      }
+
+      if (netstatsTotal) {
+        netstatsTotal.innerHTML = slowBytes(network_total_transmitted);
       }
 
       return;

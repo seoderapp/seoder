@@ -1,3 +1,8 @@
+---
+import ArrowDown from "./Svgs/ArrowDown.astro";
+import ArrowUp from "./Svgs/ArrowUp.astro";
+---
+
 <div class="grid-space">
   <div class="flex-row spaceless stats">
     <div class="text-center ph cpu-box">
@@ -10,8 +15,44 @@
     </div>
     <div class="stats-box ph">
       <div class="gutter stats-head">Network</div>
-      <div class="tild">Received, Transmited, Total Transmited</div>
-      <div id="network-stats" class="stats-bar gutter"></div>
+      <div class="stats-bar gutter net-row space">
+        <div class="net-row space-s net-cell">
+          <div id="network-stats"></div>
+          <ArrowDown />
+        </div>
+        <div class="net-row space-s net-cell">
+          <ArrowUp />
+          <div id="network-stats-up"></div>
+        </div>
+      </div>
+      <div class="stats-bar gutter net-row">
+        <div class="net-cell">
+          <div id="network-stats-total"></div>
+        </div>
+        <div>Total</div>
+      </div>
     </div>
   </div>
 </div>
+
+<style>
+  .net-row {
+    display: flex;
+    flex-direction: row;
+    place-items: center;
+    overflow: hidden;
+  }
+  .net-cell div {
+    width: 3.5rem;
+    font-size: 0.72rem;
+    text-overflow: ellipsis;
+    text-align: left;
+    overflow: hidden;
+  }
+  .space {
+    gap: 1rem;
+  }
+  .space-s {
+    gap: 0.15rem;
+  }
+</style>
