@@ -9,23 +9,25 @@ use warp::{
 };
 
 use crate::string_concat_impl;
-use seoder_lib::{string_concat::string_concat, tokio, ENTRY_PROGRAM};
+use seoder_lib::{string_concat::string_concat, tokio, ENTRY_PROGRAM, packages::spider::utils::logd};
 
 /// file server basic server init
 pub async fn file_server() {
-    let cors = warp::cors().allow_any_origin();
+    let cors = warp::cors()
+    .allow_any_origin();
+
     let upload_route = warp::path("upload")
         .and(warp::post())
         .and(warp::multipart::form().max_length(5_000_000))
-        .and_then(upload)
-        .with(&cors);
+        .and_then(upload).with(&cors);
 
     let download_route = warp::path("download")
-        .and(warp::fs::dir(ENTRY_PROGRAM.0.to_string()))
-        .with(&cors);
-    let router = upload_route.or(download_route).recover(handle_rejection);
+        .and(warp::fs::dir(ENTRY_PROGRAM.0.to_string())).with(&cors);
+
+    let router = upload_route.or(download_route).recover(handle_rejection).with(&cors);
 
     println!("Server started at localhost:7050");
+    
     warp::serve(router).run(([0, 0, 0, 0], 7050)).await;
 }
 
@@ -34,6 +36,7 @@ async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
         eprintln!("form error: {}", e);
         warp::reject::reject()
     })?;
+
 
     for p in parts {
         if p.name() == "file" {
@@ -44,12 +47,6 @@ async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
 
             match content_type {
                 Some(file_type) => match file_type {
-                    "application/pdf" => {
-                        file_ending = "pdf";
-                    }
-                    "image/png" => {
-                        file_ending = "png";
-                    }
                     "text/plain" => {
                         file_ending = "txt";
                     }
@@ -73,9 +70,9 @@ async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
             };
 
             let file_name = if d.ends_with(file_ending) {
-                string_concat!("./_db/files/", d)
+                string_concat!(&ENTRY_PROGRAM.1, d)
             } else {
-                string_concat!("./_db/files/", d, ".", file_ending)
+                string_concat!(&ENTRY_PROGRAM.1, d, ".", file_ending)
             };
 
             let value = p
@@ -95,7 +92,7 @@ async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
                 warp::reject::reject()
             })?;
 
-            println!("created file: {}", file_name);
+            logd(string_concat!("created file: ", file_name));
         }
     }
 

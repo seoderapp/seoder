@@ -435,7 +435,12 @@
           request.open("GET", url, true);
 
           request.onload = async function () {
-            await window.__TAURI__.fs.writeTextFile(filePath, request.response);
+            if (filePath && request.response) {
+              await window.__TAURI__.fs.writeTextFile(
+                filePath,
+                request.response
+              );
+            }
           };
 
           request.onerror = function () {
@@ -446,12 +451,14 @@
         });
 
         cellBtnRunButton.addEventListener("click", (event) => {
+          event.preventDefault();
           if (engineMap.has(path)) {
             logfeed.replaceChildren();
           }
 
+          cellStatus.textContent = "Running";
+
           socket.send("run-campaign " + path);
-          event.preventDefault();
         });
 
         // todo: replace feed
@@ -611,22 +618,19 @@
   const fsDelete = document.getElementById("fs-delete");
 
   uploadform?.addEventListener("submit", (event) => {
+    event.preventDefault();
     const url = "http://localhost:7050/upload";
     const request = new XMLHttpRequest();
 
     request.open("POST", url, true);
 
-    request.onload = function () {
-      // console.log(request.responseText);
-      // todo: upload complete
-    };
+    request.onload = function () {};
 
     request.onerror = function () {
       // request failed
     };
 
     request.send(new FormData(event.target as HTMLFormElement));
-    event.preventDefault();
   });
 
   rsform?.addEventListener("submit", (event) => {

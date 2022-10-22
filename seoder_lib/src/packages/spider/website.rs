@@ -162,7 +162,7 @@ impl Website {
 
     /// Start to crawl website concurrently using gRPC callback
     async fn crawl_concurrent(&mut self, client: Client) {
-        let spawn_limit = if !CONFIG.2 {
+        let spawn_limit = if CONFIG.2 {
             num_cpus::get() / 2
         } else {
             // todo: use custom stats to determine number
