@@ -27,6 +27,7 @@ pub async fn store_fs_io_matching(
     mut rx: UnboundedReceiver<Message>,
     global_thread_count: Arc<Mutex<usize>>,
 ) {
+    // todo: conditional lazy static
     lazy_static! {
         static ref SELECTOR: Selector =
             Selector::parse("body > *:not(script):not(noscript):not(css):not(style):not(link)")
@@ -35,6 +36,7 @@ pub async fn store_fs_io_matching(
 
     let path = &campaign.name;
     let patterns = &campaign.patterns;
+    let source_match = campaign.source_match;
 
     let rgx = RegexSet::new(if !&patterns.is_empty() {
         patterns
@@ -42,10 +44,6 @@ pub async fn store_fs_io_matching(
         &CONFIG.4.campaign.patterns
     })
     .unwrap();
-
-    task::yield_now().await;
-
-    let source_match = campaign.source_match;
 
     // if campaign is empty loop through all folders and spawn custom threads
     if path.is_empty() {
@@ -121,8 +119,6 @@ pub async fn store_fs_io_matching(
                     }
                 });
 
-                task::yield_now().await;
-
                 match rxx.await {
                     Ok(v) => {
                         let result = rgx.is_match(&v.join(""));
@@ -193,8 +189,6 @@ pub async fn store_fs_io_matching(
                         logd("the receiver dropped");
                     }
                 });
-
-                task::yield_now().await;
 
                 match rxx.await {
                     Ok(v) => {

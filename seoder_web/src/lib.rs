@@ -362,7 +362,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                     create_dir(&db_dir).await.unwrap();
                     create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
-                    create_dir(&string_concat!(db_dir, "/invalid")).await.unwrap();
+                    create_dir(&string_concat!(db_dir, "/invalid"))
+                        .await
+                        .unwrap();
 
                     let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
                         .await

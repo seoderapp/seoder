@@ -152,7 +152,6 @@ pub async fn download_proxies() -> bool {
 
     let mut resp = client.request(req).await.unwrap_or_default();
 
-
     let file_path = string_concat!(&ENTRY_PROGRAM.3, "proxies.txt");
 
     let mut file = File::create(&file_path).await.unwrap();

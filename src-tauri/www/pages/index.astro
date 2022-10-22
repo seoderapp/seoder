@@ -7,9 +7,9 @@ import Settings from "../components/Settings.astro";
 import Stats from "../components/Stats.astro";
 import Campaign from "../components/Campaign.astro";
 import Menu from "../components/Menu.astro";
-import Log from "../components/Log.astro";
 import Intro from "../components/Intro.astro";
 import Program from "../components/Program.astro";
+import { Tabs } from "../components/Tabs";
 ---
 
 <Layout title="Seoder - The marketing lead generation tool">
@@ -21,7 +21,7 @@ import Program from "../components/Program.astro";
         <Campaign />
       </Fragment>
       <Fragment slot="right">
-        <Log />
+        <Tabs client:load />
         <Stats />
       </Fragment>
     </Program>

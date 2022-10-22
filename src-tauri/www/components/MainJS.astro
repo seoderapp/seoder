@@ -119,6 +119,8 @@ declare global {
 
   if (logfeed && !logfeed.children.length) {
     feedEmpty.className = "block";
+  } else if (feedEmpty) {
+    feedEmpty.className = "hidden";
   }
 
   newCampaignButton?.addEventListener("click", () => {
@@ -279,6 +281,10 @@ declare global {
 
       if (engineMap.has(path)) {
         const item = engineMap.get(path);
+
+        if (feedEmpty && !logfeed.children.length) {
+          feedEmpty.className = "hidden";
+        }
 
         // todo: swap current log
         if (url && item.urls && !item.urls.has(url)) {
@@ -480,7 +486,7 @@ declare global {
               // TODO: replace feed with new links
             }
 
-            if (!logfeed.children.length) {
+            if (feedEmpty && !logfeed.children.length) {
               feedEmpty.className = "hidden";
             }
           }
@@ -683,7 +689,6 @@ declare global {
   });
 
   fileSelect?.addEventListener("change", function (event) {
-    console.log(this.value);
     socket.send("set-list " + this.value);
     event.preventDefault();
   });

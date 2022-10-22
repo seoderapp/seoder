@@ -212,12 +212,7 @@ impl Website {
                 let path = path.clone();
                 let path1 = path.clone();
 
-                let f = if tokio::fs::metadata(&p).await.is_ok() {
-                    p
-                } else {
-                    string_concat!("../", &p)
-                };
-                let f = File::open(&f).await.unwrap();
+                let f = File::open(string_concat!(&ENTRY_PROGRAM.1, &p)).await.unwrap();
 
                 task::spawn(async move {
                     let reader = BufReader::new(f);

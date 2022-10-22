@@ -221,7 +221,7 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
     let mut buffer = false;
     let mut proxy = false;
     let mut tor = false;
-    let mut target = string_concat!(ENTRY_PROGRAM.1, "/urls-input.txt"); // todo: fix target
+    let mut target = string_concat!(ENTRY_PROGRAM.1, "urls-input.txt"); // todo: fix target
     let mut license = String::from("");
     let file = OpenOptions::new().read(true).open(&ENTRY_PROGRAM.2).await;
 

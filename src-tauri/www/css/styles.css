@@ -460,10 +460,6 @@ button {
   font-size: 1rem;
 }
 
-#feed-log li {
-  padding: 0.2rem 0;
-}
-
 #campaign-create-form,
 #settings-container {
   -webkit-backface-visibility: hidden;
