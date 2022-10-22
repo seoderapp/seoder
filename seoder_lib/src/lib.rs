@@ -31,7 +31,7 @@ lazy_static! {
             string_concat!(data_dir, "/seoder/engines/"),
             string_concat!(data_dir, "/seoder/files/"),
             string_concat!(data_dir, "/seoder/config.txt"),
-            data_dir
+            string_concat!(data_dir, "/seoder/"),
         )
     };
 }

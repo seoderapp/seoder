@@ -72,7 +72,13 @@ pub async fn list_files(mut outgoing: OutGoing) -> OutGoing {
 
     while let Some(child) = dir.next_entry().await.unwrap_or_default() {
         if child.metadata().await.unwrap().is_file() {
-            let dpt = child.path().file_name().unwrap().to_str().unwrap_or_default().to_owned();
+            let dpt = child
+                .path()
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap_or_default()
+                .to_owned();
 
             if dpt.ends_with(".txt") {
                 let v = json!({ "fpath": dpt });
@@ -258,14 +264,14 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
                         let path = std::path::Path::new(&h1);
                         let filename = path.file_name().unwrap();
 
-                        target =  filename.to_str().unwrap_or_default().to_string();
+                        target = filename.to_str().unwrap_or_default().to_string();
                     }
                 }
             }
         }
         _ => {}
     };
-    
+
     let sl = json!({
        "timeout": timeout,
        "buffer": buffer,

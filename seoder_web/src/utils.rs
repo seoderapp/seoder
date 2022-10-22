@@ -3,6 +3,7 @@ use std::path::Path;
 use crate::tokio::io::BufReader;
 
 use crate::string_concat_impl;
+use hyper::{Body, Client, Method, Request};
 use seoder_lib::packages::spider::utils::log;
 use seoder_lib::string_concat::string_concat;
 use seoder_lib::tokio;
@@ -104,8 +105,6 @@ target ./urls-input.txt",
 
 /// validate program license key external
 pub async fn validate_program(key: &str) -> bool {
-    use hyper::{Body, Client, Method, Request};
-
     let dev = cfg!(debug_assertions);
 
     let endpoint = if dev {
@@ -134,6 +133,36 @@ pub async fn validate_program(key: &str) -> bool {
     };
 
     resp.status().is_success() && !resp.headers().is_empty()
+}
+
+/// download latest free public proxies
+pub async fn download_proxies() -> bool {
+    use hyper::body::HttpBody;
+    let endpoint = "https://raw.githubusercontent.com/shiftytr/proxy-list/master/proxy.txt";
+    let req = Request::builder()
+        .method(Method::GET)
+        .uri(endpoint)
+        .header("content-type", "application/text")
+        .body(Body::from(""))
+        .unwrap_or_default();
+
+    use hyper_tls::HttpsConnector;
+    let https = HttpsConnector::new();
+    let client = Client::builder().build::<_, hyper::Body>(https);
+
+    let mut resp = client.request(req).await.unwrap_or_default();
+
+
+    let file_path = string_concat!(&ENTRY_PROGRAM.3, "proxies.txt");
+
+    let mut file = File::create(&file_path).await.unwrap();
+
+    while let Some(next) = resp.data().await {
+        let chunk = next.unwrap_or_default();
+        file.write(&chunk).await.unwrap();
+    }
+
+    true
 }
 
 /// read file to target

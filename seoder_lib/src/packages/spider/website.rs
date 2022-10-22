@@ -1,3 +1,5 @@
+use crate::ENTRY_PROGRAM;
+
 use super::configuration::{setup, Configuration};
 use super::fs::store_fs_io_matching;
 use super::utils::fetch_page_html;
@@ -128,7 +130,7 @@ impl Website {
         }
 
         if proxy {
-            match File::open("proxies.txt").await {
+            match File::open(string_concat!(&ENTRY_PROGRAM.3, "proxies.txt")).await {
                 Ok(file) => {
                     let reader = BufReader::new(file);
                     let mut lines = reader.lines();

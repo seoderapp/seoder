@@ -22,6 +22,7 @@ use serde::{Deserialize, Serialize};
 use sysinfo::{System, SystemExt};
 use tokio_tungstenite::WebSocketStream;
 use tungstenite::{Message, Result};
+use utils::download_proxies;
 
 use std::io::Error as IoError;
 use std::{
@@ -361,6 +362,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                     create_dir(&db_dir).await.unwrap();
                     create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
+                    create_dir(&string_concat!(db_dir, "/invalid")).await.unwrap();
 
                     let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
                         .await
@@ -517,6 +519,8 @@ pub async fn start() -> Result<(), IoError> {
     env_logger::init();
     seoder_lib::init().await;
     utils::init_config().await;
+
+    tokio::spawn(download_proxies());
 
     // server peer state
     let state = PeerMap::new(Mutex::new(HashMap::new()));
