@@ -286,7 +286,6 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
                     if h0 == "target" {
                         let path = std::path::Path::new(&h1);
                         let filename = path.file_name().unwrap();
-
                         let f = filename.to_str().unwrap_or_default().to_string();
 
                         if !f.is_empty() {

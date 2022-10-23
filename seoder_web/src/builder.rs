@@ -22,10 +22,21 @@ pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>,
 
                 while let Some(line) = lines.next_line().await.unwrap() {
                     let hh = line.split(" ").collect::<Vec<&str>>();
-
+                    let h0 = hh[0];
+                    let mut h1 = hh[1].to_string();
+                    
+                    // todo: push all into array after first index
+                    if hh.len() == 3 {
+                        h1.push_str(hh[2]);
+                    }
+                    
                     if hh.len() == 2 {
-                        if hh[0] == "target" {
-                            target = hh[1].to_string();
+                        if h0 == "target" {
+                            let path = std::path::Path::new(&h1);
+                            let filename = path.file_name().unwrap();
+                            let f = filename.to_str().unwrap_or_default().to_string();
+
+                            target = f.to_string();
                         }
                     }
                 }

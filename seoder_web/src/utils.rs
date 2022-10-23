@@ -94,7 +94,6 @@ pub async fn init_config() {
     // setup one time config
     if !conf {
         let mut file = File::create(&loc).await.unwrap();
-        let target = string_concat!("target ", ENTRY_PROGRAM.1, "urls-input.txt");
 
         file.write(
             b"timeout 15
@@ -105,6 +104,8 @@ license false\n",
         )
         .await
         .unwrap();
+
+        let target = string_concat!("target ", ENTRY_PROGRAM.1, "urls-input.txt");
 
         file.write(&target.as_bytes()).await.unwrap();
     }
@@ -177,7 +178,7 @@ pub async fn download_proxies() -> bool {
 
 /// read file to target
 pub async fn get_file_value(path: &str, value: &str) -> String {
-    let mut target = String::from("");
+    let mut v = String::from("");
 
     match OpenOptions::new().read(true).open(&path).await {
         Ok(file) => {
@@ -189,7 +190,7 @@ pub async fn get_file_value(path: &str, value: &str) -> String {
 
                 if hh.len() == 2 {
                     if hh[0] == value {
-                        target = hh[1].to_string();
+                        v = hh[1].to_string();
                     }
                 }
             }
@@ -197,5 +198,5 @@ pub async fn get_file_value(path: &str, value: &str) -> String {
         _ => {}
     };
 
-    target
+    v
 }
