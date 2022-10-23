@@ -1,0 +1,21 @@
+---
+import AnchorButton from "./AnchorButton.astro";
+import LogoLight from "./LogoLight.astro";
+---
+
+<nav>
+  <a href={"/"}>
+    <LogoLight />
+  </a>
+  <AnchorButton href="/payments" title={"BUY NOW"} />
+</nav>
+
+<style>
+  nav {
+    padding: 0.2rem 0.7rem;
+    display: flex;
+    flex-direction: row;
+    place-content: space-between;
+    align-items: center;
+  }
+</style>

@@ -5,30 +5,35 @@ import Footer from "../components/Footer.astro";
 import Apple from "../components/Logos/Apple.astro";
 import Linux from "../components/Logos/Linux.astro";
 import Windows from "../components/Logos/Windows.astro";
+import Navbar from "../components/Navbar.astro";
+import AnchorButton from "../components/AnchorButton.astro";
 ---
 
 <Layout title="Seoder - The marketing lead generation tool">
   <main>
+    <Navbar />
     <div class="prog">
-      <h1>Welcome to <span class="text-gradient">Seoder</span></h1>
-      <p class="instructions">
-        The best marketing lead generation tool<br />
-      </p>
-      <img
-        src="/bg.png"
-        class="bg"
-        height={400}
-        width={400}
-        alt="Seoder app intro display"
-      />
-      <h2>Purchase License</h2>
-      <p>You can purchase a license now to use the product once it is ready.</p>
+      <div class="flex-wrap">
+        <div>
+          <h1>Find keywords in bulk links quickly</h1>
+          <p class="instructions">
+            Import thousands of URLs and identify keywords {`you’re`} looking for
+          </p>
+          <AnchorButton href="/payments" title={"BUY NOW"} />
+        </div>
+        <div>
+          <img
+            src="/bg.png"
+            class="bg"
+            height={333}
+            width={333}
+            alt="Seoder app intro display"
+          />
+        </div>
+      </div>
 
-      <Card
-        href="/payments"
-        title="Purchase"
-        body="Buy a license to use the product"
-      />
+      <h2>Targeted Marketing Campaigns</h2>
+      <p>Get the most out of a quick and easy lead generation tool</p>
 
       <h3>Downloads</h3>
 
@@ -75,15 +80,15 @@ import Windows from "../components/Logos/Windows.astro";
 <style>
   main {
     margin: auto;
-    max-width: 60ch;
     position: relative;
-    z-index: 2;
-    padding-top: 10%;
+    max-width: 100ch;
   }
   h1 {
     font-size: 3rem;
     font-weight: 800;
     margin: 0;
+    padding: 0;
+    max-width: 25rem;
   }
   .text-gradient {
     background-image: var(--accent-gradient);
@@ -94,11 +99,6 @@ import Windows from "../components/Logos/Windows.astro";
   }
   .instructions {
     line-height: 1.6;
-    margin: 1rem 0;
-    border: 1px solid rgba(var(--accent), 25%);
-    background-color: white;
-    padding: 1rem;
-    border-radius: 0.4rem;
   }
   .instructions code {
     font-size: 0.875em;
@@ -118,12 +118,23 @@ import Windows from "../components/Logos/Windows.astro";
     padding: 0;
   }
   .prog {
-    background: #fff;
-    border-radius: 0.5rem;
     padding: 1.5rem;
-    border: 3px solid black;
   }
   .bg {
     width: 100%;
+  }
+  .flex-wrap {
+    flex-wrap: wrap;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    text-align: left;
+  }
+  .flex-wrap a {
+    background: #d9d9d9;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    color: #000;
+    text-decoration: none;
   }
 </style>

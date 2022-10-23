@@ -1,4 +1,5 @@
 ---
+import Navbar from "../components/Navbar.astro";
 import Layout from "../layouts/Layout.astro";
 
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -6,43 +7,47 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 <Layout title="Welcome to Payments.">
   <main>
-    <h1>Welcome to <span class="text-gradient">Payments</span></h1>
-    <h2>License usage for Seoder</h2>
-    <p>The license is active for 1 year with up to 3 seats</p>
-    <form id="register">
-      <label for="first-name"> First name</label>
-      <br />
-      <input
-        type="text"
-        name="first-name"
-        id="first-name"
-        placeholder="Elliot"
-        required
-      />
-      <br />
-      <label for="last-name"> Last name</label>
-      <br />
-      <input
-        type="text"
-        name="last-name"
-        id="last-name"
-        placeholder="Alderson"
-        required
-      />
-      <br />
-      <label for="email"> Email</label>
-      <br />
-      <input
-        type="email"
-        name="email"
-        id="email"
-        placeholder="elliot@example.com"
-        required
-      />
-      <br />
-      <br />
-      <button type="submit">Buy Now</button>
-    </form>
+    <Navbar />
+    <div class={"prog"}>
+      <h1><span class="text-gradient">Purchase License</span></h1>
+      <h2>License for Seoder</h2>
+      <p>The license is active for 1 year with up to 3 seats</p>
+      <form id="register">
+        <div>
+          <label for="first-name">First name</label>
+          <input
+            type="text"
+            name="first-name"
+            id="first-name"
+            placeholder="Elliot"
+            required
+          />
+        </div>
+        <div>
+          <label for="last-name">Last name</label>
+          <input
+            type="text"
+            name="last-name"
+            id="last-name"
+            placeholder="Alderson"
+            required
+          />
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            placeholder="elliot@example.com"
+            required
+          />
+        </div>
+        <div class="button-container">
+          <button type="submit">Buy Now</button>
+        </div>
+      </form>
+    </div>
   </main>
 
   <script src="https://checkout.stripe.com/checkout.js" is:inline></script>
@@ -60,7 +65,6 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
           metadata: { stripeToken }, // Temporarily store this so our webhooks can do their thing
         };
 
-        // Create the Keygen user [todo: move to SS]
         const response = await fetch(`/api/keygen-account`, {
           method: "POST",
           headers: {
@@ -82,8 +86,7 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
           throw new Error(message);
         }
 
-        // All good! The webhooks will handle the rest. :)
-        register.parentNode.innerHTML = `Thanks for your purchase, ${data.attributes.firstName}! 👊💥`;
+        register.parentNode.innerHTML = `Thanks for your purchase, ${data.attributes.firstName}! 🚀`;
       },
     });
 
@@ -103,8 +106,8 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
 <style>
   main {
     margin: auto;
-    padding: 1.5rem;
-    max-width: 60ch;
+    position: relative;
+    max-width: 100ch;
   }
   h1 {
     font-size: 3rem;
@@ -118,22 +121,6 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
     background-size: 400%;
     background-position: 0%;
   }
-  .instructions {
-    line-height: 1.6;
-    margin: 1rem 0;
-    border: 1px solid rgba(var(--accent), 25%);
-    background-color: white;
-    padding: 1rem;
-    border-radius: 0.4rem;
-  }
-  .instructions code {
-    font-size: 0.875em;
-    font-weight: bold;
-    background: rgba(var(--accent), 12%);
-    color: rgb(var(--accent));
-    border-radius: 4px;
-    padding: 0.3em 0.45em;
-  }
   .instructions strong {
     color: rgb(var(--accent));
   }
@@ -142,5 +129,36 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
     grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
     gap: 1rem;
     padding: 0;
+  }
+  form {
+    padding: 0.6rem 0;
+  }
+  form label {
+    display: block;
+    padding: 0.3rem 0px;
+  }
+  form input {
+    border-radius: 0.3rem;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid #ccc;
+    min-width: 15rem;
+  }
+  .button-container {
+    padding: 1rem 0;
+  }
+  .prog {
+    padding: 1.5rem;
+  }
+  .button-container button {
+    text-transform: uppercase;
+    color: #2f2768;
+    border: 2px solid #2f2768;
+    padding: 0.5rem 0.8rem;
+    border-radius: 0.3rem;
+    min-width: 16.8rem;
+    margin: 0;
+  }
+  .button-container button:hover {
+    border-color: #4b3dbb;
   }
 </style>
