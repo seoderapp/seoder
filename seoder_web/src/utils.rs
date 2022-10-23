@@ -4,6 +4,7 @@ use crate::tokio::io::BufReader;
 
 use crate::string_concat_impl;
 use hyper::{Body, Client, Method, Request};
+use lazy_static::lazy_static;
 use seoder_lib::packages::spider::utils::log;
 use seoder_lib::string_concat::string_concat;
 use seoder_lib::tokio;
@@ -111,22 +112,26 @@ license false\n",
 
 /// validate program license key external
 pub async fn validate_program(key: &str) -> bool {
-    let dev = cfg!(debug_assertions);
-
-    let endpoint = if dev {
-        "http://127.0.0.1:3000/api/keygen-validate"
-    } else {
-        "https://seoder.io/api/keygen-validate"
-    };
+    lazy_static! {
+        /// url endpoint
+        pub static ref ENDPOINT: &'static str =  match std::env::var("DEV") {
+            Ok(_) => {
+                "http://127.0.0.1:3000/api/keygen-validate"
+            }
+            Err(_) => {
+                "https://seoder.io/api/keygen-validate"
+            }
+        };
+    }
 
     let req = Request::builder()
         .method(Method::POST)
-        .uri(endpoint)
+        .uri(*ENDPOINT)
         .header("content-type", "application/json")
         .body(Body::from(string_concat!(r#"{"key": ""#, key, r#""}"#)))
         .unwrap_or_default();
 
-    let resp = if dev {
+    let resp = if *ENDPOINT == "http://127.0.0.1:3000/api/keygen-validate" {
         let client = Client::new();
 
         client.request(req).await.unwrap_or_default()

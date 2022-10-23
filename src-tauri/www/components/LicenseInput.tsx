@@ -10,8 +10,7 @@ export default function LicenseInput() {
 
   const disabled = license.length < 30;
 
-  const clear = (e) => {
-    e.preventDefault();
+  const clear = () => {
     const ele = document.getElementById("settings-container");
     if (ele && ele.className !== "hidden") {
       ele.className = "hidden";
