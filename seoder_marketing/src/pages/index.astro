@@ -18,12 +18,17 @@ import Feature from "../components/Feature.astro";
       <section>
         <div class="flex-wrap">
           <div>
-            <h1 class="text-primary">Find keywords in bulk links quickly</h1>
+            <h1 class="text-primary title">
+              Find keywords in bulk links quickly
+            </h1>
             <p class="instructions text-primary">
-              Import thousands of URLs and identify keywords {`you’re`} looking for
+              Import thousands of domains and identify keywords {`you’re`} looking
+              for
             </p>
-            <AnchorButton href="/payments" title={"BUY NOW"} />
-            <p class="small">Try free 7 day trial</p>
+            <div class={"text-center"}>
+              <AnchorButton href="/payments" title={"BUY NOW"} />
+              <p class="trial">Try free 7 day trial</p>
+            </div>
           </div>
           <div>
             <img
@@ -130,6 +135,7 @@ import Feature from "../components/Feature.astro";
     position: relative;
     max-width: 100ch;
   }
+
   section {
     padding-bottom: 3rem;
   }
@@ -137,8 +143,23 @@ import Feature from "../components/Feature.astro";
     font-size: 1.7rem;
     max-width: 14rem;
   }
-  .small {
+
+  .title {
+    font-size: 3rem;
+    background: linear-gradient(92.87deg, #463a9c -3.43%, #be63c7 87.13%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+  }
+  .trial {
     font-size: 0.7rem;
+    color: #2f2768;
+    padding: 0.5rem 0;
+  }
+  .text-center {
+    max-width: 14rem;
+    text-align: center;
   }
   .center {
     text-align: center;
@@ -147,7 +168,7 @@ import Feature from "../components/Feature.astro";
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 4rem;
   }
   h1 {
     font-size: 3rem;
@@ -167,7 +188,9 @@ import Feature from "../components/Feature.astro";
     background-position: 0%;
   }
   .instructions {
-    line-height: 1.6;
+    font-size: 1.6rem;
+    max-width: 30rem;
+    color: #2f2768;
   }
   .instructions code {
     font-size: 0.875em;
@@ -187,7 +210,8 @@ import Feature from "../components/Feature.astro";
     padding: 0;
   }
   .link-card-grid-feat {
-    grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
+    flex: 1;
+    grid-template-columns: repeat(auto-fit, minmax(31ch, 1fr));
   }
   .prog {
     padding: 1.5rem;
