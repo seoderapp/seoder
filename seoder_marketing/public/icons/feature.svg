@@ -1,0 +1,7 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+<title>Feature icon</title>
+<circle cx="30" cy="30" r="30" fill="#2F2768"/>
+<path d="M30 20V34" stroke="white" stroke-width="2" stroke-miterlimit="10"/>
+<path d="M26 24L30 20L34 24" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="square"/>
+<path d="M35 28H38C38.5304 28 39.0391 28.2107 39.4142 28.5858C39.7893 28.9609 40 29.4696 40 30V38C40 38.5304 39.7893 39.0391 39.4142 39.4142C39.0391 39.7893 38.5304 40 38 40H22C21.4696 40 20.9609 39.7893 20.5858 39.4142C20.2107 39.0391 20 38.5304 20 38V30C20 29.4696 20.2107 28.9609 20.5858 28.5858C20.9609 28.2107 21.4696 28 22 28H25" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="square"/>
+</svg>

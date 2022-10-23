@@ -1,0 +1,47 @@
+---
+export interface Props {
+  title: string;
+  body: string;
+  img: string;
+  soon?: boolean;
+}
+
+const { img, title, body, soon } = Astro.props;
+---
+
+<li>
+  <div class="row">
+    <div>
+      <img src={img} alt="" />
+    </div>
+    <div>
+      <h3>{title}</h3>
+      <p>{body}</p>
+      {soon ? <span class="soon">Coming Soon</span> : null}
+    </div>
+  </div>
+</li>
+
+<style>
+  h3 {
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    list-style-type: none;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }
+  .soon {
+    background: rgba(47, 39, 104, 0.2);
+    border-radius: 30px;
+    padding: 0.3rem 0.7rem;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 0.7rem;
+  }
+</style>

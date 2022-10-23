@@ -7,6 +7,8 @@ import Linux from "../components/Logos/Linux.astro";
 import Windows from "../components/Logos/Windows.astro";
 import Navbar from "../components/Navbar.astro";
 import AnchorButton from "../components/AnchorButton.astro";
+import Search from "../components/Svgs/Search.astro";
+import Feature from "../components/Feature.astro";
 ---
 
 <Layout title="Seoder - The marketing lead generation tool">
@@ -36,14 +38,55 @@ import AnchorButton from "../components/AnchorButton.astro";
       </section>
 
       <section>
-        <p class="highlight">Features</p>
-        <h2 class="text-primary">Blazingly fast keyword searcher</h2>
+        <div class="row">
+          <div>
+            <p class="highlight">Features</p>
+            <h2 class="text-primary sub-heading">
+              Blazingly fast keyword searcher
+            </h2>
+            <Search />
+          </div>
+          <ul role="list" class="link-card-grid link-card-grid-feat">
+            <Feature
+              title={"Bulk upload urls"}
+              body={`Custom import as many urls as you’d like to scan against`}
+              img={"/icons/bulk.svg"}
+            />
+            <Feature
+              title={"Export to csv"}
+              body={`Easily export your data for each scan`}
+              img={"/icons/feature.svg"}
+            />
+            <Feature
+              title={"Use Tor and Proxy"}
+              body={`Prevent tracking and anonymously crawl domains using Tor or rotating proxy servers`}
+              img={"/icons/eye.svg"}
+            />
+            <Feature
+              title={"Find contact emails"}
+              body={`Reach out to prospective leads automatically with our automatic email finder`}
+              img={"/icons/contact.svg"}
+              soon
+            />
+            <Feature
+              title={"Install up to 3 computers"}
+              body={`Got more than one machine? No worries, you can install Seoder on up to 3 computers`}
+              img={"/icons/computer.svg"}
+            />
+            <Feature
+              title={"Search over 200+ million domains"}
+              body={`Scan over 200+ million active domains or choose specific top level domains`}
+              img={"/icons/world.svg"}
+              soon
+            />
+          </ul>
+        </div>
       </section>
 
       <section>
         <p class="highlight center">Downloads</p>
 
-        <h3 class="text-primary">Available for all major platforms</h3>
+        <h4 class="text-primary">Available for all major platforms</h4>
 
         <ul role="list" class="link-card-grid">
           <Card
@@ -87,11 +130,24 @@ import AnchorButton from "../components/AnchorButton.astro";
     position: relative;
     max-width: 100ch;
   }
+  section {
+    padding-bottom: 3rem;
+  }
+  .sub-heading {
+    font-size: 1.7rem;
+    max-width: 14rem;
+  }
   .small {
     font-size: 0.7rem;
   }
   .center {
     text-align: center;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
   h1 {
     font-size: 3rem;
@@ -129,6 +185,9 @@ import AnchorButton from "../components/AnchorButton.astro";
     grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
     gap: 1rem;
     padding: 0;
+  }
+  .link-card-grid-feat {
+    grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
   }
   .prog {
     padding: 1.5rem;
