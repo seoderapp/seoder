@@ -47,7 +47,7 @@ import Feature from "../components/Feature.astro";
           <div>
             <p class="highlight">Features</p>
             <h2 class="text-primary sub-heading">
-              Blazingly fast keyword searcher
+              Beyond fast keyword searcher
             </h2>
             <Search />
           </div>
@@ -90,8 +90,9 @@ import Feature from "../components/Feature.astro";
 
       <section>
         <p class="highlight center">Downloads</p>
-
-        <h4 class="text-primary">Available for all major platforms</h4>
+        <h4 class="text-primary center heading">
+          Available for all major platforms
+        </h4>
 
         <ul role="list" class="link-card-grid">
           <Card
@@ -133,11 +134,15 @@ import Feature from "../components/Feature.astro";
   main {
     margin: auto;
     position: relative;
-    max-width: 100ch;
+    max-width: 105ch;
   }
 
   section {
     padding-bottom: 3rem;
+  }
+
+  .heading {
+    font-size: 1.4rem;
   }
   .sub-heading {
     font-size: 1.7rem;
@@ -168,7 +173,7 @@ import Feature from "../components/Feature.astro";
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 4rem;
+    gap: 3rem;
   }
   h1 {
     font-size: 3rem;
