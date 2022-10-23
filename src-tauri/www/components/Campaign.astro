@@ -1,15 +1,10 @@
+---
+import EmptyCampaign from "./Empty/Create.astro";
+---
+
 <div class="card">
   <div class="card-body">
     <ul id="engine-list"></ul>
-    <div id="empty-list" class="hidden">
-      <div>No Campaigns yet</div>
-      <div>To get started start a new campaign</div>
-      <button
-        id="new-campaign-button"
-        class="panel-btn button btn-primary full-w"
-      >
-        Add Campaign
-      </button>
-    </div>
+    <EmptyCampaign client:load />
   </div>
 </div>

@@ -1,0 +1,37 @@
+<div class="card">
+  <div class="card-body">
+    <ul id="engine-list"></ul>
+    <div id="empty-list" class="hidden">
+      <div class="p">
+        <div class="title">No Campaigns yet</div>
+        <div>To get started start a new campaign</div>
+        <button class="panel-btn button btn-primary full-w">
+          Add Campaign
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .title {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .p {
+    padding: 0.6rem;
+  }
+</style>
+
+<script>
+  const campaignCreateForm = document.getElementById("campaign-create-form");
+  function addCampaign() {
+    if (campaignCreateForm) {
+      campaignCreateForm.className = "block";
+    }
+  }
+  document
+    .getElementById("empty-list")
+    .querySelector("button")
+    .addEventListener("click", addCampaign);
+</script>

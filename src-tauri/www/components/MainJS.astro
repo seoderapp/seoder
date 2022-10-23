@@ -118,7 +118,7 @@ declare global {
     "target-select"
   ) as HTMLInputElement;
 
-  if (list && !list.children.length) {
+  if (emptyList && list && !list.children.length) {
     emptyList.className = "block";
   }
 
@@ -778,9 +778,11 @@ declare global {
         patterns: epatterns.value,
       });
 
-      if (!list.children.length) {
+      if (emptyList && list && !list.children.length) {
         emptyList.className = "hidden";
       }
+
+      campaignCreateForm.className = "hidden";
 
       socket.send("create-engine " + m);
       socket.send("list-engines");
