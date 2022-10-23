@@ -13,65 +13,69 @@ import AnchorButton from "../components/AnchorButton.astro";
   <main>
     <Navbar />
     <div class="prog">
-      <div class="flex-wrap">
-        <div>
-          <h1>Find keywords in bulk links quickly</h1>
-          <p class="instructions">
-            Import thousands of URLs and identify keywords {`you’re`} looking for
-          </p>
-          <AnchorButton href="/payments" title={"BUY NOW"} />
+      <section>
+        <div class="flex-wrap">
+          <div>
+            <h1 class="text-primary">Find keywords in bulk links quickly</h1>
+            <p class="instructions text-primary">
+              Import thousands of URLs and identify keywords {`you’re`} looking for
+            </p>
+            <AnchorButton href="/payments" title={"BUY NOW"} />
+            <p class="small">Try free 7 day trial</p>
+          </div>
+          <div>
+            <img
+              src="/bg.png"
+              class="bg"
+              height={333}
+              width={333}
+              alt="Seoder app intro display"
+            />
+          </div>
         </div>
-        <div>
-          <img
-            src="/bg.png"
-            class="bg"
-            height={333}
-            width={333}
-            alt="Seoder app intro display"
-          />
-        </div>
-      </div>
+      </section>
 
-      <h2>Targeted Marketing Campaigns</h2>
-      <p>Get the most out of a quick and easy lead generation tool</p>
+      <section>
+        <p class="highlight">Features</p>
+        <h2 class="text-primary">Blazingly fast keyword searcher</h2>
+      </section>
 
-      <h3>Downloads</h3>
+      <section>
+        <p class="highlight center">Downloads</p>
 
-      <p>
-        Download and install the program on your platform. Updates are rolled
-        out often during pre-release stages.
-      </p>
+        <h3 class="text-primary">Available for all major platforms</h3>
 
-      <ul role="list" class="link-card-grid">
-        <Card
-          href="/releases/Seoder_0.0.1_aarch64"
-          title="Desktop Mac Silicon"
-          body="Pre-release arch64 M1 chips"
-        >
-          <Apple />
-        </Card>
-        <Card
-          href="/releases/Seoder_0.0.1_universal.dmg"
-          title="Desktop Mac Universal"
-          body="Pre-release mac universal"
-        >
-          <Apple />
-        </Card>
-        <Card
-          href="/releases/seoder_app_0.0.1_linux.app.tar.gz"
-          title="Desktop Linux"
-          body="Pre-release linux"
-        >
-          <Linux />
-        </Card>
-        <Card
-          href="/releases/seoder_app_0.0.1_x64_en-US.msi"
-          title="Desktop Windows"
-          body="Pre-release windows"
-        >
-          <Windows />
-        </Card>
-      </ul>
+        <ul role="list" class="link-card-grid">
+          <Card
+            href="/releases/Seoder_0.0.1_aarch64.dmg"
+            title="Desktop Mac Silicon"
+            body="Pre-release arch64 M1 chip"
+          >
+            <Apple />
+          </Card>
+          <Card
+            href="/releases/Seoder_0.0.1_universal.dmg"
+            title="Desktop Mac Universal"
+            body="Pre-release mac universal"
+          >
+            <Apple />
+          </Card>
+          <Card
+            href="/releases/seoder_app_0.0.1_linux.app.tar.gz"
+            title="Desktop Linux"
+            body="Pre-release linux"
+          >
+            <Linux />
+          </Card>
+          <Card
+            href="/releases/seoder_app_0.0.1_x64_en-US.msi"
+            title="Desktop Windows"
+            body="Pre-release windows"
+          >
+            <Windows />
+          </Card>
+        </ul>
+      </section>
     </div>
   </main>
   <Footer />
@@ -83,12 +87,21 @@ import AnchorButton from "../components/AnchorButton.astro";
     position: relative;
     max-width: 100ch;
   }
+  .small {
+    font-size: 0.7rem;
+  }
+  .center {
+    text-align: center;
+  }
   h1 {
     font-size: 3rem;
     font-weight: 800;
     margin: 0;
     padding: 0;
     max-width: 25rem;
+  }
+  .text-primary {
+    color: #2f2768;
   }
   .text-gradient {
     background-image: var(--accent-gradient);
@@ -113,7 +126,7 @@ import AnchorButton from "../components/AnchorButton.astro";
   }
   .link-card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
     gap: 1rem;
     padding: 0;
   }
@@ -136,5 +149,8 @@ import AnchorButton from "../components/AnchorButton.astro";
     padding: 0.5rem 1rem;
     color: #000;
     text-decoration: none;
+  }
+  .highlight {
+    color: #e8c01a;
   }
 </style>
