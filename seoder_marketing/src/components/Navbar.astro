@@ -1,13 +1,23 @@
 ---
 import AnchorButton from "./AnchorButton.astro";
 import LogoLight from "./LogoLight.astro";
+
+export interface Props {
+  target?: string;
+}
+
+const { target } = Astro.props;
 ---
 
 <nav>
   <a href={"/"}>
     <LogoLight />
   </a>
-  <AnchorButton href="/payments" title={"BUY NOW"} />
+  {
+    target !== "payments" ? (
+      <AnchorButton href="/payments" title={"BUY NOW"} />
+    ) : null
+  }
 </nav>
 
 <style>
