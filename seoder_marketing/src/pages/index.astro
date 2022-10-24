@@ -1,15 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Card from "../components/Card.astro";
 import Footer from "../components/Footer.astro";
-import Apple from "../components/Logos/Apple.astro";
-import Linux from "../components/Logos/Linux.astro";
-import Windows from "../components/Logos/Windows.astro";
 import Navbar from "../components/Navbar.astro";
 import AnchorButton from "../components/AnchorButton.astro";
 import Search from "../components/Svgs/Search.astro";
 import Feature from "../components/Feature.astro";
 import Download from "../components/Download.astro";
+import Title from "../components/Typo/Title.astro";
 ---
 
 <Layout
@@ -22,9 +19,7 @@ import Download from "../components/Download.astro";
       <section>
         <div class="flex-wrap">
           <div>
-            <h1 class="text-primary title">
-              Find keywords in bulk links quickly
-            </h1>
+            <Title>Find keywords in bulk links quickly</Title>
             <p class="instructions text-primary">
               Import thousands of domains and identify keywords {`you’re`} looking
               for
@@ -119,14 +114,6 @@ import Download from "../components/Download.astro";
     max-width: 14rem;
   }
 
-  .title {
-    font-size: 3rem;
-    background: linear-gradient(92.87deg, #463a9c -3.43%, #be63c7 87.13%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-fill-color: transparent;
-  }
   .trial {
     font-size: 0.8rem;
     color: #2f2768;
@@ -147,27 +134,15 @@ import Download from "../components/Download.astro";
     flex-wrap: wrap;
     gap: 3rem;
   }
-  h1 {
-    font-size: 3rem;
-    font-weight: 800;
-    margin: 0;
-    padding: 0;
-    max-width: 25rem;
-  }
   .text-primary {
     color: #2f2768;
   }
-  .text-gradient {
-    background-image: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-size: 400%;
-    background-position: 0%;
-  }
   .instructions {
-    font-size: 1.6rem;
+    font-size: 2rem;
     max-width: 30rem;
     color: #2f2768;
+    margin: 0;
+    padding-bottom: 3.6rem;
   }
   .instructions strong {
     color: rgb(var(--accent));

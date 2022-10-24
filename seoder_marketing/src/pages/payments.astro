@@ -2,6 +2,7 @@
 import Download from "../components/Download.astro";
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
+import Title from "../components/Typo/Title.astro";
 import Layout from "../layouts/Layout.astro";
 
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -15,7 +16,7 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
     <Navbar target={"payments"} />
     <div class="prog">
       <section class={"center-container"}>
-        <h1 class="text-gradient">Purchase License</h1>
+        <Title>Purchase License</Title>
         <h2>The license is active for 1 year with up to 3 seats</h2>
         <form id="register">
           <div>
@@ -132,13 +133,6 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
     max-width: 20rem;
     font-weight: normal;
     text-align: center;
-  }
-  .text-gradient {
-    background-image: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-size: 400%;
-    background-position: 0%;
   }
   .instructions strong {
     color: rgb(var(--accent));
