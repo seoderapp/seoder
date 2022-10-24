@@ -34,15 +34,16 @@ const currentYear = new Date().getFullYear();
     max-width: 105ch;
   }
   .container {
-    gap: 0.7rem;
+    gap: 1.5rem;
     display: flex;
     flex-direction: row;
     padding: 2rem 0;
   }
   footer a {
     color: #2f2768;
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-decoration: none;
+    font-weight: 600;
   }
   .cc {
     font-size: 0.76rem;
@@ -53,7 +54,7 @@ const currentYear = new Date().getFullYear();
     left: 0;
     right: 0;
     bottom: 0px;
-    z-index: 1;
+    pointer-events: none;
   }
 
   @media only screen and (max-width: 800px) {
