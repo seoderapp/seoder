@@ -3,11 +3,25 @@ import Card from "./Card.astro";
 import Apple from "./Logos/Apple.astro";
 import Linux from "./Logos/Linux.astro";
 import Windows from "./Logos/Windows.astro";
+
+export type Props = {
+  sub?: boolean;
+};
+
+const { sub } = Astro.props;
+
+const platText = "Available for all major platforms";
 ---
 
 <section>
   <p class="highlight center">Downloads</p>
-  <h4 class="text-primary center heading">Available for all major platforms</h4>
+  {
+    sub ? (
+      <h3 class="text-primary center heading">{platText}</h3>
+    ) : (
+      <h4 class="text-primary center heading">{platText}</h4>
+    )
+  }
 
   <ul role="list" class="link-card-grid">
     <Card
@@ -48,7 +62,10 @@ import Windows from "./Logos/Windows.astro";
 
   .heading {
     font-size: 1.4rem;
+    padding: 0.3rem 0;
+    margin: 0;
   }
+
   .sub-heading {
     font-size: 1.7rem;
     max-width: 14rem;
@@ -81,5 +98,10 @@ import Windows from "./Logos/Windows.astro";
 
   .highlight {
     color: #e8c01a;
+  }
+
+  p {
+    padding: 0;
+    margin: 0;
   }
 </style>
