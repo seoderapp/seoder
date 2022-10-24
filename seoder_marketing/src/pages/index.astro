@@ -35,8 +35,8 @@ import Title from "../components/Typo/Title.astro";
             <img
               src="/bg.png"
               class="bg"
-              height={333}
-              width={333}
+              height={460}
+              width={606}
               alt="Seoder app intro display"
             />
           </div>
@@ -44,8 +44,8 @@ import Title from "../components/Typo/Title.astro";
       </section>
 
       <section>
-        <div class="row">
-          <div>
+        <div class="row features">
+          <div class="features">
             <p class="highlight">Features</p>
             <h2 class="text-primary sub-heading">
               Beyond fast keyword searcher
@@ -96,12 +96,6 @@ import Title from "../components/Typo/Title.astro";
 </Layout>
 
 <style>
-  main {
-    margin: auto;
-    position: relative;
-    max-width: 105ch;
-  }
-
   section {
     padding-bottom: 4rem;
   }
@@ -134,6 +128,10 @@ import Title from "../components/Typo/Title.astro";
     flex-wrap: wrap;
     gap: 3rem;
   }
+  .features {
+    justify-content: center;
+    flex: 0.4;
+  }
   .text-primary {
     color: #2f2768;
   }
@@ -144,9 +142,6 @@ import Title from "../components/Typo/Title.astro";
     margin: 0;
     padding-bottom: 3.6rem;
   }
-  .instructions strong {
-    color: rgb(var(--accent));
-  }
   .link-card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
@@ -156,6 +151,7 @@ import Title from "../components/Typo/Title.astro";
   .link-card-grid-feat {
     flex: 1;
     grid-template-columns: repeat(auto-fit, minmax(31ch, 1fr));
+    gap: 2rem;
   }
   .prog {
     padding: 1.5rem;
@@ -167,14 +163,7 @@ import Title from "../components/Typo/Title.astro";
     flex-wrap: wrap;
     display: flex;
     flex-direction: row;
-    gap: 1rem;
+    gap: 6rem;
     text-align: left;
-  }
-  .flex-wrap a {
-    background: #d9d9d9;
-    border-radius: 4px;
-    padding: 0.5rem 1rem;
-    color: #000;
-    text-decoration: none;
   }
 </style>

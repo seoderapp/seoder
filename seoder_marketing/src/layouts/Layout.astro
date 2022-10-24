@@ -23,6 +23,7 @@ const { title, description } = Astro.props;
     ></script>
     <style is:global>
       :root {
+        --max-width: 142.884ch;
         --accent: 124, 58, 237;
         --accent-gradient: linear-gradient(
           45deg,
@@ -39,6 +40,11 @@ const { title, description } = Astro.props;
         font-family: system-ui, sans-serif;
         font-size: 16px;
         background-color: #f5f5f5;
+      }
+      main {
+        margin: auto;
+        position: relative;
+        max-width: var(--max-width);
       }
       h2 {
         margin: 0;
