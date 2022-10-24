@@ -17,20 +17,20 @@ const currentYear = new Date().getFullYear();
       Seoder &copy; {currentYear}
     </p>
   </div>
-  <FooterBg />
+  <div class="footer-bg">
+    <FooterBg />
+  </div>
 </footer>
 
 <style>
   footer {
     position: relative;
+    overflow: hidden;
   }
   .footer-container {
-    padding: 3rem 0;
-    position: relative;
+    padding: 2.4rem 2rem;
     margin: auto;
-    padding-top: 1.5rem;
     z-index: 2;
-    position: relative;
     max-width: 105ch;
   }
   .container {
@@ -47,5 +47,21 @@ const currentYear = new Date().getFullYear();
   .cc {
     font-size: 0.76rem;
     opacity: 0.5;
+  }
+  .footer-bg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0px;
+    z-index: 1;
+  }
+
+  @media only screen and (max-width: 800px) {
+    footer {
+      background: rgba(232, 192, 26, 0.17);
+    }
+    .footer-bg {
+      display: none;
+    }
   }
 </style>
