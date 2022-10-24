@@ -42,28 +42,33 @@ const currentYear = new Date().getFullYear();
     position: relative;
     overflow: hidden;
   }
-  .footer-container {
-    padding: 2.4rem 2rem;
-    margin: auto;
-    z-index: 2;
-    max-width: var(--max-width);
-  }
-  .container {
-    gap: 1.5rem;
+
+  footer ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    gap: 1.4rem;
     display: flex;
-    flex-direction: row;
-    padding: 2rem 0;
   }
+
+  footer li {
+    display: inline;
+  }
+
   footer a {
     color: #2f2768;
     font-size: 1rem;
     text-decoration: none;
     font-weight: 600;
   }
-  .cc {
-    font-size: 0.76rem;
-    opacity: 0.7;
+
+  .footer-container {
+    padding: 2.4rem 2rem;
+    margin: auto;
+    z-index: 2;
+    max-width: var(--max-width);
   }
+
   .footer-bg {
     position: absolute;
     left: 0;
@@ -73,15 +78,24 @@ const currentYear = new Date().getFullYear();
     z-index: -1;
   }
 
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+  .container {
+    gap: 1.5rem;
+    display: flex;
+    flex-direction: row;
+    padding: 2rem 0;
+  }
+
+  .cc {
+    font-size: 0.76rem;
+    opacity: 0.7;
   }
 
   @media only screen and (max-width: 800px) {
     footer {
       background: rgba(232, 192, 26, 0.17);
+    }
+    footer ul {
+      flex-direction: column;
     }
     .footer-bg {
       display: none;
