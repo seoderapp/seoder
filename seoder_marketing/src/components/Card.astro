@@ -22,7 +22,6 @@ const { href, title, body } = Astro.props;
 </li>
 <style>
   .link-card {
-    list-style: none;
     display: flex;
     padding: 0.1rem 0.06rem;
     background-color: white;
@@ -58,7 +57,7 @@ const { href, title, body } = Astro.props;
   .link-card:is(:hover, :focus-within) {
     background-position: 0;
   }
-  .link-card:is(:hover, :focus-within) h4 {
-    color: rgb(var(--accent));
+  .link-card:is(:hover, :focus-within) * {
+    color: #fff;
   }
 </style>
