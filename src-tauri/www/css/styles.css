@@ -63,7 +63,7 @@ button {
   position: relative;
 }
 
-#engine-list {
+.list {
   list-style: none;
   padding: 1rem 0rem;
   margin: 0;
@@ -78,12 +78,14 @@ button {
   border: 3px solid transparent;
 }
 
-#engine-list > .engine-item {
+.list > .engine-item {
   font-weight: 300;
   font-size: 1.1rem;
   display: flex;
   flex: 1;
   min-height: 75px;
+  color: #2f2768;
+  overflow: hidden;
 }
 
 .engine-title {
@@ -98,8 +100,12 @@ button {
 
 .engine-stats {
   text-align: left;
-  font-style: 200;
-  color: #2f2768;
+  font-weight: 200;
+  font-size: 0.67rem;
+}
+
+.engine-paths {
+  font-size: 0.63rem;
 }
 
 #elicense {

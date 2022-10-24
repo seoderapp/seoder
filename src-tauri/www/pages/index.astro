@@ -10,6 +10,10 @@ import Menu from "../components/Menu.astro";
 import Intro from "../components/Intro.astro";
 import Program from "../components/Program.astro";
 import { Tabs } from "../components/Tabs";
+
+declare global {
+  var __TAURI__: any;
+}
 ---
 
 <Layout title="Seoder - The marketing lead generation tool">

@@ -16,3 +16,4 @@ ok-valid_json.txt
 # app config
 config.txt
 out
+.env

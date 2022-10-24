@@ -1,10 +1,12 @@
 ---
+import { CampaignList } from "./CampaignList";
 import EmptyCampaign from "./Empty/Create.astro";
 ---
 
 <div class="card">
   <div class="card-body">
-    <ul id="engine-list"></ul>
-    <EmptyCampaign client:load />
+    <CampaignList client:load>
+      <EmptyCampaign />
+    </CampaignList>
   </div>
 </div>

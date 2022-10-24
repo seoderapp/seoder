@@ -359,8 +359,8 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 let pat = v.patterns;
 
                 tokio::task::spawn(async move {
-                    let ptt = pt.split(',');
-                    let ott = pat.split(',');
+                    let ptt = pt.split(','); // paths
+                    let ott = pat.split(','); // patterns
 
                     create_dir(&db_dir).await.unwrap();
                     create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
@@ -373,7 +373,8 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         .unwrap();
 
                     for x in ptt {
-                        let x = string_concat!(x, "\n");
+                        let base = if !x.starts_with("/") { "/" } else { "" };
+                        let x = string_concat!(base, x, "\n");
                         file.write_all(&x.as_bytes()).await.unwrap();
                     }
 

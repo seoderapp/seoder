@@ -6,7 +6,18 @@ declare global {
 
 <script>
   // import { profile } from "../stores/profile";
-  import { selectAction } from "../stores/engine";
+  import {
+    selectAction,
+    engines,
+    engineMap,
+    fileMap,
+    selectedEngine,
+  } from "../stores/engine";
+  import { socket, socketRuntime, initSockets } from "../events/sockets";
+
+  import { CellStatus } from "./CampaignCell";
+
+  initSockets();
 
   // license control [determine screens] quickly
   const program = document.getElementById("appProgram");
@@ -65,9 +76,6 @@ declare global {
     return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
   }
 
-  const socket = new WebSocket("ws://127.0.0.1:8080");
-  const socketRuntime = new WebSocket("ws://127.0.0.1:8089"); // feed loop
-
   socketRuntime.addEventListener("open", () => {
     socketRuntime.send("loop");
   });
@@ -91,7 +99,6 @@ declare global {
   const logfeed = document.getElementById("feed-log"); // valid feed log
   const invalidLogfeed = document.getElementById("error-log"); // invalid log
 
-  const list = document.getElementById("engine-list");
   // settings
   const settingsContainer = document.getElementById("settings-container");
   const settingsBtn = document.getElementById("settings-button");
@@ -101,8 +108,7 @@ declare global {
   // new create
   const newCampaignButton = document.getElementById("new-campaign-button");
   const campaignCreateForm = document.getElementById("campaign-create-form");
-  // empty selectors
-  const emptyList = document.getElementById("empty-list");
+
   const feedEmpty = document.getElementById("feed-start"); // feed log empty
   const errorEmpty = document.getElementById("error-start"); // feed log empty
 
@@ -117,10 +123,6 @@ declare global {
   const fileSelect = document.getElementById(
     "target-select"
   ) as HTMLInputElement;
-
-  if (emptyList && list && !list.children.length) {
-    emptyList.className = "block";
-  }
 
   if (logfeed && !logfeed.children.length) {
     feedEmpty.className = "block";
@@ -149,12 +151,6 @@ declare global {
   }
 
   let selected = "";
-
-  // files for uploading
-  const fileMap = new Map();
-  // engine map
-  const engineMap = new Map();
-
   let initialTarget = "";
 
   /*
@@ -249,17 +245,17 @@ declare global {
       return;
     }
 
-    if (cfin) {
+    if (raw.startsWith(cfin)) {
       const data = JSON.parse(raw);
       const { finished, time } = data || {};
 
-      const cellStatus = document.getElementById("engine_status_" + finished);
+      const item = engines.get()[finished];
 
-      if (cellStatus) {
-        cellStatus.textContent = "Finished";
-        cellStatus.className = "engine-status engine-status-finished";
-        console.log(time);
+      if (item) {
+        item.status = CellStatus.FINISHED;
       }
+
+      console.log(time);
     }
 
     if (raw.startsWith(ptp)) {
@@ -268,7 +264,12 @@ declare global {
 
       if (engineMap.has(pengine)) {
         const item = engineMap.get(pengine);
+        const eitem = engines.get()[pengine];
+
         item.total = ploc ?? item.total ?? 0;
+        item.valid = item.valid ?? 0;
+
+        eitem.total = ploc ?? item.total ?? 0;
         item.valid = item.valid ?? 0;
 
         const cell = document.getElementById("engine_stats_" + pengine);
@@ -384,213 +385,21 @@ declare global {
 
     if (raw.startsWith(ptpe)) {
       const np = JSON.parse(raw);
-      const path = np && np.epath;
+      const path = np && (np.epath as string);
 
       if (!engineMap.has(path)) {
-        if (list && !list.children.length) {
-          emptyList.className = "hidden";
-        }
-
-        engineMap.set(path, {
+        const engineSource = {
           total: 0,
           valid: 0,
           urls: new Set(),
           invalidUrls: new Set(),
-        });
+          patterns: np?.patterns,
+          paths: np?.paths,
+          status: CellStatus.READY,
+        };
 
-        // exit if list does not exist
-        if (!list) {
-          return;
-        }
-
-        const cell = document.createElement("li");
-        // click wrapper
-        const cellButtonWrapper = document.createElement("button");
-        // inner wrapper
-        const cellInnerContainer = document.createElement("div");
-
-        const cellBtnBlock = document.createElement("div");
-        const cellContentBlock = document.createElement("div");
-        const cellContentPaths = document.createElement("div");
-        const cellTitle = document.createElement("div");
-        const cellStats = document.createElement("div");
-        // run button
-        const cellBtnRunButton = document.createElement("button");
-        const cellBtnRunText = document.createElement("div");
-        const cellBtnRunImage = document.createElement("img");
-        // export button
-        const cellBtnExportButton = document.createElement("button");
-        const cellBtnExportText = document.createElement("div");
-        const cellBtnExportImage = document.createElement("img");
-        // delete button
-        const cellBtnDeleteText = document.createElement("div");
-        const cellBtnDeleteRemoveImage = document.createElement("img");
-        const cellBtnDeleteButton = document.createElement("button");
-
-        const cellRightBlock = document.createElement("div");
-        // status code
-        const cellStatus = document.createElement("div");
-        cellStatus.id = "engine_status_" + path;
-        cellStatus.textContent = "Ready";
-        cellStatus.className = "engine-status";
-        cell.className = "engine-item";
-        cellButtonWrapper.className = "cell-btn";
-        cellBtnBlock.className = "row gutter-t full-w-120";
-        cellInnerContainer.className = "row full-w";
-        cellBtnDeleteButton.className = "btn-base active-delete";
-
-        cell.id = "engine_" + path;
-        cellStats.id = "engine_stats_" + path;
-
-        cellContentPaths.className = "row";
-        cellContentBlock.className = "flex";
-        cellTitle.className = "engine-title";
-        cellStats.className = "engine-stats";
-
-        cellTitle.textContent = path;
-        cellContentPaths.textContent = np.paths;
-        cellStats.textContent = "0 / 0";
-
-        cellBtnRunText.textContent = "Run";
-        cellBtnRunImage.src = "/assets/unpause.svg";
-        cellBtnRunButton.className = "btn-base";
-
-        cellBtnExportText.textContent = "Export data";
-        cellBtnExportImage.src = "/assets/export.svg";
-        cellBtnExportButton.className = "btn-base";
-
-        cellBtnDeleteText.textContent = "Delete";
-        cellBtnDeleteRemoveImage.src = "/assets/trashcan.svg";
-
-        cellBtnExportButton.addEventListener("click", async (event) => {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          const filePath = await window.__TAURI__.dialog.save({
-            multiple: false,
-            filters: [
-              {
-                name: path,
-                extensions: ["txt"],
-              },
-            ],
-          });
-
-          const url =
-            "http://localhost:7050/download/" + path + "/valid/links.txt";
-          const request = new XMLHttpRequest();
-
-          // todo: Post endpoint to write to file instead of get
-          request.open("GET", url, true);
-
-          request.onload = async function () {
-            if (filePath && request.response) {
-              await window.__TAURI__.fs.writeTextFile(
-                filePath,
-                request.response
-              );
-            }
-          };
-
-          request.onerror = function () {
-            alert("Issue downloading the file.");
-          };
-
-          request.send(new FormData());
-        });
-
-        cellBtnRunButton.addEventListener("click", (event) => {
-          event.preventDefault();
-
-          if (engineMap.has(path)) {
-            logfeed.replaceChildren();
-            invalidLogfeed.replaceChildren();
-          }
-
-          cellStatus.textContent = "Running";
-
-          socket.send("run-campaign " + path);
-        });
-
-        // todo: replace feed
-        cellButtonWrapper.addEventListener("click", (event) => {
-          event.preventDefault();
-          const ac = selectAction(path);
-
-          // clear on new select
-          if (selected && selected !== path) {
-            logfeed.replaceChildren();
-            // TODO: replace feed with new links
-          }
-
-          if (feedEmpty && !logfeed.children.length) {
-            feedEmpty.className = "hidden";
-          }
-
-          const active = document.getElementsByClassName(
-            "cell-btn cell-btn-active"
-          );
-
-          if (!ac && active) {
-            for (let i = 0; i < active.length; i++) {
-              if (active[i].className === "cell-btn cell-btn-active") {
-                active[i].className = "cell-btn";
-              }
-            }
-          }
-
-          if (ac) {
-            cellButtonWrapper.className = "cell-btn cell-btn-active";
-          }
-
-          // todo: remove extra selected var
-          selected = path;
-        });
-
-        cellBtnDeleteButton.addEventListener("click", (event) => {
-          if (engineMap.has(path)) {
-            engineMap.delete(path);
-            logfeed.replaceChildren();
-          }
-
-          if (!list.children.length) {
-            emptyList.className = "block";
-          }
-
-          socket.send("delete-engine " + path);
-          cell.remove();
-          event.preventDefault();
-        });
-
-        cellBtnRunButton.appendChild(cellBtnRunImage);
-        cellBtnRunButton.appendChild(cellBtnRunText);
-
-        cellBtnExportButton.appendChild(cellBtnExportImage);
-        cellBtnExportButton.appendChild(cellBtnExportText);
-
-        cellBtnDeleteButton.appendChild(cellBtnDeleteRemoveImage);
-        cellBtnDeleteButton.appendChild(cellBtnDeleteText);
-
-        // todo: status block
-        cellBtnBlock.appendChild(cellBtnRunButton);
-        cellBtnBlock.appendChild(cellBtnExportButton);
-        cellBtnBlock.appendChild(cellBtnDeleteButton);
-
-        cellContentBlock.appendChild(cellTitle);
-        cellContentBlock.appendChild(cellStats);
-        cellContentBlock.appendChild(cellContentPaths);
-        cellContentBlock.appendChild(cellBtnBlock);
-
-        cellRightBlock.appendChild(cellStatus);
-
-        // left block
-        cellInnerContainer.appendChild(cellContentBlock);
-        // right block
-        cellInnerContainer.appendChild(cellRightBlock);
-        // inner base
-        cellButtonWrapper.appendChild(cellInnerContainer);
-        // button wrapper
-        cell.appendChild(cellButtonWrapper);
-        list.appendChild(cell);
+        engines.setKey(path, engineSource);
+        engineMap.set(path, engineSource);
       }
       return;
     }
@@ -601,8 +410,13 @@ declare global {
 
       if (engineMap.has(path)) {
         const item = engineMap.get(path);
+        const eitem = engines.get()[path];
+
         item.total = item.total ?? 0;
         item.valid = np.count ?? item.valid ?? 0;
+
+        eitem.total = eitem.total ?? 0;
+        eitem.valid = np.count ?? eitem.valid ?? 0;
 
         const cell = document.getElementById("engine_stats_" + path);
 
@@ -658,6 +472,7 @@ declare global {
         cell?.remove();
         kitem?.remove();
         engineMap.delete(path);
+        engines.setKey(path, undefined);
       }
     }
   }
@@ -689,20 +504,23 @@ declare global {
   });
 
   rsform?.addEventListener("submit", (event) => {
+    const selected = selectedEngine.get();
+    const eitem = engines.get()[selected];
+
     if (selected) {
       if (engineMap.has(selected)) {
         const e = engineMap.get(selected);
-        e.url = [];
-        e.invalidUrls = [];
+
+        eitem.urls.clear();
+        eitem.invalidUrls.clear();
+
+        e.url.clear();
+        e.invalidUrls.clear();
+
+        eitem.status = CellStatus.RUNNING;
 
         // todo: replace it with new selected engine map
         logfeed.replaceChildren();
-      }
-
-      const cmp = document.getElementById("engine_status_" + selected);
-
-      if (cmp) {
-        cmp.textContent = "Running";
       }
 
       socket.send("run-campaign " + selected);
@@ -778,12 +596,9 @@ declare global {
         patterns: epatterns.value,
       });
 
-      if (emptyList && list && !list.children.length) {
-        emptyList.className = "hidden";
-      }
-
       campaignCreateForm.className = "hidden";
 
+      // todo: send new engine created on submit or add optimistic update
       socket.send("create-engine " + m);
       socket.send("list-engines");
     } else {
