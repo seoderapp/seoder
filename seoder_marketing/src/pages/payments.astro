@@ -1,4 +1,6 @@
 ---
+import Download from "../components/Download.astro";
+import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
 import Layout from "../layouts/Layout.astro";
 
@@ -8,100 +10,104 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
 <Layout title="Welcome to Payments.">
   <main>
     <Navbar target={"payments"} />
-    <div class={"prog"}>
-      <h1><span class="text-gradient">Purchase License</span></h1>
-      <h2>License for Seoder</h2>
-      <p>The license is active for 1 year with up to 3 seats</p>
-      <form id="register">
-        <div>
-          <label for="first-name">First name</label>
-          <input
-            type="text"
-            name="first-name"
-            id="first-name"
-            placeholder="Elliot"
-            required
-          />
-        </div>
-        <div>
-          <label for="last-name">Last name</label>
-          <input
-            type="text"
-            name="last-name"
-            id="last-name"
-            placeholder="Alderson"
-            required
-          />
-        </div>
-        <div>
-          <label for="email">Email</label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="elliot@example.com"
-            required
-          />
-        </div>
-        <div class="button-container">
-          <button type="submit">Buy Now</button>
-        </div>
-      </form>
+    <div class="prog">
+      <section class={"center-container"}>
+        <h1 class="text-gradient">Purchase License</h1>
+        <h2>The license is active for 1 year with up to 3 seats</h2>
+        <form id="register">
+          <div>
+            <label for="first-name">First name</label>
+            <input
+              type="text"
+              name="first-name"
+              id="first-name"
+              placeholder="Elliot"
+              required
+            />
+          </div>
+          <div>
+            <label for="last-name">Last name</label>
+            <input
+              type="text"
+              name="last-name"
+              id="last-name"
+              placeholder="Alderson"
+              required
+            />
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="elliot@example.com"
+              required
+            />
+          </div>
+          <div class="button-container">
+            <button type="submit">Buy Now</button>
+          </div>
+        </form>
+      </section>
+      <Download />
     </div>
   </main>
-
-  <script src="https://checkout.stripe.com/checkout.js" is:inline></script>
-
-  <script defer is:inline define:vars={{ STRIPE_PUBLISHABLE_KEY }}>
-    const register = document.getElementById("register");
-
-    const handler = StripeCheckout.configure({
-      key: STRIPE_PUBLISHABLE_KEY,
-      token: async ({ id: stripeToken }) => {
-        const attributes = {
-          firstName: document.getElementById("first-name").value,
-          lastName: document.getElementById("last-name").value,
-          email: document.getElementById("email").value,
-          metadata: { stripeToken }, // Temporarily store this so our webhooks can do their thing
-        };
-
-        const response = await fetch(`/api/keygen-account`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/vnd.api+json",
-            Accept: "application/vnd.api+json",
-          },
-          body: JSON.stringify({
-            data: attributes,
-          }),
-        });
-
-        const { data, errors } = await response.json();
-
-        if (errors) {
-          const message = errors.map((e) => e.detail).toString();
-
-          register.parentNode.innerHTML = `An error occurred during user creation: ${message} (double check your ENV vars)`;
-
-          throw new Error(message);
-        }
-
-        register.parentNode.innerHTML = `Thanks for your purchase, ${data.attributes.firstName}! 🚀`;
-      },
-    });
-
-    register.addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      handler.open({
-        panelLabel: "Buy License",
-        name: "Seoder",
-        image: "/logo.svg",
-        amount: 20000,
-      });
-    });
-  </script>
+  <div class={"space"}></div>
+  <Footer />
 </Layout>
+
+<script src="https://checkout.stripe.com/checkout.js" is:inline></script>
+
+<script defer is:inline define:vars={{ STRIPE_PUBLISHABLE_KEY }}>
+  const register = document.getElementById("register");
+
+  const handler = StripeCheckout.configure({
+    key: STRIPE_PUBLISHABLE_KEY,
+    token: async ({ id: stripeToken }) => {
+      const attributes = {
+        firstName: document.getElementById("first-name").value,
+        lastName: document.getElementById("last-name").value,
+        email: document.getElementById("email").value,
+        metadata: { stripeToken }, // Temporarily store this so our webhooks can do their thing
+      };
+
+      const response = await fetch(`/api/keygen-account`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/vnd.api+json",
+          Accept: "application/vnd.api+json",
+        },
+        body: JSON.stringify({
+          data: attributes,
+        }),
+      });
+
+      const { data, errors } = await response.json();
+
+      if (errors) {
+        const message = errors.map((e) => e.detail).toString();
+
+        register.parentNode.innerHTML = `An error occurred during user creation: ${message} (double check your ENV vars)`;
+
+        throw new Error(message);
+      }
+
+      register.parentNode.innerHTML = `Thanks for your purchase, ${data.attributes.firstName}! 🚀`;
+    },
+  });
+
+  register.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    handler.open({
+      panelLabel: "Buy License",
+      name: "Seoder",
+      image: "/logo.svg",
+      amount: 20000,
+    });
+  });
+</script>
 
 <style>
   main {
@@ -109,10 +115,17 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
     position: relative;
     max-width: 105ch;
   }
+
   h1 {
     font-size: 3rem;
     font-weight: 800;
     margin: 0;
+  }
+  .space {
+    height: 11rem;
+  }
+  h2 {
+    font-weight: normal;
   }
   .text-gradient {
     background-image: var(--accent-gradient);
@@ -132,6 +145,7 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
   }
   form {
     padding: 0.6rem 0;
+    text-align: left;
   }
   form label {
     display: block;
@@ -149,16 +163,22 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
   .prog {
     padding: 1.5rem;
   }
+  .center-container {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+  }
   .button-container button {
     text-transform: uppercase;
     color: #2f2768;
-    border: 2px solid #2f2768;
+    border: none;
     padding: 0.5rem 0.8rem;
     border-radius: 0.3rem;
     min-width: 16.8rem;
     margin: 0;
+    background-color: #e8c01a;
   }
   .button-container button:hover {
-    border-color: #4b3dbb;
+    background-color: #e9c73e;
   }
 </style>

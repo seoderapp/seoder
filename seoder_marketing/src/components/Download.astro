@@ -1,0 +1,85 @@
+---
+import Card from "./Card.astro";
+import Apple from "./Logos/Apple.astro";
+import Linux from "./Logos/Linux.astro";
+import Windows from "./Logos/Windows.astro";
+---
+
+<section>
+  <p class="highlight center">Downloads</p>
+  <h4 class="text-primary center heading">Available for all major platforms</h4>
+
+  <ul role="list" class="link-card-grid">
+    <Card
+      href="/releases/Seoder_0.0.1_aarch64.dmg"
+      title="Desktop Mac Silicon"
+      body="Pre-release arch64 M1 chip"
+    >
+      <Apple />
+    </Card>
+    <Card
+      href="/releases/Seoder_0.0.1_universal.dmg"
+      title="Desktop Mac Universal"
+      body="Pre-release mac universal"
+    >
+      <Apple />
+    </Card>
+    <Card
+      href="/releases/seoder_app_0.0.1_linux.app.tar.gz"
+      title="Desktop Linux"
+      body="Pre-release linux"
+    >
+      <Linux />
+    </Card>
+    <Card
+      href="/releases/seoder_app_0.0.1_x64_en-US.msi"
+      title="Desktop Windows"
+      body="Pre-release windows"
+    >
+      <Windows />
+    </Card>
+  </ul>
+</section>
+
+<style>
+  section {
+    padding-bottom: 4rem;
+  }
+
+  .heading {
+    font-size: 1.4rem;
+  }
+  .sub-heading {
+    font-size: 1.7rem;
+    max-width: 14rem;
+  }
+  .trial {
+    font-size: 0.7rem;
+    color: #2f2768;
+    padding: 0.5rem 0;
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  .text-primary {
+    color: #2f2768;
+  }
+
+  .link-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
+    gap: 1rem;
+    padding: 0;
+  }
+
+  .link-card-grid-feat {
+    flex: 1;
+    grid-template-columns: repeat(auto-fit, minmax(31ch, 1fr));
+  }
+
+  .highlight {
+    color: #e8c01a;
+  }
+</style>

@@ -9,6 +9,7 @@ import Navbar from "../components/Navbar.astro";
 import AnchorButton from "../components/AnchorButton.astro";
 import Search from "../components/Svgs/Search.astro";
 import Feature from "../components/Feature.astro";
+import Download from "../components/Download.astro";
 ---
 
 <Layout title="Seoder - The marketing lead generation tool">
@@ -88,43 +89,7 @@ import Feature from "../components/Feature.astro";
         </div>
       </section>
 
-      <section>
-        <p class="highlight center">Downloads</p>
-        <h4 class="text-primary center heading">
-          Available for all major platforms
-        </h4>
-
-        <ul role="list" class="link-card-grid">
-          <Card
-            href="/releases/Seoder_0.0.1_aarch64.dmg"
-            title="Desktop Mac Silicon"
-            body="Pre-release arch64 M1 chip"
-          >
-            <Apple />
-          </Card>
-          <Card
-            href="/releases/Seoder_0.0.1_universal.dmg"
-            title="Desktop Mac Universal"
-            body="Pre-release mac universal"
-          >
-            <Apple />
-          </Card>
-          <Card
-            href="/releases/seoder_app_0.0.1_linux.app.tar.gz"
-            title="Desktop Linux"
-            body="Pre-release linux"
-          >
-            <Linux />
-          </Card>
-          <Card
-            href="/releases/seoder_app_0.0.1_x64_en-US.msi"
-            title="Desktop Windows"
-            body="Pre-release windows"
-          >
-            <Windows />
-          </Card>
-        </ul>
-      </section>
+      <Download />
     </div>
   </main>
   <Footer />
