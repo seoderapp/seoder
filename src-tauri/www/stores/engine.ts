@@ -19,14 +19,34 @@ export interface Engine {
 export const engines = map<Engine>();
 
 // get engine list
-export const enginesList = computed(engines, (all) => {
-  const keys = Object.keys(all);
-
-  return keys;
-});
+export const enginesList = computed(engines, (all) => Object.keys(all));
 
 // active engine selected
 export const selectedEngine = atom<string>("");
+
+// get active engine selected
+export const selectedItem = computed(
+  [engines, selectedEngine],
+  (eng, selected) => {
+    return selected && eng[selected];
+  }
+);
+
+// get errors logs
+export const selectedErrors = computed(
+  [engines, selectedEngine],
+  (eng, selected) => {
+    return eng[selected]?.invalidUrls;
+  }
+);
+
+// get errors logs
+export const selectedValid = computed(
+  [engines, selectedEngine],
+  (eng, selected) => {
+    return eng[selected]?.urls;
+  }
+);
 
 // select or deselect engine
 export const selectAction = action(
@@ -50,13 +70,9 @@ export const setStatus = action(
     const item = store.get()[path];
 
     if (item) {
-      store.setKey(path, {
-        ...item,
-        status,
-      });
+      item.status = status;
+      store.notify(path);
     }
-
-    return store.get();
   }
 );
 

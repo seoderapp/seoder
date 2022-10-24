@@ -7,14 +7,26 @@ const currentYear = new Date().getFullYear();
 <footer>
   <div class="footer-container">
     <div class="container">
-      <a href="https://usefathom.com/ref/IRZNZG" rel="noopener" target="_blank"
-        >Analytics</a
-      >
-      <a href="mailto:support@seoder.io">Support Team</a>
-      <a href="/payments">Buy Now</a>
-      <a href="https://twitter.com/seoderio" rel="noopener" target="_blank"
-        >Twitter</a
-      >
+      <ul>
+        <li>
+          <a
+            href="https://usefathom.com/ref/IRZNZG"
+            rel="noopener"
+            target="_blank">Analytics</a
+          >
+        </li>
+        <li>
+          <a href="mailto:support@seoder.io">Support Team</a>
+        </li>
+        <li>
+          <a href="/payments">Buy Now</a>
+        </li>
+        <li>
+          <a href="https://twitter.com/seoderio" rel="noopener" target="_blank"
+            >Twitter</a
+          >
+        </li>
+      </ul>
     </div>
     <p class={"cc"}>
       Seoder &copy; {currentYear}
@@ -59,6 +71,12 @@ const currentYear = new Date().getFullYear();
     bottom: 0px;
     pointer-events: none;
     z-index: -1;
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
   }
 
   @media only screen and (max-width: 800px) {

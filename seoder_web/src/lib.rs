@@ -362,6 +362,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     let ptt = pt.split(','); // paths
                     let ott = pat.split(','); // patterns
 
+                    // todo: valid path exist
                     create_dir(&db_dir).await.unwrap();
                     create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
                     create_dir(&string_concat!(db_dir, "/invalid"))

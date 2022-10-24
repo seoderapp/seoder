@@ -1,12 +1,12 @@
 import { useStore } from "@nanostores/react";
+import { FC } from "react";
 import { engines, enginesList } from "../stores/engine";
 import { CampaignCell } from "./CampaignCell";
 
-export const CampaignList = ({ children }: any) => {
+export const CampaignList: FC = ({ children }) => {
   const list = useStore(enginesList);
   const engineItems = engines.get();
 
-  // empty form css visiblity
   const emptyStyle = list.length ? "hidden" : "block";
 
   return (

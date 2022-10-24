@@ -45,10 +45,7 @@ const onExportEvent = async (path: string) => {
 };
 
 const onDeleteEvent = (path: string) => {
-  if (engineMap.has(path)) {
-    engineMap.delete(path);
-    engines.setKey(path, undefined);
-  }
+  engines.setKey(path, undefined);
 
   socket.send("delete-engine " + path);
 };
@@ -90,7 +87,16 @@ export const CampaignCell = ({
   const onRunPress = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setStatus(path, CellStatus.RUNNING);
+    item.invalidUrls.clear();
+    item.urls.clear();
+
+    engines.setKey(path, {
+      ...item,
+      urls: new Set(),
+      invalidUrls: new Set(),
+      status: CellStatus.RUNNING,
+    });
+
     onRunEvent(path);
   };
 
@@ -126,7 +132,7 @@ export const CampaignCell = ({
           <div className={"flex"}>
             <div className={"engine-title"}>{path}</div>
             <div id={"engine_stats_" + path} className={"engine-stats"}>
-              0 / 0
+              {item.valid} / {item.total}
             </div>
             <div className={"row engine-paths"}>{item?.paths}</div>
             <div className={"row gutter-t full-w-120"}>

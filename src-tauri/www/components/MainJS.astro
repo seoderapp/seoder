@@ -7,9 +7,7 @@ declare global {
 <script>
   // import { profile } from "../stores/profile";
   import {
-    selectAction,
     engines,
-    engineMap,
     fileMap,
     selectedEngine,
     setStatus,
@@ -97,9 +95,6 @@ declare global {
   const netstatsUp = document.getElementById("network-stats-up");
   const netstatsTotal = document.getElementById("network-stats-total");
 
-  const logfeed = document.getElementById("feed-log"); // valid feed log
-  const invalidLogfeed = document.getElementById("error-log"); // invalid log
-
   // settings
   const settingsContainer = document.getElementById("settings-container");
   const settingsBtn = document.getElementById("settings-button");
@@ -124,12 +119,6 @@ declare global {
   const fileSelect = document.getElementById(
     "target-select"
   ) as HTMLInputElement;
-
-  if (logfeed && !logfeed.children.length) {
-    feedEmpty.className = "block";
-  } else if (feedEmpty) {
-    feedEmpty.className = "hidden";
-  }
 
   newCampaignButton?.addEventListener("click", () => {
     campaignCreateForm.className = "block";
@@ -250,31 +239,23 @@ declare global {
       const data = JSON.parse(raw);
       const { finished, time } = data || {};
 
-      setStatus(finished, CellStatus.RUNNING);
-
+      setStatus(finished, CellStatus.FINISHED);
       console.log(time);
+      return;
     }
 
     if (raw.startsWith(ptp)) {
       const np = JSON.parse(raw);
       const { pengine, ploc } = np || {};
+      const eitem = engines.get()[pengine];
 
-      if (engineMap.has(pengine)) {
-        const item = engineMap.get(pengine);
-        const eitem = engines.get()[pengine];
+      if (eitem) {
+        eitem.total = ploc ?? eitem.total ?? 0;
+        eitem.valid = eitem.valid ?? 0;
 
-        item.total = ploc ?? item.total ?? 0;
-        item.valid = item.valid ?? 0;
-
-        eitem.total = ploc ?? item.total ?? 0;
-        item.valid = item.valid ?? 0;
-
-        const cell = document.getElementById("engine_stats_" + pengine);
-
-        if (cell) {
-          cell.textContent = item.valid + " / " + item.total;
-        }
+        engines.notify(pengine);
       }
+
       return;
     }
 
@@ -282,24 +263,14 @@ declare global {
       const np = JSON.parse(raw);
       const { invalid_url: url, invalid_path: path } = np || {};
 
-      if (engineMap.has(path)) {
-        const item = engineMap.get(path);
+      const item = engines.get()[path];
 
-        if (errorEmpty && !invalidLogfeed.children.length) {
-          errorEmpty.className = "hidden";
-        }
+      if (item && url && item.invalidUrls && !item.invalidUrls.has(url)) {
+        item.invalidUrls.add(url);
 
-        // todo: swap current log
-        if (url && item.invalidUrls && !item.invalidUrls.has(url)) {
-          item.invalidUrls.add(url);
-
-          if (invalidLogfeed) {
-            const logc = document.createElement("li");
-            logc.innerText = url;
-
-            invalidLogfeed.appendChild(logc);
-          }
-        }
+        engines.setKey(path, {
+          ...item,
+        });
       }
       return;
     }
@@ -307,25 +278,13 @@ declare global {
     if (raw.startsWith(vpaths)) {
       const np = JSON.parse(raw);
       const { url, path } = np || {};
+      const item = engines.get()[path];
 
-      if (engineMap.has(path)) {
-        const item = engineMap.get(path);
-
-        if (feedEmpty && !logfeed.children.length) {
-          feedEmpty.className = "hidden";
-        }
-
-        // todo: swap current log
-        if (url && item.urls && !item.urls.has(url)) {
-          item.urls.add(url);
-
-          if (logfeed) {
-            const logc = document.createElement("li");
-            logc.innerText = url;
-
-            logfeed.appendChild(logc);
-          }
-        }
+      if (item && url && item.urls && !item.urls.has(url)) {
+        item.urls.add(url);
+        engines.setKey(path, {
+          ...item,
+        });
       }
       return;
     }
@@ -384,7 +343,7 @@ declare global {
       const np = JSON.parse(raw);
       const path = np && (np.epath as string);
 
-      if (!engineMap.has(path)) {
+      if (!engines.get()[path]) {
         const engineSource = {
           total: 0,
           valid: 0,
@@ -396,7 +355,6 @@ declare global {
         };
 
         engines.setKey(path, engineSource);
-        engineMap.set(path, engineSource);
       }
       return;
     }
@@ -404,22 +362,11 @@ declare global {
     if (raw.startsWith(ptc)) {
       const np = JSON.parse(raw);
       const path = np && np.path;
+      const item = engines.get()[path];
 
-      if (engineMap.has(path)) {
-        const item = engineMap.get(path);
-        const eitem = engines.get()[path];
-
-        item.total = item.total ?? 0;
+      if (item) {
         item.valid = np.count ?? item.valid ?? 0;
-
-        eitem.total = eitem.total ?? 0;
-        eitem.valid = np.count ?? eitem.valid ?? 0;
-
-        const cell = document.getElementById("engine_stats_" + path);
-
-        if (cell) {
-          cell.textContent = item.valid + " / " + item.total;
-        }
+        engines.notify(path);
       }
     }
 
@@ -462,13 +409,7 @@ declare global {
       const np = JSON.parse(raw);
       const path = np && np.depath;
 
-      if (engineMap.has(path)) {
-        const cell = document.getElementById("engine_" + path);
-        const kitem = document.getElementById("ekeys_" + path);
-
-        cell?.remove();
-        kitem?.remove();
-        engineMap.delete(path);
+      if (engines.get()[path]) {
         engines.setKey(path, undefined);
       }
     }
@@ -501,31 +442,22 @@ declare global {
   });
 
   rsform?.addEventListener("submit", (event) => {
+    event.preventDefault();
     const selected = selectedEngine.get();
     const eitem = engines.get()[selected];
 
     if (selected) {
-      if (engineMap.has(selected)) {
-        const e = engineMap.get(selected);
+      // js objects
+      eitem.urls.clear();
+      eitem.invalidUrls.clear();
+      eitem.status = CellStatus.RUNNING;
 
-        eitem.urls.clear();
-        eitem.invalidUrls.clear();
-
-        e.url.clear();
-        e.invalidUrls.clear();
-
-        eitem.status = CellStatus.RUNNING;
-
-        // todo: replace it with new selected engine map
-        logfeed.replaceChildren();
-      }
+      engines.notify(selected);
 
       socket.send("run-campaign " + selected);
     } else {
       alert("Please select a campaign");
     }
-
-    event.preventDefault();
   });
 
   rform?.addEventListener("submit", (event) => {

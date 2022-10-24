@@ -1,17 +1,15 @@
 import "../css/feed.css";
 import { Log } from "./Log";
 import { useState } from "react";
+import { useStore } from "@nanostores/react";
+import { selectedItem } from "../stores/engine";
 
 export const Tabs = () => {
   const [primaryFocused, setFocused] = useState<boolean>(true);
+  const item = useStore(selectedItem);
 
-  const onClickPrimary = () => {
-    setFocused(true);
-  };
-
-  const onClickSecondary = () => {
-    setFocused(false);
-  };
+  const onClickPrimary = () => setFocused(true);
+  const onClickSecondary = () => setFocused(false);
 
   return (
     <div className={"feed"}>
@@ -43,7 +41,7 @@ export const Tabs = () => {
         role="tabpanel"
         aria-labelledby="tab-console"
       >
-        <Log id={"feed-log"} emptyId={"feed-start"} />
+        <Log id={"feed-log"} emptyId={"feed-start"} logs={item?.urls} />
       </div>
 
       <div
@@ -51,7 +49,11 @@ export const Tabs = () => {
         role="tabpanel"
         aria-labelledby="tab-console"
       >
-        <Log id={"error-log"} emptyId={"error-start"} />
+        <Log
+          id={"error-log"}
+          emptyId={"error-start"}
+          logs={item?.invalidUrls}
+        />
       </div>
     </div>
   );

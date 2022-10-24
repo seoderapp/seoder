@@ -3,10 +3,14 @@ import { CampaignList } from "./CampaignList";
 import EmptyCampaign from "./Empty/Create.astro";
 ---
 
-<div class="card">
-  <div class="card-body">
-    <CampaignList client:load>
-      <EmptyCampaign />
-    </CampaignList>
-  </div>
+<div class="card-body">
+  <CampaignList client:load>
+    <EmptyCampaign />
+  </CampaignList>
 </div>
+
+<style>
+  .card-body {
+    overflow: auto;
+  }
+</style>
