@@ -30,7 +30,9 @@ import Download from "../components/Download.astro";
               for
             </p>
             <div class={"text-center"}>
-              <AnchorButton href="/payments" title={"BUY NOW"} />
+              <div>
+                <AnchorButton href="/payments" title={"BUY NOW"} />
+              </div>
               <p class="trial">Try free 7 day trial</p>
             </div>
           </div>
@@ -126,9 +128,11 @@ import Download from "../components/Download.astro";
     text-fill-color: transparent;
   }
   .trial {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     color: #2f2768;
-    padding: 0.5rem 0;
+    padding: 0.6rem 0;
+    margin: 0;
+    opacity: 0.8;
   }
   .text-center {
     max-width: 14rem;
@@ -164,14 +168,6 @@ import Download from "../components/Download.astro";
     font-size: 1.6rem;
     max-width: 30rem;
     color: #2f2768;
-  }
-  .instructions code {
-    font-size: 0.875em;
-    font-weight: bold;
-    background: rgba(var(--accent), 12%);
-    color: rgb(var(--accent));
-    border-radius: 4px;
-    padding: 0.3em 0.45em;
   }
   .instructions strong {
     color: rgb(var(--accent));
