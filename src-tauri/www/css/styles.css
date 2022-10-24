@@ -67,7 +67,9 @@ button {
   list-style: none;
   padding: 1rem 0rem;
   margin: 0;
-  gap: 4px;
+  gap: 0.4rem;
+  flex-direction: column;
+  display: flex;
 }
 
 .cell-btn {

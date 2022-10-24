@@ -8,7 +8,7 @@ export type EngineProps = {
   invalidUrls: Set<string | unknown>;
   paths?: string[];
   patterns?: string[];
-  status?: CellStatus;
+  status: CellStatus;
 };
 
 export interface Engine {
@@ -42,7 +42,23 @@ export const selectAction = action(
   }
 );
 
-// backcompat
+// set engine item status
+export const setStatus = action(
+  engines,
+  "setStatus",
+  (store, path: string, status: CellStatus) => {
+    const item = store.get()[path];
+
+    if (item) {
+      store.setKey(path, {
+        ...item,
+        status,
+      });
+    }
+
+    return store.get();
+  }
+);
 
 // files for uploading
 export const fileMap = new Map();

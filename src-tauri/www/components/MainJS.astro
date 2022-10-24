@@ -12,6 +12,7 @@ declare global {
     engineMap,
     fileMap,
     selectedEngine,
+    setStatus,
   } from "../stores/engine";
   import { socket, socketRuntime, initSockets } from "../events/sockets";
 
@@ -249,11 +250,7 @@ declare global {
       const data = JSON.parse(raw);
       const { finished, time } = data || {};
 
-      const item = engines.get()[finished];
-
-      if (item) {
-        item.status = CellStatus.FINISHED;
-      }
+      setStatus(finished, CellStatus.RUNNING);
 
       console.log(time);
     }
@@ -532,6 +529,19 @@ declare global {
   });
 
   rform?.addEventListener("submit", (event) => {
+    const allEngines = engines.get();
+
+    Object.keys(allEngines).forEach((key) => {
+      const item = allEngines[key];
+
+      allEngines[key] = {
+        ...item,
+        status: CellStatus.RUNNING,
+      };
+    });
+
+    engines.set(allEngines);
+
     socket.send("run-all-campaigns");
     event.preventDefault();
   });

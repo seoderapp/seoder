@@ -5,7 +5,7 @@ import {
   selectAction,
   selectedEngine,
   engineMap,
-  fileMap,
+  setStatus,
 } from "../stores/engine";
 import { useState } from "react";
 import { socket } from "../events/sockets";
@@ -73,7 +73,6 @@ export const CampaignCell = ({
 }) => {
   const selected = useStore(selectedEngine);
   const [pressed, setPressed] = useState<boolean>();
-  const [status, setStatus] = useState<string>(CellStatus.READY);
 
   const selectItem = (event) => {
     event.preventDefault();
@@ -91,7 +90,7 @@ export const CampaignCell = ({
   const onRunPress = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setStatus(CellStatus.RUNNING);
+    setStatus(path, CellStatus.RUNNING);
     onRunEvent(path);
   };
 
@@ -105,9 +104,9 @@ export const CampaignCell = ({
   };
 
   const engineStatusClass =
-    status === CellStatus.FINISHED
+    item.status === CellStatus.FINISHED
       ? " engine-status-finished"
-      : status === CellStatus.RUNNING
+      : item.status === CellStatus.RUNNING
       ? " engine-status-running"
       : "";
 
@@ -152,7 +151,7 @@ export const CampaignCell = ({
             id={"engine_status_" + path}
             className={`engine-status${engineStatusClass}`}
           >
-            {status}
+            {item.status}
           </div>
         </div>
       </div>
