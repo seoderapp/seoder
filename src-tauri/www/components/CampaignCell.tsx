@@ -80,7 +80,7 @@ export const CampaignCell = ({
   path: string;
   item: EngineProps;
 }) => {
-  const selected = useStore(selectedEngine);
+  const $selected = useStore(selectedEngine);
   const [pressed, setPressed] = useState<boolean>();
 
   const selectItem = (event) => {
@@ -111,7 +111,7 @@ export const CampaignCell = ({
 
     engines.notify(path);
 
-    if (selected === path) {
+    if ($selected === path) {
       errorLogs.set([]);
       validLogs.set([]);
       invalidLogs.set([]);
@@ -124,7 +124,7 @@ export const CampaignCell = ({
     event.preventDefault();
     event.stopPropagation();
     onDeleteEvent(path);
-    if (selected === path) {
+    if ($selected === path) {
       selectAction(path);
     }
   };
@@ -134,7 +134,8 @@ export const CampaignCell = ({
   const bgClass =
     item.status === CellStatus.RUNNING ? " engine-background-running" : "";
 
-  const baseClass = path === selected ? "cell-btn cell-btn-active" : "cell-btn";
+  const baseClass =
+    path === $selected ? "cell-btn cell-btn-active" : "cell-btn";
 
   return (
     <li

@@ -85,13 +85,13 @@ export function Log({ id, emptyId, logs }: Props) {
 }
 
 export function LogValid({ id, emptyId, scrolling }: Props) {
-  const list = useStore(validLogs);
+  const $list = useStore(validLogs);
   const divRef = useRef(null);
   const [scrollEnabled, setScrolling] = useState<boolean>(scrolling);
 
   useScrolling({
     divRef,
-    list,
+    list: $list,
     scrolling: scrollEnabled,
     atom: validLogs,
   });
@@ -103,14 +103,14 @@ export function LogValid({ id, emptyId, scrolling }: Props) {
 
   const onToggleScrolling = () => setScrolling((v) => !v);
 
-  const empty = !list.length;
+  const empty = !$list.length;
 
   return (
     <div className="log">
       <ul id={id} role={"list"}>
         <EmptyCell empty={empty} emptyId={emptyId} />
 
-        {list.map((item: string) => (
+        {$list.map((item: string) => (
           <LogItem key={item}>{item}</LogItem>
         ))}
         <ScrollButton
@@ -125,13 +125,13 @@ export function LogValid({ id, emptyId, scrolling }: Props) {
 }
 
 export function LogInvalid({ id, emptyId, scrolling }: Props) {
-  const list = useStore(invalidLogs);
+  const $list = useStore(invalidLogs);
   const divRef = useRef(null);
   const [scrollEnabled, setScrolling] = useState<boolean>(scrolling);
 
   useScrolling({
     divRef,
-    list,
+    list: $list,
     scrolling: scrollEnabled,
     atom: invalidLogs,
   });
@@ -143,14 +143,14 @@ export function LogInvalid({ id, emptyId, scrolling }: Props) {
 
   const onToggleScrolling = () => setScrolling((v) => !v);
 
-  const empty = !list.length;
+  const empty = !$list.length;
 
   return (
     <div className="log">
       <ul id={id} role={"list"}>
         <EmptyCell empty={empty} emptyId={emptyId} />
 
-        {list.map((item: string) => (
+        {$list.map((item: string) => (
           <LogItem key={item}>{item}</LogItem>
         ))}
         <ScrollButton
@@ -165,13 +165,13 @@ export function LogInvalid({ id, emptyId, scrolling }: Props) {
 }
 
 export function LogErrors({ id, emptyId, scrolling }: Props) {
-  const list = useStore(errorLogs);
+  const $list = useStore(errorLogs);
   const divRef = useRef(null);
   const [scrollEnabled, setScrolling] = useState<boolean>(scrolling);
 
   useScrolling({
     divRef,
-    list,
+    list: $list,
     scrolling: scrollEnabled,
     atom: errorLogs,
   });
@@ -182,14 +182,14 @@ export function LogErrors({ id, emptyId, scrolling }: Props) {
 
   const onToggleScrolling = () => setScrolling((v) => !v);
 
-  const empty = !list.length;
+  const empty = !$list.length;
 
   return (
     <div className="log">
       <ul id={id} role={"list"}>
         <EmptyCell empty={empty} emptyId={emptyId} />
 
-        {list.map((item: string) => (
+        {$list.map((item: string) => (
           <LogItem key={item}>{item}</LogItem>
         ))}
         <ScrollButton
