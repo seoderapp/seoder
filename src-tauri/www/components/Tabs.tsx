@@ -38,7 +38,7 @@ export const Tabs = () => {
         role="tabpanel"
         aria-labelledby="tab-console"
       >
-        <LogValid />
+        <LogValid scrolling={primaryFocused} />
       </div>
 
       <div
@@ -46,7 +46,7 @@ export const Tabs = () => {
         role="tabpanel"
         aria-labelledby="tab-console"
       >
-        <LogErrors />
+        <LogErrors id={"log-errors"} scrolling={!primaryFocused} />
       </div>
     </div>
   );
