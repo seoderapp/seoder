@@ -8,6 +8,7 @@ declare global {
   import {
     addErrorLogs,
     addValidLogs,
+    EngineProps,
     engines,
     errorLogs,
     fileMap,
@@ -145,6 +146,7 @@ declare global {
   /*
    * List of web socket matchers * special for high performance
    */
+  const estats = "{" + '"' + "stats"; // os stats
   const bftc = "{" + '"' + "buffer" + '"'; // buffer
   const ptp = "{" + '"' + "pengine" + '"' + ":" + '"'; // engine
   const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"'; // selected file
@@ -155,11 +157,19 @@ declare global {
   const cfin = "{" + '"' + "finished" + '"'; // crawl finished
   const vpaths = "{" + '"' + "path" + '"' + ":" + '"'; // valid paths
   const ipaths = "{" + '"' + "invalid_path" + '"' + ":" + '"'; // invalid paths
+  const epaths = "{" + '"' + "error_path" + '"' + ":" + '"'; // errors paths
   const vlicense = "{" + '"' + "license"; // valid license;
 
   // defaults for program entry
   let defaultOptionSet = false;
   let firstCheck = false;
+
+  function determineFinished(item: EngineProps) {
+    return (
+      item.errorUrls.size + item.invalidUrls.size + item.urls.size ===
+      item.total
+    );
+  }
 
   function eventSub(event) {
     const raw = event.data;
@@ -199,7 +209,7 @@ declare global {
       }
     }
 
-    if (raw.startsWith("{" + '"' + "stats")) {
+    if (raw.startsWith(estats)) {
       const data = JSON.parse(raw);
       const {
         cpu_usage,
@@ -253,9 +263,36 @@ declare global {
 
         engines.notify(pengine);
 
-        if (eitem.invalidUrls.size + eitem.urls.size === eitem.total) {
+        if (determineFinished(eitem)) {
           setStatus(pengine, CellStatus.FINISHED);
         }
+      }
+
+      return;
+    }
+
+    if (raw.startsWith(epaths)) {
+      const np = JSON.parse(raw);
+      const { error_path, error_url } = np || {};
+      const item = engines.get()[error_path];
+
+      if (
+        item &&
+        error_url &&
+        item.errorUrls &&
+        !item.errorUrls.has(error_url)
+      ) {
+        item.errorUrls.add(error_url);
+
+        if (selectedEngine.get() === error_path) {
+          addErrorLogs(error_url);
+        }
+
+        if (determineFinished(item)) {
+          setStatus(error_path, CellStatus.FINISHED);
+        }
+
+        engines.notify(error_path);
       }
 
       return;
@@ -272,7 +309,7 @@ declare global {
         if (selectedEngine.get() === path) {
           addErrorLogs(url);
         }
-        if (item.invalidUrls.size + item.urls.size === item.total) {
+        if (determineFinished(item)) {
           setStatus(path, CellStatus.FINISHED);
         }
       }
@@ -290,7 +327,7 @@ declare global {
         if (selectedEngine.get() === path) {
           addValidLogs(url);
         }
-        if (item.invalidUrls.size + item.urls.size === item.total) {
+        if (determineFinished(item)) {
           setStatus(path, CellStatus.FINISHED);
         }
       }
@@ -358,6 +395,7 @@ declare global {
           valid: 0,
           urls: new Set(),
           invalidUrls: new Set(),
+          errorUrls: new Set(),
           patterns: np?.patterns,
           paths: np?.paths,
           status: CellStatus.READY,
@@ -377,7 +415,7 @@ declare global {
         item.valid = np.count ?? item.valid ?? 0;
         engines.notify(path);
 
-        if (item.invalidUrls.size + item.urls.size === item.total) {
+        if (determineFinished(item)) {
           setStatus(path, CellStatus.FINISHED);
         }
       }

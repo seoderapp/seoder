@@ -6,6 +6,7 @@ export type EngineProps = {
   valid: number;
   urls: Set<string | unknown>;
   invalidUrls: Set<string | unknown>;
+  errorUrls: Set<string | unknown>;
   paths?: string[];
   patterns?: string[];
   status: CellStatus;

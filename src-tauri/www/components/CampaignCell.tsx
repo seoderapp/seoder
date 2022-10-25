@@ -104,6 +104,7 @@ export const CampaignCell = ({
     }
 
     item.invalidUrls.clear();
+    item.errorUrls.clear();
     item.urls.clear();
     item.status = CellStatus.RUNNING;
 

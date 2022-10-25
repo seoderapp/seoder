@@ -60,8 +60,7 @@ pub async fn store_fs_io_matching(
             let e = entry.path().to_str().unwrap().to_owned();
             let cmp_base = string_concat!(&e, "/valid");
             let cmp_invalid = string_concat!(&e, "/invalid");
-            // todo: use error folder split
-            // let cmp_errors = string_concat!(&e, "/errors");
+            let cmp_errors = string_concat!(&e, "/errors");
 
             // only iterate through directory contents
             if !match tokio::fs::metadata(&cmp_base).await {
@@ -73,6 +72,7 @@ pub async fn store_fs_io_matching(
 
             let mut o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
             let mut oo = create_file(&string_concat!(&cmp_invalid, "/links.txt")).await;
+            let mut oe = create_file(&string_concat!(&cmp_errors, "/links.txt")).await;
 
             while let Some(i) = rx.recv().await {
                 let (link, jor, spawned) = i;
@@ -87,7 +87,7 @@ pub async fn store_fs_io_matching(
 
                 // errors 
                 if response == "" || error {
-                    oo.write(&link.as_bytes()).await.unwrap();
+                    oe.write(&link.as_bytes()).await.unwrap();
                     continue;
                 }
 
@@ -99,7 +99,6 @@ pub async fn store_fs_io_matching(
                     if result {
                         o.write(&link.as_bytes()).await.unwrap();
                     } else {
-                        // right empty matches as Errors - TODO Split file
                         oo.write(&link.as_bytes()).await.unwrap();
                         task::yield_now().await;
                     }
@@ -130,7 +129,6 @@ pub async fn store_fs_io_matching(
                         if result {
                             o.write(&link.as_bytes()).await.unwrap();
                         } else {
-                            // todo: split file
                             oo.write(&link.as_bytes()).await.unwrap();
                         }
                     }
@@ -151,14 +149,18 @@ pub async fn store_fs_io_matching(
 
         let cmp_base = string_concat!(&cmp, "/valid");
         let cmp_invalid = string_concat!(&cmp, "/invalid");
+        let cmp_errors = string_concat!(&cmp, "/errors");
 
         tokio::fs::create_dir(&&cmp_base).await.unwrap_or_default();
         tokio::fs::create_dir(&&cmp_invalid)
             .await
             .unwrap_or_default();
-
+            tokio::fs::create_dir(&&cmp_errors)
+            .await
+            .unwrap_or_default();
         let mut o = create_file(&&string_concat!(&cmp_base, "/links.txt")).await;
         let mut oo = create_file(&&string_concat!(&cmp_invalid, "/links.txt")).await;
+        let mut oe = create_file(&&string_concat!(&cmp_errors, "/links.txt")).await;
 
         while let Some(i) = rx.recv().await {
             let (link, jor, spawned) = i;
@@ -172,7 +174,7 @@ pub async fn store_fs_io_matching(
             let link = string_concat!(&link, "\n");
 
             if response == "" || error {
-                oo.write(&link.as_bytes()).await.unwrap();
+                oe.write(&link.as_bytes()).await.unwrap();
                 continue;
             }
 
@@ -182,7 +184,6 @@ pub async fn store_fs_io_matching(
                 if result {
                     o.write(&link.as_bytes()).await.unwrap();
                 } else {
-                    // todo: split file
                     oo.write(&link.as_bytes()).await.unwrap();
                 }
             } else {
@@ -212,7 +213,6 @@ pub async fn store_fs_io_matching(
                         if result {
                             o.write(&link.as_bytes()).await.unwrap();
                         } else {
-                            // todo: split file
                             oo.write(&link.as_bytes()).await.unwrap();
                         }
                     }

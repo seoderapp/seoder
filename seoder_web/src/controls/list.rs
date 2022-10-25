@@ -30,14 +30,23 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                 .open(string_concat!(dpt, "/invalid/links.txt"))
                 .await;
 
+                let error_file = OpenOptions::new()
+                .read(true)
+                .open(string_concat!(dpt, "/errors/links.txt"))
+                .await;
+
             let mut d = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
 
             if d.starts_with("/") {
                 d.remove(0);
             }
 
+            // valid lines
             let mut lns = 0;
+            // invalid lines
             let mut ilns = 0;
+            // errors lines
+            let mut elns = 0;
 
             match file {
                 Ok(file) => {
@@ -77,7 +86,27 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                 _ => {}
             };
 
-            let v = json!({ "count": lns, "ecount": ilns, "path": d });
+            match error_file {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let mut lines = reader.lines();
+
+                    while let Some(url) = lines.next_line().await.unwrap() {
+                        let v = json!({ "error_url": url, "error_path": d });
+
+                        outgoing
+                            .send(Message::Text(v.to_string()))
+                            .await
+                            .unwrap_or_default();
+
+                            elns += 1;
+                    }
+                }
+                _ => {}
+            };
+
+
+            let v = json!({ "count": lns, "ecount": ilns, "error_count": elns,  "path": d });
 
             outgoing
                 .send(Message::Text(v.to_string()))
