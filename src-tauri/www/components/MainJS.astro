@@ -252,6 +252,10 @@ declare global {
         eitem.total = ploc ?? eitem.total ?? 0;
 
         engines.notify(pengine);
+
+        if (eitem.invalidUrls.size + eitem.urls.size === eitem.total) {
+          setStatus(pengine, CellStatus.FINISHED);
+        }
       }
 
       return;
@@ -268,6 +272,9 @@ declare global {
         if (selectedEngine.get() === path) {
           addErrorLogs(url);
         }
+        if (item.invalidUrls.size + item.urls.size === item.total) {
+          setStatus(path, CellStatus.FINISHED);
+        }
       }
 
       return;
@@ -282,6 +289,9 @@ declare global {
         item.urls.add(url);
         if (selectedEngine.get() === path) {
           addValidLogs(url);
+        }
+        if (item.invalidUrls.size + item.urls.size === item.total) {
+          setStatus(path, CellStatus.FINISHED);
         }
       }
 
@@ -366,6 +376,10 @@ declare global {
       if (item) {
         item.valid = np.count ?? item.valid ?? 0;
         engines.notify(path);
+
+        if (item.invalidUrls.size + item.urls.size === item.total) {
+          setStatus(path, CellStatus.FINISHED);
+        }
       }
       return;
     }

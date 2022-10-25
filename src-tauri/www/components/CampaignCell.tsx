@@ -60,6 +60,17 @@ export enum CellStatus {
   FINISHED = "Finished",
 }
 
+// determine cell status class
+const cellStatusClass = (item: EngineProps): string => {
+  if (item.status === CellStatus.FINISHED) {
+    return "engine-status engine-status-finished";
+  }
+  if (item.status === CellStatus.RUNNING) {
+    return "engine-status engine-status-running";
+  }
+  return "engine-status";
+};
+
 export const CampaignCell = ({
   item,
   path,
@@ -115,12 +126,7 @@ export const CampaignCell = ({
     }
   };
 
-  const engineStatusClass =
-    item.status === CellStatus.FINISHED
-      ? " engine-status-finished"
-      : item.status === CellStatus.RUNNING
-      ? " engine-status-running"
-      : "";
+  const engineStatusClass = cellStatusClass(item);
 
   return (
     <li
@@ -159,10 +165,7 @@ export const CampaignCell = ({
               </button>
             </div>
           </div>
-          <div
-            id={"engine_status_" + path}
-            className={`engine-status${engineStatusClass}`}
-          >
+          <div id={"engine_status_" + path} className={engineStatusClass}>
             {item.status}
           </div>
         </div>

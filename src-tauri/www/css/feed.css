@@ -35,3 +35,10 @@
   background-color: #0e1116;
   color: #fff;
 }
+
+.empty-log {
+  float: revert;
+  clear: both;
+  padding: 0;
+  text-align: center;
+}

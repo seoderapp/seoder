@@ -83,9 +83,8 @@ export function LogErrors({ id, emptyId, scrolling }: Props) {
           <LogItem key={item}>{item}</LogItem>
         ))}
         <li
+          className={"empty-log"}
           style={{
-            padding: 0,
-            textAlign: "center",
             display: !empty ? "list-item" : "none",
           }}
           ref={divRef}
@@ -143,9 +142,8 @@ export function LogValid({ id, emptyId, scrolling }: Props) {
           <LogItem key={item}>{item}</LogItem>
         ))}
         <li
+          className={"empty-log"}
           style={{
-            padding: 0,
-            textAlign: "center",
             display: !empty ? "list-item" : "none",
           }}
           ref={divRef}

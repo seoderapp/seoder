@@ -50,6 +50,7 @@ pub async fn store_fs_io_matching(
         let mut entries = match read_dir(&ENTRY_PROGRAM.0).await {
             Ok(dir) => dir,
             Err(_) => {
+                logd("No Campaigns found!");
                 // todo: print error
                 return;
             }
@@ -59,6 +60,8 @@ pub async fn store_fs_io_matching(
             let e = entry.path().to_str().unwrap().to_owned();
             let cmp_base = string_concat!(&e, "/valid");
             let cmp_invalid = string_concat!(&e, "/invalid");
+            // todo: use error folder split
+            // let cmp_errors = string_concat!(&e, "/errors");
 
             // only iterate through directory contents
             if !match tokio::fs::metadata(&cmp_base).await {
@@ -82,6 +85,7 @@ pub async fn store_fs_io_matching(
                 let error = response.starts_with("- error ");
                 let link = string_concat!(link, "\n");
 
+                // errors 
                 if response == "" || error {
                     oo.write(&link.as_bytes()).await.unwrap();
                     continue;
@@ -95,6 +99,8 @@ pub async fn store_fs_io_matching(
                     if result {
                         o.write(&link.as_bytes()).await.unwrap();
                     } else {
+                        // right empty matches as Errors - TODO Split file
+                        oo.write(&link.as_bytes()).await.unwrap();
                         task::yield_now().await;
                     }
                     continue;
@@ -123,6 +129,9 @@ pub async fn store_fs_io_matching(
                         task::yield_now().await;
                         if result {
                             o.write(&link.as_bytes()).await.unwrap();
+                        } else {
+                            // todo: split file
+                            oo.write(&link.as_bytes()).await.unwrap();
                         }
                     }
                     Err(_) => logd("the sender dropped"),
@@ -172,6 +181,9 @@ pub async fn store_fs_io_matching(
                 task::yield_now().await;
                 if result {
                     o.write(&link.as_bytes()).await.unwrap();
+                } else {
+                    // todo: split file
+                    oo.write(&link.as_bytes()).await.unwrap();
                 }
             } else {
                 let (tx, rxx) = tokio::sync::oneshot::channel();
@@ -199,6 +211,9 @@ pub async fn store_fs_io_matching(
                         task::yield_now().await;
                         if result {
                             o.write(&link.as_bytes()).await.unwrap();
+                        } else {
+                            // todo: split file
+                            oo.write(&link.as_bytes()).await.unwrap();
                         }
                     }
                     Err(_) => logd("the sender dropped"),
