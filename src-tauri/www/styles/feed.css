@@ -16,7 +16,7 @@
   list-style-type: none;
   font-family: "SF Mono";
   overflow: auto;
-  height: calc(80vh - 54px);
+  height: calc(80vh - 5.188rem);
 }
 
 .log li {
@@ -37,8 +37,6 @@
 }
 
 .empty-log {
-  float: revert;
-  clear: both;
   padding: 0;
   text-align: center;
 }

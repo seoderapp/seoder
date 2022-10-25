@@ -3,6 +3,7 @@ import {
   EngineProps,
   engines,
   errorLogs,
+  invalidLogs,
   selectAction,
   selectedEngine,
   validLogs,
@@ -113,6 +114,7 @@ export const CampaignCell = ({
     if (selected === path) {
       errorLogs.set([]);
       validLogs.set([]);
+      invalidLogs.set([]);
     }
 
     onRunEvent(path);

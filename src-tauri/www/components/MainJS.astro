@@ -7,6 +7,7 @@ declare global {
 <script>
   import {
     addErrorLogs,
+    addInvalidLogs,
     addValidLogs,
     EngineProps,
     engines,
@@ -300,14 +301,16 @@ declare global {
 
     if (raw.startsWith(ipaths)) {
       const np = JSON.parse(raw);
+
       const { invalid_url: url, invalid_path: path } = np || {};
 
       const item = engines.get()[path];
 
-      if (item && url && item.invalidUrls && !item.invalidUrls.has(url)) {
+      if (item && item.invalidUrls && !item.invalidUrls.has(url)) {
         item.invalidUrls.add(url);
+
         if (selectedEngine.get() === path) {
-          addErrorLogs(url);
+          addInvalidLogs(url);
         }
         if (determineFinished(item)) {
           setStatus(path, CellStatus.FINISHED);

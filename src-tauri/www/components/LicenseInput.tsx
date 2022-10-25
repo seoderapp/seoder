@@ -1,5 +1,5 @@
 import { useState, SyntheticEvent } from "react";
-import "../css/license.css";
+import "../styles/license.css";
 
 export default function LicenseInput() {
   const [license, setLicense] = useState<string>("");

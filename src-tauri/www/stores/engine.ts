@@ -27,10 +27,15 @@ export const selectedEngine = atom<string>("");
 
 // valid list of logs
 export const validLogs = atom<string[]>([]);
+export const invalidLogs = atom<string[]>([]);
 export const errorLogs = atom<string[]>([]);
 
 export function addValidLogs(next: string) {
   validLogs.set([...validLogs.get(), next]);
+}
+
+export function addInvalidLogs(next: string) {
+  invalidLogs.set([...invalidLogs.get(), next]);
 }
 
 export function addErrorLogs(next: string) {
@@ -45,19 +50,27 @@ export const selectedItem = computed(
   }
 );
 
-// get errors logs
-export const selectedErrors = computed(
+// get invalid logs
+export const selectedInvalid = computed(
   [engines, selectedEngine],
   (eng, selected) => {
     return eng[selected]?.invalidUrls;
   }
 );
 
-// get errors logs
+// get valid logs
 export const selectedValid = computed(
   [engines, selectedEngine],
   (eng, selected) => {
     return eng[selected]?.urls;
+  }
+);
+
+// get errors logs
+export const selectedErrors = computed(
+  [engines, selectedEngine],
+  (eng, selected) => {
+    return eng[selected]?.errorUrls;
   }
 );
 
@@ -71,10 +84,12 @@ export const selectAction = action(
     } else {
       store.set(selected);
       const valid = Array.from(selectedValid.get() ?? []) as string[];
-      const invalid = Array.from(selectedErrors.get() ?? []) as string[];
+      const invalid = Array.from(selectedInvalid.get() ?? []) as string[];
+      const errors = Array.from(selectedErrors.get() ?? []) as string[];
 
       validLogs.set(valid);
-      errorLogs.set(invalid);
+      invalidLogs.set(invalid);
+      errorLogs.set(errors);
     }
 
     return store.get();

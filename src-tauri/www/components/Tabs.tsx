@@ -1,52 +1,81 @@
-import "../css/feed.css";
-import { LogErrors, LogValid } from "./Log";
+import "../styles/feed.css";
+import { LogErrors, LogInvalid, LogValid } from "./Log";
 import { useState } from "react";
 
-export const Tabs = () => {
-  const [primaryFocused, setFocused] = useState<boolean>(true);
+enum TabType {
+  "valid",
+  "invalid",
+  "errors",
+}
 
-  const onClickPrimary = () => setFocused(true);
-  const onClickSecondary = () => setFocused(false);
+export const Tabs = () => {
+  const [focused, setFocused] = useState<TabType>(TabType.valid);
+
+  const onClickValid = () => setFocused(TabType.valid);
+  const onClickInvalid = () => setFocused(TabType.invalid);
+  const onClickErrors = () => setFocused(TabType.errors);
+
+  const validFocused = focused === TabType.valid;
+  const invalidFocused = focused === TabType.invalid;
+  const errorFocused = focused === TabType.errors;
 
   return (
     <div className={"feed"}>
       <div className={"flex-row"} role="tablist">
         <button
-          className={`tab${primaryFocused ? " tab-active" : ""}`}
-          onClick={onClickPrimary}
+          className={`tab${validFocused ? " tab-active" : ""}`}
+          onClick={onClickValid}
           type="button"
           role="tab"
           id={"tab-console"}
-          aria-selected={primaryFocused}
+          aria-selected={validFocused}
         >
-          Console
+          Valids
         </button>
         <button
-          className={`tab${!primaryFocused ? " tab-active" : ""}`}
-          onClick={onClickSecondary}
+          className={`tab${invalidFocused ? " tab-active" : ""}`}
+          onClick={onClickInvalid}
           type="button"
           role="tab"
           id={"tab-error"}
-          aria-selected={!primaryFocused}
+          aria-selected={invalidFocused}
+        >
+          Invalids
+        </button>
+        <button
+          className={`tab${errorFocused ? " tab-active" : ""}`}
+          onClick={onClickErrors}
+          type="button"
+          role="tab"
+          id={"tab-invalid"}
+          aria-selected={errorFocused}
         >
           Errors
         </button>
       </div>
 
       <div
-        className={primaryFocused ? "" : "hidden"}
+        className={validFocused ? "" : "hidden"}
         role="tabpanel"
         aria-labelledby="tab-console"
       >
-        <LogValid scrolling={primaryFocused} />
+        <LogValid scrolling={validFocused} />
       </div>
 
       <div
-        className={primaryFocused ? "hidden" : ""}
+        className={invalidFocused ? "" : "hidden"}
         role="tabpanel"
         aria-labelledby="tab-console"
       >
-        <LogErrors id={"log-errors"} scrolling={!primaryFocused} />
+        <LogInvalid scrolling={invalidFocused} />
+      </div>
+
+      <div
+        className={errorFocused ? "" : "hidden"}
+        role="tabpanel"
+        aria-labelledby="tab-console"
+      >
+        <LogErrors scrolling={errorFocused} />
       </div>
     </div>
   );
