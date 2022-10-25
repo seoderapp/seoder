@@ -87,6 +87,11 @@ export const CampaignCell = ({
   const onRunPress = (event) => {
     event.preventDefault();
     event.stopPropagation();
+
+    if (item.status === CellStatus.RUNNING) {
+      return alert("Campaign already in progress");
+    }
+
     item.invalidUrls.clear();
     item.urls.clear();
     item.status = CellStatus.RUNNING;
@@ -97,6 +102,7 @@ export const CampaignCell = ({
       errorLogs.set([]);
       validLogs.set([]);
     }
+
     onRunEvent(path);
   };
 

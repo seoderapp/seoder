@@ -449,8 +449,11 @@ declare global {
     const selected = selectedEngine.get();
     const eitem = engines.get()[selected];
 
-    if (selected) {
-      // js objects
+    if (eitem) {
+      if (eitem.status === CellStatus.RUNNING) {
+        return alert("Campaign already in progress");
+      }
+
       eitem.urls.clear();
       eitem.invalidUrls.clear();
       eitem.status = CellStatus.RUNNING;
@@ -467,21 +470,25 @@ declare global {
   });
 
   rform?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
     const allEngines = engines.get();
+
+    let allreadyRunning = true;
 
     Object.keys(allEngines).forEach((key) => {
       const item = allEngines[key];
-
-      allEngines[key] = {
-        ...item,
-        status: CellStatus.RUNNING,
-      };
+      if (item.status !== CellStatus.RUNNING) {
+        allreadyRunning = false;
+      }
+      item.status = CellStatus.RUNNING;
     });
 
-    engines.set(allEngines);
-
-    socket.send("run-all-campaigns");
-    event.preventDefault();
+    if (allreadyRunning) {
+      alert("All campaigns already in progress.");
+    } else {
+      socket.send("run-all-campaigns");
+    }
   });
 
   bufferform?.addEventListener("submit", (event) => {
