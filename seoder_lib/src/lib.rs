@@ -17,10 +17,11 @@ pub extern crate string_concat;
 
 #[macro_use]
 extern crate lazy_static;
+pub use packages::spider::website::Website;
+use std::collections::HashSet;
 use std::path::Path;
 use tokio::fs::create_dir_all;
-
-pub use packages::spider::website::Website;
+use tokio::sync::Mutex;
 
 lazy_static! {
     /// engines, files, config.txt, and the data directory
@@ -34,6 +35,11 @@ lazy_static! {
             string_concat!(data_dir, "/seoder/"),
         )
     };
+}
+
+lazy_static! {
+    /// stopped crawls
+    pub static ref STOPPED: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
 }
 
 /// init entry dirs for prog

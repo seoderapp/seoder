@@ -30,7 +30,7 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                 .open(string_concat!(dpt, "/invalid/links.txt"))
                 .await;
 
-                let error_file = OpenOptions::new()
+            let error_file = OpenOptions::new()
                 .read(true)
                 .open(string_concat!(dpt, "/errors/links.txt"))
                 .await;
@@ -99,12 +99,11 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                             .await
                             .unwrap_or_default();
 
-                            elns += 1;
+                        elns += 1;
                     }
                 }
                 _ => {}
             };
-
 
             let v = json!({ "count": lns, "ecount": ilns, "error_count": elns,  "path": d });
 

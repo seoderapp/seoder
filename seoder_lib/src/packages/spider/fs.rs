@@ -1,3 +1,4 @@
+use crate::STOPPED;
 use crate::packages::spider::utils::logd;
 use crate::packages::spider::website::CONFIG;
 
@@ -10,6 +11,7 @@ use scraper::Html;
 use scraper::Selector;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::time::Duration;
 use tokio::fs::read_dir;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -82,10 +84,18 @@ pub async fn store_fs_io_matching(
                     *global_thread_count.lock().unwrap() -= 1;
                 }
 
+                if STOPPED.lock().await.contains(path) {
+                    let mut interval = tokio::time::interval(Duration::from_millis(1000));
+                    // loop until unlocked
+                    while STOPPED.lock().await.contains(path) {
+                        interval.tick().await;
+                    }
+                }
+
                 let error = response.starts_with("- error ");
                 let link = string_concat!(link, "\n");
 
-                // errors 
+                // errors
                 if response == "" || error {
                     oe.write(&link.as_bytes()).await.unwrap();
                     continue;
@@ -137,7 +147,7 @@ pub async fn store_fs_io_matching(
             }
         }
     } else {
-        let cmp = string_concat!(ENTRY_PROGRAM.0, path);
+        let cmp = string_concat!(ENTRY_PROGRAM.0, &path);
 
         match tokio::fs::metadata(&cmp).await {
             Ok(_) => (),
@@ -155,7 +165,7 @@ pub async fn store_fs_io_matching(
         tokio::fs::create_dir(&&cmp_invalid)
             .await
             .unwrap_or_default();
-            tokio::fs::create_dir(&&cmp_errors)
+        tokio::fs::create_dir(&&cmp_errors)
             .await
             .unwrap_or_default();
         let mut o = create_file(&&string_concat!(&cmp_base, "/links.txt")).await;
@@ -165,6 +175,14 @@ pub async fn store_fs_io_matching(
         while let Some(i) = rx.recv().await {
             let (link, jor, spawned) = i;
             let (response, _) = jor;
+
+            if STOPPED.lock().await.contains(path) {
+                let mut interval = tokio::time::interval(Duration::from_millis(1000));
+                // loop until unlocked
+                while STOPPED.lock().await.contains(path) {
+                    interval.tick().await;
+                }
+            }
 
             if spawned && *global_thread_count.lock().unwrap() > 0 {
                 *global_thread_count.lock().unwrap() -= 1;

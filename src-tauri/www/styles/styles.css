@@ -416,6 +416,9 @@ button {
 
 .engine-background-running {
   background-color: #c6f7d4;
+}
+
+.cell-btn-active.engine-background-running {
   border-color: #76ff9d;
 }
 

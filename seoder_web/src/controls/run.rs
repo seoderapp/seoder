@@ -1,19 +1,16 @@
 use crate::builder;
-use crate::json;
+// use crate::json;
 use crate::log;
 use crate::string_concat::string_concat;
 use crate::string_concat::string_concat_impl;
 use crate::tokio;
-use crate::OutGoing;
 use crate::Website;
 use crate::ENTRY_PROGRAM;
-use futures_util::SinkExt;
 use seoder_lib::packages::spider::utils::logd;
 use seoder_lib::tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
-use tungstenite::Message;
 
 /// run all programs
-pub async fn run_all(mut outgoing: OutGoing) -> OutGoing {
+pub async fn run_all() {
     let mut dir = tokio::fs::read_dir(&ENTRY_PROGRAM.0).await.unwrap();
 
     let (sender, mut receiver): (
@@ -59,44 +56,33 @@ pub async fn run_all(mut outgoing: OutGoing) -> OutGoing {
     drop(sender);
 
     while let Some(m) = receiver.recv().await {
-        let (dpt, b) = m;
-        let v = json!({ "finished": dpt, "time": b });
-
-        outgoing
-            .send(Message::Text(v.to_string()))
-            .await
-            .unwrap_or_default();
+        // let (dpt, b) = m;
+        // TODO: set global finished handler
+        // let v = json!({ "finished": dpt, "time": b });
+        // todo set global finished via loop
     }
-
-    outgoing
 }
 
 /// run single program
-pub async fn run(mut outgoing: OutGoing, input: &str) -> OutGoing {
+pub async fn run(input: &str) {
     let (pt, pat, target) = builder::engine_builder(&input, false).await;
 
     let mut website: Website = Website::new(&target);
 
-    website.engine.campaign.name = input.into();
+    let engine_name = input.replacen(&ENTRY_PROGRAM.0, "", 1);
+    
+    website.engine.campaign.name = engine_name;
     website.engine.campaign.paths = pt;
     website.engine.campaign.patterns = pat;
 
     let performance = crate::tokio::time::Instant::now();
 
-    let handle = tokio::spawn(async move { website.crawl().await });
-
-    handle.await.unwrap();
+    website.crawl().await;
 
     let b = string_concat!(performance.elapsed().as_secs().to_string(), "s - ", &input);
 
     log("crawl finished - time elasped: ", &b);
 
-    let v = json!({ "finished": input, "time": b });
+    // let v = json!({ "finished": input, "time": b });
 
-    outgoing
-        .send(Message::Text(v.to_string()))
-        .await
-        .unwrap_or_default();
-
-    outgoing
 }

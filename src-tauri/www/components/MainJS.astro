@@ -160,6 +160,8 @@ declare global {
   const ipaths = "{" + '"' + "invalid_path" + '"' + ":" + '"'; // invalid paths
   const epaths = "{" + '"' + "error_path" + '"' + ":" + '"'; // errors paths
   const vlicense = "{" + '"' + "license"; // valid license;
+  const cstarted = "{" + '"' + "started"; // started campaigns from pause
+  const cpaused = "{" + '"' + "paused"; // paused campaigns from pause
 
   // defaults for program entry
   let defaultOptionSet = false;
@@ -405,6 +407,27 @@ declare global {
         };
 
         engines.setKey(path, engineSource);
+      }
+      return;
+    }
+
+    if (raw.startsWith(cstarted)) {
+      const np = JSON.parse(raw);
+      const path = np && np.path;
+      const item = engines.get()[path];
+
+      if (item) {
+        setStatus(path, CellStatus.RUNNING);
+      }
+    }
+
+    if (raw.startsWith(cpaused)) {
+      const np = JSON.parse(raw);
+      const path = np && np.path;
+      const item = engines.get()[path];
+
+      if (item) {
+        setStatus(path, CellStatus.PAUSED);
       }
       return;
     }

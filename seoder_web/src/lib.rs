@@ -17,6 +17,7 @@ use seoder_lib::tokio::io::AsyncWriteExt;
 use seoder_lib::tokio::sync::mpsc::unbounded_channel;
 use seoder_lib::Website;
 use seoder_lib::ENTRY_PROGRAM;
+use seoder_lib::STOPPED;
 pub use seoder_lib::{serde_json, string_concat, tokio};
 use serde::{Deserialize, Serialize};
 use sysinfo::{System, SystemExt};
@@ -54,7 +55,7 @@ mod panel;
 mod utils;
 
 /// determine action
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 enum Action {
     Stats,
     Config,
@@ -72,6 +73,8 @@ enum Action {
     SetProxy,
     SetTor,
     SetLicense,
+    SetStopped,
+    SetStarted,
     Loop,
 }
 
@@ -189,7 +192,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             if st == Action::RunAllCampaigns {
                 if valid_license {
-                    outgoing = controls::run::run_all(outgoing).await;
+                    controls::run::run_all().await;
                 } else {
                     let v = json!({
                         "license": false
@@ -204,7 +207,10 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             if st == Action::RunCampaign {
                 if valid_license {
-                    outgoing = controls::run::run(outgoing, &input).await;
+                    let input = input.clone();
+                   tokio::spawn(async move {
+                    controls::run::run(&input).await
+                   });
                 } else {
                     let v = json!({
                         "license": false
@@ -239,6 +245,30 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
             if st == Action::SetProxy {
                 utils::write_config("proxy", &input).await;
+            }
+
+            // Todo: persist stop across app shutdown
+            if st == Action::SetStopped {
+                STOPPED.lock().await.insert(input.clone());
+
+                let v = json!({ "stopped": input });
+                
+                outgoing
+                    .send(Message::Text(v.to_string()))
+                    .await
+                    .unwrap_or_default();
+            }
+
+            // Todo: set started
+            if st == Action::SetStarted {
+                STOPPED.lock().await.remove(&input);
+
+                let v = json!({ "started": input });
+
+                outgoing
+                    .send(Message::Text(v.to_string()))
+                    .await
+                    .unwrap_or_default();
             }
 
             if st == Action::SetTor {
@@ -289,8 +319,19 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         let c = s;
         let cc = ss;
 
+        if c == "set-stopped" {
+            if let Err(_) = sender.send((Action::SetStopped, cc.to_string())) {
+                logd("receiver dropped");
+            }
+        } 
+
+        else if c == "set-started" {
+            if let Err(_) = sender.send((Action::SetStarted, cc.to_string())) {
+                logd("receiver dropped");
+            }
+        }
         // start the feed stats
-        if c == "feed" {
+       else  if c == "feed" {
             if let Err(_) = sender.send((Action::Stats, "".to_string())) {
                 logd("the receiver dropped");
             }
@@ -326,7 +367,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             if let Err(_) = sender.send((Action::RemoveFile, cc)) {
                 logd("receiver dropped");
             }
-        } else if ms == "run-all-campaigns" {
+        } else if c == "run-all-campaigns" {
             if let Err(_) = sender.send((Action::RunAllCampaigns, "".to_string())) {
                 logd("the receiver dropped");
             }
@@ -365,7 +406,9 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     // todo: valid path exist
                     create_dir(&db_dir).await.unwrap();
                     create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
-                    create_dir(&string_concat!(db_dir, "/errors")).await.unwrap();
+                    create_dir(&string_concat!(db_dir, "/errors"))
+                        .await
+                        .unwrap();
                     create_dir(&string_concat!(db_dir, "/invalid"))
                         .await
                         .unwrap();

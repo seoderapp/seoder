@@ -1,4 +1,4 @@
-use crate::ENTRY_PROGRAM;
+use crate::{ENTRY_PROGRAM, STOPPED};
 
 use super::configuration::{setup, Configuration};
 use super::fs::store_fs_io_matching;
@@ -203,6 +203,9 @@ impl Website {
 
         let txxx = tx.clone();
 
+        let campaign_name = &self.engine.campaign.name;
+        let campaign_name = campaign_name.clone();
+
         let handle = tokio::spawn(async move {
             while let Some(path) = st.next().await {
                 // soft
@@ -223,11 +226,24 @@ impl Website {
                     .await
                     .unwrap();
 
+                    let campaign_name = campaign_name.clone();
+
                 task::spawn(async move {
                     let reader = BufReader::new(f);
                     let mut lines = reader.lines();
 
+                    let campaign_name = campaign_name.clone();
                     while let Some(link) = lines.next_line().await.unwrap() {
+
+
+                        if STOPPED.lock().await.contains(&campaign_name) {
+                            let mut interval = tokio::time::interval(Duration::from_millis(1000));
+                            // loop until unlocked
+                            while STOPPED.lock().await.contains(&p) {
+                                interval.tick().await;
+                            }
+                        }
+
                         if *thread_count.lock().unwrap() < spawn_limit {
                             *thread_count.lock().unwrap() += 1;
 

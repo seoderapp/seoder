@@ -55,8 +55,17 @@ const onRunEvent = (path: string) => {
   socket.send("run-campaign " + path);
 };
 
+const onPauseEvent = (path: string) => {
+  socket.send("set-stopped " + path);
+};
+
+const onStartedEvent = (path: string) => {
+  socket.send("set-started " + path);
+};
+
 export enum CellStatus {
   READY = "Ready",
+  PAUSED = "Paused",
   RUNNING = "Running",
   FINISHED = "Finished",
 }
@@ -120,6 +129,21 @@ export const CampaignCell = ({
     onRunEvent(path);
   };
 
+  const onPausePress = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (item.status === CellStatus.PAUSED) {
+      item.status = CellStatus.RUNNING;
+      onStartedEvent(path);
+    } else {
+      item.status = CellStatus.PAUSED;
+      onPauseEvent(path);
+    }
+
+    engines.notify(path);
+  };
+
   const onDeletePress = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -134,8 +158,29 @@ export const CampaignCell = ({
   const bgClass =
     item.status === CellStatus.RUNNING ? " engine-background-running" : "";
 
-  const baseClass =
-    path === $selected ? "cell-btn cell-btn-active" : "cell-btn";
+  const baseClass = path === $selected ? "cell-btn-active" : "";
+
+  let cellRunProps = {
+    title: "Run",
+    icon: "/assets/unpause.svg",
+    onPress: onRunPress,
+  };
+
+  if (item.status === CellStatus.RUNNING) {
+    cellRunProps = {
+      title: "Pause",
+      icon: "/assets/pause.svg",
+      onPress: onPausePress,
+    };
+  }
+
+  if (item.status === CellStatus.PAUSED) {
+    cellRunProps = {
+      title: "Start",
+      icon: "/assets/unpause.svg",
+      onPress: onPausePress, // handle same method to unpause
+    };
+  }
 
   return (
     <li
@@ -146,7 +191,7 @@ export const CampaignCell = ({
       aria-pressed={pressed ? "true" : "false"}
       onClick={selectItem}
     >
-      <div className={`${baseClass}${bgClass}`}>
+      <div className={`cell-btn ${baseClass}${bgClass}`}>
         <div className={"row full-w"}>
           <div className={"flex"}>
             <div className={"engine-title"}>{path}</div>
@@ -155,9 +200,9 @@ export const CampaignCell = ({
             </div>
             <div className={"row engine-paths"}>{item?.paths}</div>
             <div className={"row gutter-t full-w-120"}>
-              <button className={"btn-base"} onClick={onRunPress}>
-                <img src={"/assets/unpause.svg"} alt={""} />
-                <div>Run</div>
+              <button className={"btn-base"} onClick={cellRunProps.onPress}>
+                <img src={cellRunProps.icon} alt={""} />
+                <div>{cellRunProps.title}</div>
               </button>
               <button className={"btn-base"} onClick={onExportEventPress}>
                 <img src={"/assets/export.svg"} alt={""} />

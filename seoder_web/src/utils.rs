@@ -35,7 +35,7 @@ pub async fn lines_to_vec(pt: String) -> Vec<String> {
 }
 
 /// write to config file
-pub async fn write_config(config: &str, input: &String) {
+pub async fn write_config(config: &str, input: &str) {
     // exit if empty input
     if input.is_empty() {
         return;
