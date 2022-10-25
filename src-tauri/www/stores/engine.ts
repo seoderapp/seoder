@@ -78,5 +78,3 @@ export const setStatus = action(
 
 // files for uploading
 export const fileMap = new Map();
-// engine map
-export const engineMap = new Map();

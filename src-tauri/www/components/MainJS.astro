@@ -5,7 +5,6 @@ declare global {
 ---
 
 <script>
-  // import { profile } from "../stores/profile";
   import {
     engines,
     fileMap,
@@ -140,7 +139,6 @@ declare global {
     });
   }
 
-  let selected = "";
   let initialTarget = "";
 
   /*
@@ -267,7 +265,6 @@ declare global {
 
       if (item && url && item.invalidUrls && !item.invalidUrls.has(url)) {
         item.invalidUrls.add(url);
-
         engines.setKey(path, {
           ...item,
         });
@@ -368,6 +365,7 @@ declare global {
         item.valid = np.count ?? item.valid ?? 0;
         engines.notify(path);
       }
+      return;
     }
 
     if (raw.startsWith(dfpath)) {
@@ -382,8 +380,10 @@ declare global {
 
         fileMap.delete(path);
       }
+      return;
     }
 
+    // settings
     if (raw.startsWith(bftc)) {
       const np = JSON.parse(raw);
 
@@ -402,10 +402,11 @@ declare global {
           torSelect.checked = np.tor;
         }
       }
+      return;
     }
 
+    // delete engine
     if (raw.startsWith(deptc)) {
-      // parse json for now
       const np = JSON.parse(raw);
       const path = np && np.depath;
 

@@ -39,16 +39,16 @@ export function LogErrors({ id, emptyId }: Props) {
 
   return (
     <div className="log">
+      {!list.length ? (
+        <div id={emptyId} className={"block gutter-t"}>
+          Ready to run
+        </div>
+      ) : null}
       <ul id={id} role={"list"}>
         {list.map((item: string) => (
           <LogItem key={item}>{item}</LogItem>
         ))}
       </ul>
-      {!list.length ? (
-        <div id={emptyId} className={"block"}>
-          Ready to run
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -60,16 +60,16 @@ export function LogValid({ id, emptyId }: Props) {
 
   return (
     <div className="log">
+      {!list.length ? (
+        <div id={emptyId} className={"block gutter-t"}>
+          Ready to run
+        </div>
+      ) : null}
       <ul id={id} role={"list"}>
         {list.map((item: string) => (
           <LogItem key={item}>{item}</LogItem>
         ))}
       </ul>
-      {!list.length ? (
-        <div id={emptyId} className={"block"}>
-          Ready to run
-        </div>
-      ) : null}
     </div>
   );
 }

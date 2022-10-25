@@ -4,8 +4,6 @@ import {
   engines,
   selectAction,
   selectedEngine,
-  engineMap,
-  setStatus,
 } from "../stores/engine";
 import { useState } from "react";
 import { socket } from "../events/sockets";
