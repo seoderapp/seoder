@@ -129,18 +129,21 @@ export const CampaignCell = ({
 
   const engineStatusClass = cellStatusClass(item);
 
+  const bgClass =
+    item.status === CellStatus.RUNNING ? " engine-background-running" : "";
+
+  const baseClass = path === selected ? "cell-btn cell-btn-active" : "cell-btn";
+
   return (
     <li
-      className={"engine-item"}
+      className={`engine-item`}
       id={"engine_" + path}
       tabIndex="0"
       role="button"
       aria-pressed={pressed ? "true" : "false"}
       onClick={selectItem}
     >
-      <div
-        className={path === selected ? "cell-btn cell-btn-active" : "cell-btn"}
-      >
+      <div className={`${baseClass}${bgClass}`}>
         <div className={"row full-w"}>
           <div className={"flex"}>
             <div className={"engine-title"}>{path}</div>

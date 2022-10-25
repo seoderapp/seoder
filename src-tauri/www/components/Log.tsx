@@ -9,9 +9,7 @@ export interface Props {
   scrolling?: boolean;
 }
 
-const LogItem: FC = ({ children }) => {
-  return <li>{children}</li>;
-};
+const LogItem: FC = ({ children }) => <li>{children}</li>;
 
 const scrollStyles = {
   padding: "0.4rem",
@@ -19,6 +17,37 @@ const scrollStyles = {
   color: "#fff",
   textAlign: "center",
 };
+
+// scroll to bottom hook
+const useScrolling = ({ divRef, list, scrolling, atom }) => {
+  useEffect(() => {
+    const listener = atom.listen((v) => {
+      if (scrolling && v.length > list.length) {
+        divRef?.current?.scrollIntoView();
+      }
+    });
+    return () => {
+      listener();
+    };
+  }, [list, scrolling]);
+};
+
+// scroll to bottom of component
+function ScrollButton({ empty, divRef, scrollEnabled, onToggleScrolling }) {
+  return (
+    <li
+      className={"empty-log"}
+      style={{
+        display: !empty ? "list-item" : "none",
+      }}
+      ref={divRef}
+    >
+      <button onClick={onToggleScrolling} style={scrollStyles}>
+        {scrollEnabled ? "Stop Scrolling" : "Stick to Bottom"}
+      </button>
+    </li>
+  );
+}
 
 // log panel
 export function Log({ id, emptyId, logs }: Props) {
@@ -44,30 +73,20 @@ export function Log({ id, emptyId, logs }: Props) {
 export function LogErrors({ id, emptyId, scrolling }: Props) {
   const list = useStore(errorLogs);
   const divRef = useRef(null);
-  const [scroll, setScrolling] = useState<boolean>(scrolling);
+  const [scrollEnabled, setScrolling] = useState<boolean>(scrolling);
+
+  useScrolling({
+    divRef,
+    list,
+    scrolling: scrollEnabled,
+    atom: errorLogs,
+  });
 
   useEffect(() => {
     setScrolling(scrolling);
   }, [scrolling]);
 
-  useEffect(() => {
-    const listener = errorLogs.listen((v) => {
-      if (scroll && v.length > list.length) {
-        divRef?.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-          inline: "nearest",
-        });
-      }
-    });
-    return () => {
-      listener();
-    };
-  }, [list, scroll]);
-
-  const onToggleScrolling = () => {
-    setScrolling((v) => !v);
-  };
+  const onToggleScrolling = () => setScrolling((v) => !v);
 
   const empty = !list.length;
 
@@ -82,51 +101,35 @@ export function LogErrors({ id, emptyId, scrolling }: Props) {
         {list.map((item: string) => (
           <LogItem key={item}>{item}</LogItem>
         ))}
-        <li
-          className={"empty-log"}
-          style={{
-            display: !empty ? "list-item" : "none",
-          }}
-          ref={divRef}
-        >
-          <button onClick={onToggleScrolling} style={scrollStyles}>
-            {scroll ? "Stop Scrolling" : "Stick to Bottom"}
-          </button>
-        </li>
+        <ScrollButton
+          empty={empty}
+          scrollEnabled={scrollEnabled}
+          divRef={divRef}
+          onToggleScrolling={onToggleScrolling}
+        />
       </ul>
     </div>
   );
 }
-
 // unused log valid panel single
 export function LogValid({ id, emptyId, scrolling }: Props) {
   const list = useStore(validLogs);
   const divRef = useRef(null);
-  const [scroll, setScrolling] = useState<boolean>(scrolling);
+  const [scrollEnabled, setScrolling] = useState<boolean>(scrolling);
+
+  useScrolling({
+    divRef,
+    list,
+    scrolling: scrollEnabled,
+    atom: validLogs,
+  });
 
   // todo: control scroll state from parent
   useEffect(() => {
     setScrolling(scrolling);
   }, [scrolling]);
 
-  useEffect(() => {
-    const listener = validLogs.listen((v) => {
-      if (scroll && v.length > list.length) {
-        divRef?.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-          inline: "nearest",
-        });
-      }
-    });
-    return () => {
-      listener();
-    };
-  }, [list, scroll]);
-
-  const onToggleScrolling = () => {
-    setScrolling((v) => !v);
-  };
+  const onToggleScrolling = () => setScrolling((v) => !v);
 
   const empty = !list.length;
 
@@ -141,17 +144,12 @@ export function LogValid({ id, emptyId, scrolling }: Props) {
         {list.map((item: string) => (
           <LogItem key={item}>{item}</LogItem>
         ))}
-        <li
-          className={"empty-log"}
-          style={{
-            display: !empty ? "list-item" : "none",
-          }}
-          ref={divRef}
-        >
-          <button onClick={onToggleScrolling} style={scrollStyles}>
-            {scroll ? "Stop Scrolling" : "Stick to Bottom"}
-          </button>
-        </li>
+        <ScrollButton
+          empty={empty}
+          scrollEnabled={scrollEnabled}
+          divRef={divRef}
+          onToggleScrolling={onToggleScrolling}
+        />
       </ul>
     </div>
   );

@@ -406,12 +406,17 @@ button {
   color: #e06e31;
 }
 
-.engine-status-active {
+.engine-status-finished {
+  color: #2f2768;
+}
+
+.engine-status-running {
   color: #37b85b;
 }
 
-.engine-status-finished {
-  color: #2f2768;
+.engine-background-running {
+  background-color: #c6f7d4;
+  border-color: #76ff9d;
 }
 
 .full {
