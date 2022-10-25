@@ -1,10 +1,10 @@
 import { useStore } from "@nanostores/react";
 import { FC } from "react";
-import { selectedErrors, selectedValid } from "../stores/engine";
+import { errorLogs, validLogs } from "../stores/engine";
 
 export interface Props {
-  id: string;
-  emptyId: string;
+  id?: string;
+  emptyId?: string;
   logs?: Set<string | unknown>;
 }
 
@@ -34,8 +34,7 @@ export function Log({ id, emptyId, logs }: Props) {
 
 // unused log errors single
 export function LogErrors({ id, emptyId }: Props) {
-  const logs = useStore(selectedErrors);
-  const list = Array.from(logs?.keys() ?? []);
+  const list = useStore(errorLogs);
 
   return (
     <div className="log">
@@ -55,8 +54,7 @@ export function LogErrors({ id, emptyId }: Props) {
 
 // unused log valid panel single
 export function LogValid({ id, emptyId }: Props) {
-  const logs = useStore(selectedValid);
-  const list = Array.from(logs?.keys() ?? []);
+  const list = useStore(validLogs);
 
   return (
     <div className="log">

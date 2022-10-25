@@ -6,10 +6,14 @@ declare global {
 
 <script>
   import {
+    addErrorLogs,
+    addValidLogs,
     engines,
+    errorLogs,
     fileMap,
     selectedEngine,
     setStatus,
+    validLogs,
   } from "../stores/engine";
   import { socket, socketRuntime, initSockets } from "../events/sockets";
 
@@ -103,9 +107,6 @@ declare global {
   // new create
   const newCampaignButton = document.getElementById("new-campaign-button");
   const campaignCreateForm = document.getElementById("campaign-create-form");
-
-  const feedEmpty = document.getElementById("feed-start"); // feed log empty
-  const errorEmpty = document.getElementById("error-start"); // feed log empty
 
   // tor
   const torSelect = document.getElementById("tor-select") as HTMLInputElement;
@@ -249,7 +250,6 @@ declare global {
 
       if (eitem) {
         eitem.total = ploc ?? eitem.total ?? 0;
-        eitem.valid = eitem.valid ?? 0;
 
         engines.notify(pengine);
       }
@@ -265,10 +265,11 @@ declare global {
 
       if (item && url && item.invalidUrls && !item.invalidUrls.has(url)) {
         item.invalidUrls.add(url);
-        engines.setKey(path, {
-          ...item,
-        });
+        if (selectedEngine.get() === path) {
+          addErrorLogs(url);
+        }
       }
+
       return;
     }
 
@@ -279,10 +280,11 @@ declare global {
 
       if (item && url && item.urls && !item.urls.has(url)) {
         item.urls.add(url);
-        engines.setKey(path, {
-          ...item,
-        });
+        if (selectedEngine.get() === path) {
+          addValidLogs(url);
+        }
       }
+
       return;
     }
 
@@ -454,6 +456,9 @@ declare global {
       eitem.status = CellStatus.RUNNING;
 
       engines.notify(selected);
+
+      validLogs.set([]);
+      errorLogs.set([]);
 
       socket.send("run-campaign " + selected);
     } else {

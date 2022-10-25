@@ -24,6 +24,18 @@ export const enginesList = computed(engines, (all) => Object.keys(all));
 // active engine selected
 export const selectedEngine = atom<string>("");
 
+// valid list of logs
+export const validLogs = atom<string[]>([]);
+export const errorLogs = atom<string[]>([]);
+
+export function addValidLogs(next: string) {
+  validLogs.set([...validLogs.get(), next]);
+}
+
+export function addErrorLogs(next: string) {
+  errorLogs.set([...errorLogs.get(), next]);
+}
+
 // get active engine selected
 export const selectedItem = computed(
   [engines, selectedEngine],
@@ -57,7 +69,13 @@ export const selectAction = action(
       store.set("");
     } else {
       store.set(selected);
+      const valid = Array.from(selectedValid.get() ?? []) as string[];
+      const invalid = Array.from(selectedErrors.get() ?? []) as string[];
+
+      validLogs.set(valid);
+      errorLogs.set(invalid);
     }
+
     return store.get();
   }
 );

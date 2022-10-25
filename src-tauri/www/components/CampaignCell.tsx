@@ -2,8 +2,10 @@ import { useStore } from "@nanostores/react";
 import {
   EngineProps,
   engines,
+  errorLogs,
   selectAction,
   selectedEngine,
+  validLogs,
 } from "../stores/engine";
 import { useState } from "react";
 import { socket } from "../events/sockets";
@@ -87,14 +89,14 @@ export const CampaignCell = ({
     event.stopPropagation();
     item.invalidUrls.clear();
     item.urls.clear();
+    item.status = CellStatus.RUNNING;
 
-    engines.setKey(path, {
-      ...item,
-      urls: new Set(),
-      invalidUrls: new Set(),
-      status: CellStatus.RUNNING,
-    });
+    engines.notify(path);
 
+    if (selected === path) {
+      errorLogs.set([]);
+      validLogs.set([]);
+    }
     onRunEvent(path);
   };
 
