@@ -1,11 +1,11 @@
 ---
+import "../styles/styles.css";
+
 export interface Props {
   title: string;
 }
 
 const { title } = Astro.props;
-
-import "../styles/styles.css";
 ---
 
 <!DOCTYPE html>
@@ -13,7 +13,7 @@ import "../styles/styles.css";
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/x-icon" href="/icon.ico" />
+    <link rel="icon" type="image/x-icon" href="/assets/icon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>

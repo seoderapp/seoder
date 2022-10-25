@@ -1,4 +1,4 @@
-const VERSION = "0.0.1"; // todo: env
+const VERSION = "0.0.2"; // todo: env
 const APP = "Seoder_";
 
 const LINUX = "_linux.app.tar.gz";
