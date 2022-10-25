@@ -34,10 +34,19 @@ import { Image } from "@astrojs/image/components";
           </div>
           <div>
             <Image
-              src="/bg.png"
+              src="/screens/App-Landing-Screenshot.png"
+              srcset={`
+              /screens/App-Landing-Screenshot@3x.png 1818w,
+              /screens/App-Landing-Screenshot@2x.png 1212w,
+              /screens/App-Landing-Screenshot.png 606w
+            `}
+              sizes={`((min-width: 50em) and (max-width: 60em)) 50em,
+            ((min-width: 30em) and (max-width: 50em)) 30em,
+            (max-width: 30em) 20em`}
               class="bg"
               height={460}
               width={606}
+              quality={100}
               alt="Seoder app intro display"
             />
           </div>
