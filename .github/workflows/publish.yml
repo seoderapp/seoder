@@ -15,7 +15,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "14.18.0"
+          node-version: 16
       - name: install Rust stable
         uses: actions-rs/toolchain@v1
         with:
@@ -25,7 +25,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf gcc cmake libc6 openssl libssl-dev npm pkg-config g++ ca-certificates
-      - uses: tauri-apps/tauri-action@v0.2
+      - uses: tauri-apps/tauri-action@v0.3.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
