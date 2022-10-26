@@ -171,16 +171,15 @@ import { Image } from "@astrojs/image/components";
     width: 100%;
   }
   .flex-wrap {
-    flex-wrap: wrap;
     display: flex;
     flex-direction: row;
     gap: 5.9rem;
     text-align: left;
   }
-  @media only screen and (min-width: 1080px) {
+  @media only screen and (max-width: 1080px) {
     .flex-wrap {
       gap: 3rem;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
     }
   }
 </style>
