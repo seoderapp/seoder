@@ -14,7 +14,8 @@
     "allowlist": {
       "all": false,
       "fs": {
-        "writeFile": true
+        "writeFile": true,
+        "readFile": true
       },
       "dialog": {
         "all": true

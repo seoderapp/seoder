@@ -475,6 +475,7 @@ declare global {
         if (proxySelect) {
           proxySelect.checked = np.proxy;
         }
+
         if (lowpowerSelect) {
           lowpowerSelect.checked = !!np.buffer;
         }
@@ -520,6 +521,8 @@ declare global {
     request.onerror = function () {
       // request failed
     };
+
+    // todo validate file name
 
     request.send(new FormData(event.target as HTMLFormElement));
   });

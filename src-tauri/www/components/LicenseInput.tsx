@@ -1,10 +1,10 @@
-import { useState, SyntheticEvent } from "react";
+import { useState } from "react";
 import "../styles/license.css";
 
 export default function LicenseInput() {
   const [license, setLicense] = useState<string>("");
 
-  const onChangeTextEvent = (e: SyntheticEvent<HTMLFormElement>) => {
+  const onChangeTextEvent = (e) => {
     setLicense(e.target.value);
   };
 
