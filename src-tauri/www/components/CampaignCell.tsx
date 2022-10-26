@@ -182,6 +182,12 @@ export const CampaignCell = ({
     };
   }
 
+  const showBar =
+    item.status === CellStatus.RUNNING || item.status === CellStatus.PAUSED;
+
+  const totalCurrentCount =
+    item.invalidUrls.size + item.errorUrls.size + item.urls.size;
+
   return (
     <li
       className={`engine-item`}
@@ -199,7 +205,7 @@ export const CampaignCell = ({
               {item.valid} / {item.total}
             </div>
             <div className={"row engine-paths"}>{item?.paths}</div>
-            <div className={"row gutter-t full-w-120"}>
+            <div className={"row gutter-t expand-width"}>
               <button className={"btn-base"} onClick={cellRunProps.onPress}>
                 <img src={cellRunProps.icon} alt={""} />
                 <div>{cellRunProps.title}</div>
@@ -217,8 +223,20 @@ export const CampaignCell = ({
               </button>
             </div>
           </div>
-          <div id={"engine_status_" + path} className={engineStatusClass}>
-            {item.status}
+          <div>
+            <div
+              id={"engine_status_" + path}
+              className={`${engineStatusClass} gutter`}
+            >
+              {item.status}
+            </div>
+            <div className={`${showBar ? "engine-bar" : "hidden"}`}>
+              <div
+                style={{
+                  width: `${(totalCurrentCount / item.total) * 100}%`,
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

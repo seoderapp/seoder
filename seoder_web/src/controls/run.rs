@@ -55,7 +55,7 @@ pub async fn run_all() {
 
     drop(sender);
 
-    while let Some(m) = receiver.recv().await {
+    while let Some(_) = receiver.recv().await {
         // let (dpt, b) = m;
         // TODO: set global finished handler
         // let v = json!({ "finished": dpt, "time": b });
