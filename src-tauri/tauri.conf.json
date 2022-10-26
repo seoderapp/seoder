@@ -58,10 +58,10 @@
     },
     "updater": {
       "active": true,
+      "dialog": true,
       "endpoints": [
         "https:/seoder.io/api/update/{{target}}/{{current_version}}"
       ],
-      "dialog": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU0RjMzNUNEMkRBREQ4NzQKUldSMDJLMHR6VFh6NU40aXVqZmxXbDJ0VkYzRExJekcxVHVsQWxNRXJvU0d6M3A4OElaYWJCeXYK"
     },
     "windows": [

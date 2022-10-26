@@ -3,6 +3,8 @@ import Card from "./Card.astro";
 import Apple from "./Logos/Apple.astro";
 import Linux from "./Logos/Linux.astro";
 import Windows from "./Logos/Windows.astro";
+// @ts-ignore
+import pkg from "../../package.json";
 
 export type Props = {
   sub?: boolean;
@@ -11,6 +13,7 @@ export type Props = {
 const { sub } = Astro.props;
 
 const platText = "Available for all major platforms";
+const version = pkg.version ?? "0.0.2";
 ---
 
 <section>
@@ -25,28 +28,28 @@ const platText = "Available for all major platforms";
 
   <ul role="list" class="link-card-grid">
     <Card
-      href="/releases/Seoder_0.0.1_aarch64.dmg"
+      href={`/releases/Seoder_${version}_aarch64.dmg`}
       title="Desktop Mac Silicon"
       body="Pre-release arch64 M1 chip"
     >
       <Apple />
     </Card>
     <Card
-      href="/releases/Seoder_0.0.1_universal.dmg"
+      href={`/releases/Seoder_${version}_universal.dmg`}
       title="Desktop Mac Universal"
       body="Pre-release mac universal"
     >
       <Apple />
     </Card>
     <Card
-      href="/releases/seoder_app_0.0.1_linux.app.tar.gz"
+      href={`/releases/seoder_app_${version}_linux.app.tar.gz`}
       title="Desktop Linux"
       body="Pre-release linux"
     >
       <Linux />
     </Card>
     <Card
-      href="/releases/seoder_app_0.0.1_x64_en-US.msi"
+      href={`/releases/seoder_app_${version}_x64_en-US.msi`}
       title="Desktop Windows"
       body="Pre-release windows"
     >
