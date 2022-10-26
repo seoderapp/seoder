@@ -631,11 +631,15 @@ declare global {
 
       campaignCreateForm.className = "hidden";
 
-      // todo: send new engine created on submit or add optimistic update
-      socket.send("create-engine " + m);
-      socket.send("list-engines");
+      if (engines.get()[m]) {
+        window.alert("Please enter a different engine name.");
+      } else {
+        // todo: send new engine created on submit or add optimistic update
+        socket.send("create-engine " + m);
+        socket.send("list-engines");
+      }
     } else {
-      window.alert("Please enter a engine name");
+      window.alert("Please enter a engine name.");
     }
     event.preventDefault();
   });
