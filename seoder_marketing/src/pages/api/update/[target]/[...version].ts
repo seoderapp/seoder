@@ -1,7 +1,9 @@
-const VERSION = "0.0.2"; // todo: env
+import pkg from "../../../../../package.json";
+
+const VERSION = pkg.version ?? "0.0.2"; // todo: env
 const APP = "Seoder_";
 
-const LINUX = "_linux.app.tar.gz";
+const LINUX = "_amd64.AppImage.tar.gz";
 const WINDOWS = "_x64_en-US.msi";
 const MAC = "_universal.dmg";
 const MAC_M1 = "_aarch64.dmg";

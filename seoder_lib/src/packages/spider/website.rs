@@ -32,6 +32,8 @@ pub struct Website {
     pub path: String,
     /// custom engine to run
     pub engine: Engine,
+    // /// is the crawl paused
+    // paused: bool
 }
 
 /// link, (res, code), spawned
@@ -73,6 +75,7 @@ impl Website {
                 "urls-input.txt".to_string()
             },
             engine: Engine::default(),
+            // paused: false
         }
     }
 

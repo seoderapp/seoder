@@ -85,8 +85,8 @@ pub async fn store_fs_io_matching(
                 }
 
                 if STOPPED.lock().await.contains(path) {
-                    let mut interval = tokio::time::interval(Duration::from_millis(1000));
-                    // loop until unlocked
+                    // todo: watch channel instead
+                    let mut interval = tokio::time::interval(Duration::from_millis(100));
                     while STOPPED.lock().await.contains(path) {
                         interval.tick().await;
                     }
@@ -177,8 +177,8 @@ pub async fn store_fs_io_matching(
             let (response, _) = jor;
 
             if STOPPED.lock().await.contains(path) {
-                let mut interval = tokio::time::interval(Duration::from_millis(1000));
-                // loop until unlocked
+                // todo: watch channel instead
+                let mut interval = tokio::time::interval(Duration::from_millis(100));
                 while STOPPED.lock().await.contains(path) {
                     interval.tick().await;
                 }
