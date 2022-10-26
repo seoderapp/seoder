@@ -165,7 +165,7 @@ pub async fn validate_program(key: &str) -> bool {
         client.request(req).await.unwrap_or_default()
     };
 
-    resp.status().is_success() && !resp.headers().is_empty()
+    resp.status().is_success()
 }
 
 /// download latest free public proxies
