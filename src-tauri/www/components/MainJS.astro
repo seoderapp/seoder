@@ -192,6 +192,8 @@ declare global {
         }
         localStorage.setItem("authed", "true");
       } else {
+        localStorage.removeItem("authed");
+
         if (firstCheck) {
           window.alert("License is invalid");
         }
@@ -203,8 +205,6 @@ declare global {
         if (elicense) {
           elicense.className = "row";
         }
-
-        localStorage.removeItem("authed");
       }
 
       if (!firstCheck) {
@@ -419,6 +419,7 @@ declare global {
       if (item) {
         setStatus(path, CellStatus.RUNNING);
       }
+      return;
     }
 
     if (raw.startsWith(cpaused)) {
@@ -493,6 +494,7 @@ declare global {
       if (engines.get()[path]) {
         engines.setKey(path, undefined);
       }
+      return;
     }
   }
 
@@ -563,7 +565,7 @@ declare global {
     });
 
     if (allreadyRunning) {
-      alert("All campaigns already in progress.");
+      alert("All campaigns running in progress.");
     } else {
       socket.send("run-all-campaigns");
     }
@@ -640,34 +642,6 @@ declare global {
       }
     } else {
       window.alert("Please enter a engine name.");
-    }
-    event.preventDefault();
-  });
-
-  elicense?.addEventListener("submit", (event) => {
-    const slicense: HTMLInputElement = elicense.querySelector(
-      'input[name="license"]'
-    );
-
-    if (slicense && slicense.value) {
-      socket.send("set-license " + slicense.value);
-    } else {
-      window.alert("Please enter a license.");
-    }
-    event.preventDefault();
-  });
-
-  const ulicense = document.getElementById("ulicense");
-
-  ulicense?.addEventListener("submit", (event) => {
-    const slicense: HTMLInputElement = ulicense.querySelector(
-      'input[name="license"]'
-    );
-
-    if (slicense && slicense.value) {
-      socket.send("set-license " + slicense.value);
-    } else {
-      window.alert("Please enter a license.");
     }
     event.preventDefault();
   });

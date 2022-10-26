@@ -192,7 +192,7 @@ export const CampaignCell = ({
     <li
       className={`engine-item`}
       id={"engine_" + path}
-      tabIndex="0"
+      tabIndex={0}
       role="button"
       aria-pressed={pressed ? "true" : "false"}
       onClick={selectItem}

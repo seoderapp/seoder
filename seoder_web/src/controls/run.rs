@@ -25,7 +25,7 @@ pub async fn run_all() {
             let engine_name = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
 
             // includes the base path
-            let (pt, pat, target) = builder::engine_builder(&engine_name, false).await;
+            let (pt, pat, target) = builder::engine_builder(&engine_name).await;
 
             let mut website: Website = Website::new(&target);
 
@@ -65,7 +65,7 @@ pub async fn run_all() {
 
 /// run single program
 pub async fn run(input: &str) {
-    let (pt, pat, target) = builder::engine_builder(&input, false).await;
+    let (pt, pat, target) = builder::engine_builder(&input).await;
 
     let mut website: Website = Website::new(&target);
 

@@ -1,4 +1,5 @@
 const id = import.meta.env.KEYGEN_ACCOUNT_ID;
+const token = import.meta.env.KEYGEN_API_TOKEN;
 
 export async function post({ request }) {
   const jsonData = await request.json();
@@ -12,6 +13,7 @@ export async function post({ request }) {
       headers: {
         "Content-Type": "application/vnd.api+json",
         Accept: "application/vnd.api+json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         data: { type: "users", attributes: jsonData?.data },

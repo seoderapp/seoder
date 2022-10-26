@@ -36,6 +36,15 @@
   color: #fff;
 }
 
+.scroll-base {
+  padding: 0.4rem;
+  background: transparent;
+  color: #fff;
+  text-align: center;
+  display: flex;
+  margin: auto;
+}
+
 .empty-log {
   padding: 0;
   text-align: center;

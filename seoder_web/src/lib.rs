@@ -47,6 +47,7 @@ use utils::validate_program;
 
 extern crate lazy_static;
 extern crate tera;
+extern crate mac_address;
 
 mod builder;
 mod controls;

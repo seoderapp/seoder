@@ -22,6 +22,26 @@ import AppDetails from "./Svgs/AppDetails.astro";
   </div>
 </form>
 
+<script>
+  import { socket } from "../events/sockets";
+
+  const elicense = document.getElementById("elicense");
+
+  elicense?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const slicense: HTMLInputElement = elicense.querySelector(
+      'input[name="license"]'
+    );
+
+    if (slicense && slicense.value) {
+      socket.send("set-license " + slicense.value);
+    } else {
+      window.alert("Please enter a license.");
+    }
+  });
+</script>
+
 <style>
   .left-panel {
     display: flex;

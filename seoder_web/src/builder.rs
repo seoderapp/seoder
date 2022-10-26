@@ -1,6 +1,7 @@
 use crate::string_concat::string_concat;
 use crate::string_concat::string_concat_impl;
 use crate::tokio::io::BufReader;
+use crate::utils::build_query;
 use seoder_lib::packages::spider::configuration::setup;
 use seoder_lib::packages::spider::utils::log;
 use seoder_lib::tokio;
@@ -11,7 +12,6 @@ use tokio::fs::File;
 /// build a custom engine config from path and target file
 pub async fn engine_builder(
     selected_engine: &str,
-    base_included: bool,
 ) -> (Vec<String>, Vec<String>, String) {
     let e = selected_engine.to_string();
 
@@ -27,14 +27,9 @@ pub async fn engine_builder(
                 while let Some(line) = lines.next_line().await.unwrap() {
                     let hh = line.split(" ").collect::<Vec<&str>>();
                     let h0 = hh[0];
-                    let mut h1 = hh[1].to_string();
+                    let h1 = build_query(&hh);
 
-                    // todo: push all into array after first index
-                    if hh.len() == 3 {
-                        h1.push_str(hh[2]);
-                    }
-
-                    if hh.len() == 2 {
+                    if hh.len() >= 2 {
                         if h0 == "target" {
                             let path = std::path::Path::new(&h1);
                             let filename = path.file_name().unwrap();
@@ -55,22 +50,14 @@ pub async fn engine_builder(
     .await
     .unwrap();
 
-    let (f, ff) = if base_included {
-        (
-            string_concat!(&e, "/paths.txt"),
-            string_concat!(&e, "/patterns.txt"),
-        )
-    } else {
-        (
-            string_concat!(ENTRY_PROGRAM.0, &e, "/paths.txt"),
-            string_concat!(ENTRY_PROGRAM.0, &e, "/patterns.txt"),
-        )
-    };
+    let (f, ff) = (
+        string_concat!(ENTRY_PROGRAM.0, &e, "/paths.txt"),
+        string_concat!(ENTRY_PROGRAM.0, &e, "/patterns.txt"),
+    );
 
     if !selected_engine.is_empty() {
         tokio::spawn(async move {
             let paths = crate::utils::lines_to_vec(f).await;
-
             let patterns = crate::utils::lines_to_vec(ff).await;
 
             (paths, patterns, selected_file)

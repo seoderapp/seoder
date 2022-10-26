@@ -6,6 +6,7 @@ use crate::string_concat_impl;
 use hyper::{Body, Client, Method, Request};
 use lazy_static::lazy_static;
 use seoder_lib::packages::spider::utils::log;
+use seoder_lib::serde_json::json;
 use seoder_lib::string_concat::string_concat;
 use seoder_lib::tokio;
 use seoder_lib::tokio::io::AsyncBufReadExt;
@@ -13,6 +14,9 @@ use seoder_lib::tokio::io::AsyncWriteExt;
 use seoder_lib::ENTRY_PROGRAM;
 use tokio::fs::File;
 use tokio::fs::OpenOptions;
+
+use mac_address::get_mac_address;
+
 
 /// read a file line by line to a vector
 pub async fn lines_to_vec(pt: String) -> Vec<String> {
@@ -41,12 +45,10 @@ pub async fn write_config(config: &str, input: &str) {
         return;
     }
 
-    let file = OpenOptions::new().read(true).open(&ENTRY_PROGRAM.2).await;
-
     let mut sl: Vec<String> = vec![];
     let mut found_match = false;
 
-    match file {
+    match OpenOptions::new().read(true).open(&ENTRY_PROGRAM.2).await {
         Ok(ff) => {
             let reader = BufReader::new(ff);
             let mut lines = reader.lines();
@@ -62,7 +64,7 @@ pub async fn write_config(config: &str, input: &str) {
                         slots[1] = input.to_string();
                         found_match = true;
                     } else {
-                        slots[1] = hh[1].to_string();
+                        slots[1] = build_query(&hh);
                     }
                     sl.push(slots.join(" "));
                 }
@@ -125,11 +127,30 @@ pub async fn validate_program(key: &str) -> bool {
         };
     }
 
+    let id = match get_mac_address() {
+        Ok(Some(ma)) => {
+            ma
+        }
+        Ok(None) => {
+           Default::default()
+        },
+        Err(e) => {
+            log("mac error", &e.to_string());
+            Default::default()
+        },
+    };
+
+    let json = json!({
+        "key": key,
+        "fingerprint": id.to_string(),
+        "platform": std::env::consts::OS
+    });
+
     let req = Request::builder()
         .method(Method::POST)
         .uri(*ENDPOINT)
         .header("content-type", "application/json")
-        .body(Body::from(string_concat!(r#"{"key": ""#, key, r#""}"#)))
+        .body(Body::from(json.to_string()))
         .unwrap_or_default();
 
     let resp = if *ENDPOINT == "http://127.0.0.1:3000/api/keygen-validate" {
@@ -199,4 +220,23 @@ pub async fn get_file_value(path: &str, value: &str) -> String {
     };
 
     v
+}
+
+
+/// build ranged query
+pub fn build_query(hh: &Vec<&str>) -> String {
+    let mut h1 = hh[1].to_string();
+
+    // todo: push all into array after first index
+    if hh.len() >= 3 {
+        for (r, i) in hh.iter().enumerate() {
+            if r < 2 {
+                continue;
+            }
+            h1.push_str(" ");
+            h1.push_str( &i);
+        }
+    }
+
+    h1
 }

@@ -56,6 +56,25 @@ import Switch from "./Switch.astro";
   </div>
 </div>
 
+<script>
+  import { socket } from "../events/sockets";
+
+  const ulicense = document.getElementById("ulicense");
+
+  ulicense?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const slicense: HTMLInputElement = ulicense.querySelector(
+      'input[name="license"]'
+    );
+
+    if (slicense && slicense.value) {
+      socket.send("set-license " + slicense.value);
+    } else {
+      window.alert("Please enter a license.");
+    }
+  });
+</script>
+
 <style>
   .button {
     border-radius: 4px;
