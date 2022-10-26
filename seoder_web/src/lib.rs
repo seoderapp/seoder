@@ -112,6 +112,15 @@ async fn ticker(mut outgoing: OutGoing) -> OutGoing {
     outgoing
 }
 
+/// send message 
+async fn send_message(mut outgoing: OutGoing, message: &str) {
+    outgoing
+        .send(Message::Text(message.into()))
+        .await
+        .unwrap_or_default();
+
+}
+
 /// get ws stream
 async fn build_ws_stream(addr: &SocketAddr, raw_stream: TcpStream) -> WebSocketStream<TcpStream> {
     logd(string_concat::string_concat!(
@@ -165,10 +174,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             if st == Action::Stats {
                 let v = controls::stats::stats();
 
-                outgoing
-                    .send(Message::Text(v.to_string()))
-                    .await
-                    .unwrap_or_default();
+                return send_message(outgoing, &v.to_string()).await;
             }
 
             if st == Action::ListValidCampaigns {
@@ -199,10 +205,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         "license": false
                     });
 
-                    outgoing
-                        .send(Message::Text(v.to_string()))
-                        .await
-                        .unwrap_or_default();
+                    return send_message(outgoing, &v.to_string()).await;
                 }
             }
 
@@ -217,10 +220,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         "license": false
                     });
 
-                    outgoing
-                        .send(Message::Text(v.to_string()))
-                        .await
-                        .unwrap_or_default();
+                    return send_message(outgoing, &v.to_string()).await;
                 }
             }
 
@@ -238,10 +238,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                 let v = json!({ "license": valid_license });
 
-                outgoing
-                    .send(Message::Text(v.to_string()))
-                    .await
-                    .unwrap_or_default();
+                return send_message(outgoing, &v.to_string()).await;
             }
 
             if st == Action::SetProxy {
@@ -254,10 +251,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                 let v = json!({ "stopped": input });
                 
-                outgoing
-                    .send(Message::Text(v.to_string()))
-                    .await
-                    .unwrap_or_default();
+                return send_message(outgoing, &v.to_string()).await;
             }
 
             // Todo: set started
@@ -266,10 +260,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                 let v = json!({ "started": input });
 
-                outgoing
-                    .send(Message::Text(v.to_string()))
-                    .await
-                    .unwrap_or_default();
+                return send_message(outgoing, &v.to_string()).await;
             }
 
             if st == Action::SetTor {
@@ -404,7 +395,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     let ptt = pt.split(','); // paths
                     let ott = pat.split(','); // patterns
 
-                    // todo: valid path exist
                     create_dir(&db_dir).await.unwrap();
                     create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
                     create_dir(&string_concat!(db_dir, "/errors"))
