@@ -17,7 +17,6 @@ use tokio::fs::OpenOptions;
 
 use mac_address::get_mac_address;
 
-
 /// read a file line by line to a vector
 pub async fn lines_to_vec(pt: String) -> Vec<String> {
     let mut builder: Vec<String> = Vec::new();
@@ -128,16 +127,12 @@ pub async fn validate_program(key: &str) -> bool {
     }
 
     let id = match get_mac_address() {
-        Ok(Some(ma)) => {
-            ma
-        }
-        Ok(None) => {
-           Default::default()
-        },
+        Ok(Some(ma)) => ma,
+        Ok(None) => Default::default(),
         Err(e) => {
             log("mac error", &e.to_string());
             Default::default()
-        },
+        }
     };
 
     let json = json!({
@@ -222,7 +217,6 @@ pub async fn get_file_value(path: &str, value: &str) -> String {
     v
 }
 
-
 /// build ranged query
 pub fn build_query(hh: &Vec<&str>) -> String {
     let mut h1 = hh[1].to_string();
@@ -234,7 +228,7 @@ pub fn build_query(hh: &Vec<&str>) -> String {
                 continue;
             }
             h1.push_str(" ");
-            h1.push_str( &i);
+            h1.push_str(&i);
         }
     }
 

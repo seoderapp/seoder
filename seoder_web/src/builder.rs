@@ -10,9 +10,7 @@ use seoder_lib::ENTRY_PROGRAM;
 use tokio::fs::File;
 
 /// build a custom engine config from path and target file
-pub async fn engine_builder(
-    selected_engine: &str,
-) -> (Vec<String>, Vec<String>, String) {
+pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>, String) {
     let e = selected_engine.to_string();
 
     // todo: allow param passing from special configs

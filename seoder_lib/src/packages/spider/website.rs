@@ -229,7 +229,7 @@ impl Website {
                     .await
                     .unwrap();
 
-                    let campaign_name = campaign_name.clone();
+                let campaign_name = campaign_name.clone();
 
                 task::spawn(async move {
                     let reader = BufReader::new(f);
@@ -237,8 +237,6 @@ impl Website {
 
                     let campaign_name = campaign_name.clone();
                     while let Some(link) = lines.next_line().await.unwrap() {
-
-
                         if STOPPED.lock().await.contains(&campaign_name) {
                             let mut interval = tokio::time::interval(Duration::from_millis(1000));
                             // loop until unlocked

@@ -46,8 +46,8 @@ use tokio_cron_scheduler::{Job, JobScheduler};
 use utils::validate_program;
 
 extern crate lazy_static;
-extern crate tera;
 extern crate mac_address;
+extern crate tera;
 
 mod builder;
 mod controls;
@@ -112,13 +112,14 @@ async fn ticker(mut outgoing: OutGoing) -> OutGoing {
     outgoing
 }
 
-/// send message 
-async fn send_message(mut outgoing: OutGoing, message: &str) {
+/// send message
+async fn send_message(mut outgoing: OutGoing, message: &str) -> OutGoing {
     outgoing
         .send(Message::Text(message.into()))
         .await
         .unwrap_or_default();
 
+    outgoing
 }
 
 /// get ws stream
@@ -162,10 +163,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
     let v = json!({ "license": valid_license });
 
-    outgoing
-        .send(Message::Text(v.to_string()))
-        .await
-        .unwrap_or_default();
+    outgoing = send_message(outgoing, &v.to_string()).await;
 
     let handle = tokio::spawn(async move {
         while let Some(m) = receiver.recv().await {
@@ -174,30 +172,18 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             if st == Action::Stats {
                 let v = controls::stats::stats();
 
-                return send_message(outgoing, &v.to_string()).await;
-            }
-
-            if st == Action::ListValidCampaigns {
+                outgoing = send_message(outgoing, &v.to_string()).await;
+            } else if st == Action::ListValidCampaigns {
                 outgoing = controls::list::list_valid(outgoing).await;
-            }
-
-            if st == Action::ListEngines {
+            } else if st == Action::ListEngines {
                 outgoing = controls::list::list_engines(outgoing).await;
-            }
-
-            if st == Action::ListFileCount {
+            } else if st == Action::ListFileCount {
                 outgoing = controls::list::list_file_count(outgoing).await;
-            }
-
-            if st == Action::ListFiles {
+            } else if st == Action::ListFiles {
                 outgoing = controls::list::list_files(outgoing).await;
-            }
-
-            if st == Action::RemoveFile {
+            } else if st == Action::RemoveFile {
                 outgoing = controls::fs::remove_file(outgoing, &input).await;
-            }
-
-            if st == Action::RunAllCampaigns {
+            } else if st == Action::RunAllCampaigns {
                 if valid_license {
                     controls::run::run_all().await;
                 } else {
@@ -205,73 +191,52 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         "license": false
                     });
 
-                    return send_message(outgoing, &v.to_string()).await;
+                    outgoing = send_message(outgoing, &v.to_string()).await;
                 }
-            }
-
-            if st == Action::RunCampaign {
+            } else if st == Action::RunCampaign {
                 if valid_license {
                     let input = input.clone();
-                   tokio::spawn(async move {
-                    controls::run::run(&input).await
-                   });
+
+                    tokio::spawn(async move { controls::run::run(&input).await });
+
                 } else {
                     let v = json!({
                         "license": false
                     });
 
-                    return send_message(outgoing, &v.to_string()).await;
+                    outgoing = send_message(outgoing, &v.to_string()).await;
                 }
-            }
-
-            if st == Action::RemoveEngine {
+            } else if st == Action::RemoveEngine {
                 outgoing = controls::fs::remove_engine(outgoing, &input).await;
-            }
-
-            if st == Action::Config {
+            } else if st == Action::Config {
                 outgoing = controls::list::config(outgoing).await;
-            }
-
-            if st == Action::SetLicense {
+            } else if st == Action::SetLicense {
                 valid_license = validate_program(&input).await;
                 utils::write_config("license", &input).await;
 
                 let v = json!({ "license": valid_license });
 
-                return send_message(outgoing, &v.to_string()).await;
-            }
-
-            if st == Action::SetProxy {
+                outgoing = send_message(outgoing, &v.to_string()).await;
+            } else if st == Action::SetProxy {
                 utils::write_config("proxy", &input).await;
-            }
-
-            // Todo: persist stop across app shutdown
-            if st == Action::SetStopped {
+            } else if st == Action::SetStopped {
+                // Todo: persist stop across app shutdown
                 STOPPED.lock().await.insert(input.clone());
 
                 let v = json!({ "stopped": input });
-                
-                return send_message(outgoing, &v.to_string()).await;
-            }
 
-            // Todo: set started
-            if st == Action::SetStarted {
+                outgoing = send_message(outgoing, &v.to_string()).await;
+            } else if st == Action::SetStarted {
                 STOPPED.lock().await.remove(&input);
 
                 let v = json!({ "started": input });
 
-                return send_message(outgoing, &v.to_string()).await;
-            }
-
-            if st == Action::SetTor {
+                outgoing = send_message(outgoing, &v.to_string()).await;
+            } else if st == Action::SetTor {
                 utils::write_config("tor", &input).await;
-            }
-
-            if st == Action::SetBuffer {
+            } else if st == Action::SetBuffer {
                 utils::write_config("buffer", &input).await;
-            }
-
-            if st == Action::SetList {
+            } else if st == Action::SetList {
                 if !input.is_empty() {
                     utils::write_config("target", &string_concat!(&ENTRY_PROGRAM.1, &input)).await;
                 }
@@ -315,15 +280,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             if let Err(_) = sender.send((Action::SetStopped, cc.to_string())) {
                 logd("receiver dropped");
             }
-        } 
-
-        else if c == "set-started" {
+        } else if c == "set-started" {
             if let Err(_) = sender.send((Action::SetStarted, cc.to_string())) {
                 logd("receiver dropped");
             }
-        }
-        // start the feed stats
-       else  if c == "feed" {
+        } else if c == "feed" {
             if let Err(_) = sender.send((Action::Stats, "".to_string())) {
                 logd("the receiver dropped");
             }
@@ -504,7 +465,7 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
                     list_config = list_config + 1;
                 } else {
                     list_config = list_config + 1;
-                    if list_ticket == 20 {
+                    if list_ticket == 25 {
                         list_config = 0;
                     }
                 }

@@ -1,6 +1,6 @@
-use crate::STOPPED;
 use crate::packages::spider::utils::logd;
 use crate::packages::spider::website::CONFIG;
+use crate::STOPPED;
 
 use super::website::Campaign;
 use super::website::Message;

@@ -70,7 +70,7 @@ pub async fn run(input: &str) {
     let mut website: Website = Website::new(&target);
 
     let engine_name = input.replacen(&ENTRY_PROGRAM.0, "", 1);
-    
+
     website.engine.campaign.name = engine_name;
     website.engine.campaign.paths = pt;
     website.engine.campaign.patterns = pat;
@@ -84,5 +84,4 @@ pub async fn run(input: &str) {
     log("crawl finished - time elasped: ", &b);
 
     // let v = json!({ "finished": input, "time": b });
-
 }
