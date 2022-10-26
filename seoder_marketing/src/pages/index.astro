@@ -45,9 +45,9 @@ import { Image } from "@astrojs/image/components";
             (max-width: 30em) 20em`}
               class="bg"
               height={460}
-              width={606}
-              quality={100}
+              width={630}
               alt="Seoder app intro display"
+              quality={100}
             />
           </div>
         </div>
@@ -113,8 +113,9 @@ import { Image } from "@astrojs/image/components";
   .heading {
     font-size: 1.4rem;
   }
+
   .sub-heading {
-    font-size: 1.7rem;
+    font-size: 2.25rem;
     max-width: 14rem;
   }
 
@@ -173,7 +174,13 @@ import { Image } from "@astrojs/image/components";
     flex-wrap: wrap;
     display: flex;
     flex-direction: row;
-    gap: 6rem;
+    gap: 5.9rem;
     text-align: left;
+  }
+  @media only screen and (min-width: 1080px) {
+    .flex-wrap {
+      gap: 3rem;
+      flex-wrap: nowrap;
+    }
   }
 </style>
