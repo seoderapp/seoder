@@ -49,6 +49,16 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
               required
             />
           </div>
+          <div>
+            <label for="password">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="license password"
+              required
+            />
+          </div>
           <div class="button-container">
             <button type="submit">Buy Now</button>
           </div>
@@ -73,6 +83,7 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
         firstName: document.getElementById("first-name").value,
         lastName: document.getElementById("last-name").value,
         email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
         metadata: { stripeToken }, // Temporarily store this so our webhooks can do their thing
       };
 

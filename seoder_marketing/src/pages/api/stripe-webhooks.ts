@@ -106,8 +106,8 @@ export async function post({ request }) {
           text: "License key test", // plain text body
           html: `
           <div>
-            <h1>View License for Seoder<h1>
-            <h2>Key<h2/>
+            <h1>Thank you for purchasing Seoder<h1>
+            <h2>License Key<h2/>
             <b>${data.attributes.key}</b>
             <h3>Number of Machines ${data.attributes.maxMachines}<h3/>
           </div>`, // html body
