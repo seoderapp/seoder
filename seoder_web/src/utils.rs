@@ -204,9 +204,9 @@ pub async fn get_file_value(path: &str, value: &str) -> String {
             while let Some(line) = lines.next_line().await.unwrap() {
                 let hh = line.split(" ").collect::<Vec<&str>>();
 
-                if hh.len() == 2 {
+                if hh.len() >= 2 {
                     if hh[0] == value {
-                        v = hh[1].to_string();
+                        v = build_query(&hh);
                     }
                 }
             }

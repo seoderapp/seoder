@@ -227,7 +227,7 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
                 let mut engine = dpt;
 
                 if target.is_empty() {
-                    target = String::from("urls-input.txt");
+                    target = String::from(string_concat!(ENTRY_PROGRAM.1, "urls-input.txt"));
                 }
 
                 if engine.is_empty() {
@@ -239,7 +239,7 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
                 // target file length
                 match OpenOptions::new()
                     .read(true)
-                    .open(string_concat!(ENTRY_PROGRAM.1, target))
+                    .open(target)
                     .await
                 {
                     Ok(file) => {
