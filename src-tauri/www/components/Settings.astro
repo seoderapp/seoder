@@ -58,6 +58,8 @@ import Switch from "./Switch.astro";
 
 <script>
   import { socket } from "../events/sockets";
+  import { selectedFileOptionMutate } from "../utils/file-set";
+  import { initialSettings } from "../utils/singletons";
 
   const ulicense = document.getElementById("ulicense");
 
@@ -71,6 +73,35 @@ import Switch from "./Switch.astro";
       socket.send("set-license " + slicense.value);
     } else {
       window.alert("Please enter a license.");
+    }
+  });
+
+  const uploadform = document.getElementById("uploadform");
+
+  uploadform?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const url = "http://localhost:7050/upload";
+    const request = new XMLHttpRequest();
+
+    request.open("POST", url, true);
+
+    request.onload = function () {};
+
+    request.onerror = function () {
+      // request failed
+    };
+
+    const fileValue = event.target["file"].value;
+
+    if (fileValue) {
+      request.send(new FormData(event.target as HTMLFormElement));
+
+      const optimisticPath = fileValue.replace(/^.*[\\\/]/, "");
+
+      selectedFileOptionMutate({
+        path: optimisticPath,
+        initialTarget: initialSettings.initialTarget,
+      });
     }
   });
 </script>

@@ -21,6 +21,10 @@ declare global {
 
   import { CellStatus } from "./CampaignCell";
 
+  import { selectedFileOptionMutate } from "../utils/file-set";
+
+  import { initialSettings } from "../utils/singletons";
+
   initSockets();
 
   // license control [determine screens] quickly
@@ -141,8 +145,6 @@ declare global {
       campaignCreateForm.className = "hidden";
     });
   }
-
-  let initialTarget = "";
 
   /*
    * List of web socket matchers * special for high performance
@@ -344,50 +346,11 @@ declare global {
       const np = JSON.parse(raw);
       const path = np && np.fpath;
 
-      if (!fileMap.has(path)) {
-        fileMap.set(path, {});
-        // file select
-
-        if (fileSelect) {
-          if (initialTarget) {
-            const kid = "fskeys_" + initialTarget;
-            const item = document.getElementById(kid);
-            if (!item) {
-              const cellSelect: HTMLOptionElement =
-                document.createElement("option");
-
-              cellSelect.id = kid;
-              // @ts-ignore
-              cellSelect.name = "fsselect";
-              cellSelect.value = initialTarget;
-              cellSelect.innerText = initialTarget;
-
-              fileSelect.appendChild(cellSelect);
-            }
-          }
-
-          for (const [key, _] of fileMap) {
-            if (key !== initialTarget) {
-              const kid = "fskeys_" + key;
-              const item = document.getElementById(kid);
-
-              if (!item) {
-                const cellSelect: HTMLOptionElement =
-                  document.createElement("option");
-
-                cellSelect.id = kid;
-                // @ts-ignore
-                cellSelect.name = "fsselect";
-                cellSelect.value = key;
-                cellSelect.innerText = key;
-
-                fileSelect.appendChild(cellSelect);
-              }
-            }
-          }
-        }
-      }
-      return;
+      return selectedFileOptionMutate({
+        path,
+        fileSelect,
+        initialTarget: initialSettings.initialTarget,
+      });
     }
 
     if (raw.startsWith(ptpe)) {
@@ -470,7 +433,7 @@ declare global {
 
       if (!defaultOptionSet) {
         defaultOptionSet = true;
-        initialTarget = np.target;
+        initialSettings.initialTarget = np.target;
 
         if (proxySelect) {
           proxySelect.checked = np.proxy;
@@ -505,27 +468,8 @@ declare global {
   const rsform = document.getElementById("rsform");
   const rform = document.getElementById("rform");
   const eform = document.getElementById("eform");
-  const uploadform = document.getElementById("uploadform");
   const bufferform = document.getElementById("bufferform");
   const fsDelete = document.getElementById("fs-delete");
-
-  uploadform?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const url = "http://localhost:7050/upload";
-    const request = new XMLHttpRequest();
-
-    request.open("POST", url, true);
-
-    request.onload = function () {};
-
-    request.onerror = function () {
-      // request failed
-    };
-
-    // todo validate file name
-
-    request.send(new FormData(event.target as HTMLFormElement));
-  });
 
   rsform?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -605,16 +549,17 @@ declare global {
     event.preventDefault();
   });
 
-  fsDelete?.addEventListener("click", () => {
-    const cf = window.confirm("Are, you sure you want to delete this file?");
+  fsDelete?.addEventListener("click", async () => {
+    const cf = await window.confirm(
+      "Are, you sure you want to delete this file?"
+    );
 
     if (cf) {
-      const campaign: HTMLInputElement = fileSelect.querySelector(
-        'select[name="target"]'
-      );
-      const selected = campaign.value;
+      const selected = fileSelect?.value;
 
-      socket.send("delete-file " + selected);
+      if (selected) {
+        socket.send("delete-file " + selected);
+      }
     }
   });
 
