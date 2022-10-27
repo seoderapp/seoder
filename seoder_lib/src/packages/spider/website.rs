@@ -111,7 +111,7 @@ impl Website {
 
         let delay_timout = proxy || tor;
 
-        let delay = if delay_timout { CONFIG.1 * 4 } else { CONFIG.1 };
+        let delay = if delay_timout { CONFIG.1 * 3 } else { CONFIG.1 };
 
         let mut client = Client::builder()
             .default_headers(headers)
