@@ -15,7 +15,17 @@ export default defineConfig({
   site: "https://seoder.io",
   output: "server",
   adapter: vercel(),
-  integrations: [react(), robotsTxt(), sitemap(), image({
-    serviceEntryPoint: "@astrojs/image/sharp"
-  }), partytown()]
+  integrations: [
+    react(),
+    robotsTxt(),
+    sitemap(),
+    image({
+      serviceEntryPoint: "@astrojs/image/sharp",
+    }),
+    partytown({
+      config: {
+        forward: ["dataLayer.push"],
+      },
+    }),
+  ],
 });
