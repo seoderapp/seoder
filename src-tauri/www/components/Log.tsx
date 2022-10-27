@@ -91,7 +91,7 @@ export function Log({ id, emptyId, logs, scrolling }: Props) {
         ))}
         <ScrollButton
           empty={empty}
-          scrollEnabled={scrolling}
+          scrollEnabled={scrollEnabled}
           divRef={divRef}
           onToggleScrolling={onToggleScrolling}
         />

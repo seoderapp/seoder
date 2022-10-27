@@ -1,9 +1,8 @@
 import { useStore } from "@nanostores/react";
-import { FC } from "react";
 import { engines, enginesList } from "../stores/engine";
 import { CampaignCell } from "./CampaignCell";
 
-export const CampaignList: FC = ({ children }) => {
+export const CampaignList = ({ children }) => {
   const $list = useStore(enginesList);
   const engineItems = engines.get();
 

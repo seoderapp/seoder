@@ -18,11 +18,8 @@ declare global {
     validLogs,
   } from "../stores/engine";
   import { socket, socketRuntime, initSockets } from "../events/sockets";
-
   import { CellStatus } from "./CampaignCell";
-
   import { selectedFileOptionMutate } from "../utils/file-set";
-
   import { initialSettings } from "../utils/singletons";
 
   initSockets();
@@ -111,7 +108,6 @@ declare global {
   const settingsBtnCls = document.querySelectorAll(".settings-bar button");
 
   // new create
-  const newCampaignButton = document.getElementById("new-campaign-button");
   const campaignCreateForm = document.getElementById("campaign-create-form");
 
   // tor
@@ -125,10 +121,6 @@ declare global {
   const fileSelect = document.getElementById(
     "target-select"
   ) as HTMLInputElement;
-
-  newCampaignButton?.addEventListener("click", () => {
-    campaignCreateForm.className = "block";
-  });
 
   settingsBtn?.addEventListener("click", () => {
     settingsContainer.className = "block";
@@ -465,58 +457,9 @@ declare global {
   socket.addEventListener("message", eventSub);
   socketRuntime.addEventListener("message", eventSub);
 
-  const rsform = document.getElementById("rsform");
-  const rform = document.getElementById("rform");
   const eform = document.getElementById("eform");
   const bufferform = document.getElementById("bufferform");
   const fsDelete = document.getElementById("fs-delete");
-
-  rsform?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const selected = selectedEngine.get();
-    const eitem = engines.get()[selected];
-
-    if (eitem) {
-      if (eitem.status === CellStatus.RUNNING) {
-        return alert("Campaign already in progress");
-      }
-
-      eitem.urls.clear();
-      eitem.invalidUrls.clear();
-      eitem.status = CellStatus.RUNNING;
-
-      engines.notify(selected);
-
-      validLogs.set([]);
-      errorLogs.set([]);
-
-      socket.send("run-campaign " + selected);
-    } else {
-      alert("Please select a campaign");
-    }
-  });
-
-  rform?.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const allEngines = engines.get();
-
-    let allreadyRunning = true;
-
-    Object.keys(allEngines).forEach((key) => {
-      const item = allEngines[key];
-      if (item.status !== CellStatus.RUNNING) {
-        allreadyRunning = false;
-      }
-      item.status = CellStatus.RUNNING;
-    });
-
-    if (allreadyRunning) {
-      alert("All campaigns running in progress.");
-    } else {
-      socket.send("run-all-campaigns");
-    }
-  });
 
   bufferform?.addEventListener("submit", (event) => {
     const buffer: HTMLInputElement = bufferform.querySelector(

@@ -6,6 +6,17 @@
   <div>New Campaign</div>
 </button>
 
+<script>
+  // new create
+  const newCampaignButton = document.getElementById("new-campaign-button");
+  const campaignCreateForm = document.getElementById("campaign-create-form");
+
+  newCampaignButton?.addEventListener("click", () => {
+    if (campaignCreateForm) {
+      campaignCreateForm.className = "block";
+    }
+  });
+</script>
 <style>
   .campaign-button {
     background-color: #e8c01a;

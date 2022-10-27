@@ -12,8 +12,7 @@ use futures_util::stream::SplitSink;
 use futures_util::SinkExt;
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 use lazy_static::lazy_static;
-use seoder_lib::packages::spider::utils::pause;
-use seoder_lib::packages::spider::utils::resume;
+use seoder_lib::packages::spider::utils::{pause, resume, shutdown};
 use seoder_lib::packages::spider::utils::{log, logd};
 use seoder_lib::tokio::io::AsyncWriteExt;
 use seoder_lib::tokio::sync::mpsc::unbounded_channel;
@@ -207,6 +206,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     outgoing = send_message(outgoing, &v.to_string()).await;
                 }
             } else if st == Action::RemoveEngine {
+                shutdown(&input).await;
                 outgoing = controls::fs::remove_engine(outgoing, &input).await;
             } else if st == Action::Config {
                 outgoing = controls::list::config(outgoing).await;

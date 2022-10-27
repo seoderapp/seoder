@@ -4,3 +4,33 @@
     <div>Run All</div>
   </button>
 </form>
+
+<script>
+  import { socket } from "../../events/sockets";
+  import { engines } from "../../stores/engine";
+  import { CellStatus } from "../CampaignCell";
+
+  const rform = document.getElementById("rform");
+
+  rform?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const allEngines = engines.get();
+
+    let allreadyRunning = true;
+
+    Object.keys(allEngines).forEach((key) => {
+      const item = allEngines[key];
+      if (item.status !== CellStatus.RUNNING) {
+        allreadyRunning = false;
+      }
+      item.status = CellStatus.RUNNING;
+    });
+
+    if (allreadyRunning) {
+      alert("All campaigns running in progress.");
+    } else {
+      socket.send("run-all-campaigns");
+    }
+  });
+</script>
