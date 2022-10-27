@@ -23,7 +23,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, bool, (bool, bool), Engi
 
     let eg_enabled = std::env::var("ENGINE_FD").is_ok() || eg;
 
-    let mut timeout: u64 = 15;
+    let mut timeout: u64 = 20;
     let mut buffer = false;
     let mut proxy = false;
     let mut tor = false;
@@ -44,7 +44,7 @@ pub fn setup(eg: bool) -> (String, std::time::Duration, bool, (bool, bool), Engi
                         let v = hh[1];
 
                         if cf == "timeout" && !v.is_empty() {
-                            timeout = v.parse::<u64>().unwrap_or(15);
+                            timeout = v.parse::<u64>().unwrap_or(20);
                         }
                         if cf == "buffer" && !v.is_empty() {
                             buffer = v.parse::<bool>().unwrap_or(false);

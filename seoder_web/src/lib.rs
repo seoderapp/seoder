@@ -15,9 +15,10 @@ use lazy_static::lazy_static;
 use seoder_lib::packages::spider::utils::{log, logd};
 use seoder_lib::tokio::io::AsyncWriteExt;
 use seoder_lib::tokio::sync::mpsc::unbounded_channel;
+use seoder_lib::Handler;
 use seoder_lib::Website;
 use seoder_lib::ENTRY_PROGRAM;
-use seoder_lib::STOPPED;
+use seoder_lib::SEND;
 pub use seoder_lib::{serde_json, string_concat, tokio};
 use serde::{Deserialize, Serialize};
 use sysinfo::{System, SystemExt};
@@ -198,7 +199,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     let input = input.clone();
 
                     tokio::spawn(async move { controls::run::run(&input).await });
-
                 } else {
                     let v = json!({
                         "license": false
@@ -220,14 +220,29 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
             } else if st == Action::SetProxy {
                 utils::write_config("proxy", &input).await;
             } else if st == Action::SetStopped {
+                let s = SEND.clone();
+
+                s.lock()
+                    .await
+                    .0
+                    .send((input.to_string(), Handler::Pause))
+                    .unwrap();
+
+                drop(s);
                 // Todo: persist stop across app shutdown
-                STOPPED.lock().await.insert(input.clone());
 
                 let v = json!({ "stopped": input });
 
                 outgoing = send_message(outgoing, &v.to_string()).await;
             } else if st == Action::SetStarted {
-                STOPPED.lock().await.remove(&input);
+                let s = SEND.clone();
+
+                s.lock()
+                    .await
+                    .0
+                    .send((input.to_string(), Handler::Resume))
+                    .unwrap();
+                drop(s);
 
                 let v = json!({ "started": input });
 

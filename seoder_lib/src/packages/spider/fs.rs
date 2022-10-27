@@ -1,9 +1,7 @@
-use crate::packages::spider::utils::logd;
-use crate::packages::spider::website::CONFIG;
-use crate::STOPPED;
-
 use super::website::Campaign;
 use super::website::Message;
+use crate::packages::spider::utils::logd;
+use crate::packages::spider::website::CONFIG;
 
 use crate::ENTRY_PROGRAM;
 use regex::RegexSet;
@@ -11,6 +9,7 @@ use scraper::Html;
 use scraper::Selector;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tokio::fs::read_dir;
 use tokio::fs::File;
@@ -28,6 +27,7 @@ pub async fn store_fs_io_matching(
     campaign: &Campaign,
     mut rx: UnboundedReceiver<Message>,
     global_thread_count: Arc<Mutex<usize>>,
+    pause_handle: Arc<AtomicBool>
 ) {
     // todo: conditional lazy static
     lazy_static! {
@@ -77,19 +77,20 @@ pub async fn store_fs_io_matching(
             let mut oe = create_file(&string_concat!(&cmp_errors, "/links.txt")).await;
 
             while let Some(i) = rx.recv().await {
+
+                if pause_handle.load(Ordering::Relaxed) {
+                    let mut interval = tokio::time::interval(Duration::from_millis(500));
+                    // loop until unlocked
+                    while pause_handle.load(Ordering::Relaxed) {
+                        interval.tick().await;
+                    }
+                }
+
                 let (link, jor, spawned) = i;
                 let (response, _) = jor;
 
                 if spawned && *global_thread_count.lock().unwrap() > 0 {
                     *global_thread_count.lock().unwrap() -= 1;
-                }
-
-                if STOPPED.lock().await.contains(path) {
-                    // todo: watch channel instead
-                    let mut interval = tokio::time::interval(Duration::from_millis(100));
-                    while STOPPED.lock().await.contains(path) {
-                        interval.tick().await;
-                    }
                 }
 
                 let error = response.starts_with("- error ");
@@ -173,16 +174,17 @@ pub async fn store_fs_io_matching(
         let mut oe = create_file(&&string_concat!(&cmp_errors, "/links.txt")).await;
 
         while let Some(i) = rx.recv().await {
-            let (link, jor, spawned) = i;
-            let (response, _) = jor;
 
-            if STOPPED.lock().await.contains(path) {
-                // todo: watch channel instead
-                let mut interval = tokio::time::interval(Duration::from_millis(100));
-                while STOPPED.lock().await.contains(path) {
+            if pause_handle.load(Ordering::Relaxed) {
+                let mut interval = tokio::time::interval(Duration::from_millis(500));
+                // loop until unlocked
+                while pause_handle.load(Ordering::Relaxed) {
                     interval.tick().await;
                 }
             }
+
+            let (link, jor, spawned) = i;
+            let (response, _) = jor;
 
             if spawned && *global_thread_count.lock().unwrap() > 0 {
                 *global_thread_count.lock().unwrap() -= 1;
@@ -210,9 +212,9 @@ pub async fn store_fs_io_matching(
                 let ssource = response.clone();
 
                 task::spawn(async move {
-                    task::yield_now().await;
                     let doc = Html::parse_document(&ssource);
                     let items = doc.select(&SELECTOR);
+                    
                     let mut senders: Vec<String> = Vec::with_capacity(items.size_hint().0);
 
                     for element in items {

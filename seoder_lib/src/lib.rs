@@ -18,10 +18,14 @@ pub extern crate string_concat;
 #[macro_use]
 extern crate lazy_static;
 pub use packages::spider::website::Website;
-use std::collections::HashSet;
 use std::path::Path;
+use std::sync::Arc;
 use tokio::fs::create_dir_all;
 use tokio::sync::Mutex;
+// use tokio::sync::{Receiver, Sender};
+use tokio::sync::watch;
+use tokio::sync::watch::Receiver;
+use tokio::sync::watch::Sender;
 
 lazy_static! {
     /// engines, files, config.txt, and the data directory
@@ -37,9 +41,18 @@ lazy_static! {
     };
 }
 
+/// determine action
+#[derive(PartialEq, Debug)]
+pub enum Handler {
+    Start,
+    Pause,
+    Shutdown,
+    Resume,
+}
+
 lazy_static! {
-    /// stopped crawls
-    pub static ref STOPPED: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
+    /// mutable sender across realms
+    pub static ref SEND: Arc<Mutex<(Sender<(String, Handler)>, Receiver<(String, Handler)>)>> = Arc::new(Mutex::new(watch::channel(("handles".to_string(), Handler::Start))));
 }
 
 /// init entry dirs for prog

@@ -1,4 +1,4 @@
-use crate::{ENTRY_PROGRAM, STOPPED};
+use crate::{ENTRY_PROGRAM, SEND, Handler};
 
 use super::configuration::{setup, Configuration};
 use super::fs::store_fs_io_matching;
@@ -8,15 +8,17 @@ use super::ResponseOutFileType;
 
 use reqwest::header::HeaderMap;
 use reqwest::Client;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
-use tokio::sync::Semaphore;
+use tokio::sync::{Semaphore};
 use tokio::task;
 use tokio_stream::StreamExt;
+
 
 /// Represents a a web crawler for gathering links.
 /// ```rust
@@ -31,9 +33,7 @@ pub struct Website {
     /// Path to list of files.
     pub path: String,
     /// custom engine to run
-    pub engine: Engine,
-    // /// is the crawl paused
-    // paused: bool
+    pub engine: Engine
 }
 
 /// link, (res, code), spawned
@@ -75,7 +75,6 @@ impl Website {
                 "urls-input.txt".to_string()
             },
             engine: Engine::default(),
-            // paused: false
         }
     }
 
@@ -112,7 +111,7 @@ impl Website {
 
         let delay_timout = proxy || tor;
 
-        let delay = if delay_timout { CONFIG.1 * 2 } else { CONFIG.1 };
+        let delay = if delay_timout { CONFIG.1 * 4 } else { CONFIG.1 };
 
         let mut client = Client::builder()
             .default_headers(headers)
@@ -208,7 +207,31 @@ impl Website {
 
         let campaign_name = &self.engine.campaign.name;
         let campaign_name = campaign_name.clone();
+        let cname = campaign_name.clone();
 
+        let paused = Arc::new(AtomicBool::new(false));
+
+        let pause_handle = paused.clone();
+        let p_handle = pause_handle.clone();
+
+        tokio::spawn(async move {
+            let mut l = SEND.lock().await.1.to_owned();
+            
+            while l.changed().await.is_ok() {
+                let n = &*l.borrow();
+                let (name, rest) = n;
+
+                if &cname == name {
+                    if rest == &Handler::Pause {
+                        paused.store(true, Ordering::Relaxed);
+                    }
+                    if rest == &Handler::Resume {
+                        paused.store(false, Ordering::Relaxed);
+                    }
+                }
+            }
+        });
+                
         let handle = tokio::spawn(async move {
             while let Some(path) = st.next().await {
                 // soft
@@ -224,23 +247,22 @@ impl Website {
 
                 let path = path.clone();
                 let path1 = path.clone();
+                let w_handle = p_handle.clone();
 
                 let f = File::open(string_concat!(&ENTRY_PROGRAM.1, &p))
                     .await
                     .unwrap();
 
-                let campaign_name = campaign_name.clone();
-
                 task::spawn(async move {
                     let reader = BufReader::new(f);
                     let mut lines = reader.lines();
 
-                    let campaign_name = campaign_name.clone();
                     while let Some(link) = lines.next_line().await.unwrap() {
-                        if STOPPED.lock().await.contains(&campaign_name) {
-                            let mut interval = tokio::time::interval(Duration::from_millis(1000));
+
+                        if w_handle.load(Ordering::Relaxed) {
+                            let mut interval = tokio::time::interval(Duration::from_millis(500));
                             // loop until unlocked
-                            while STOPPED.lock().await.contains(&p) {
+                            while w_handle.load(Ordering::Relaxed) {
                                 interval.tick().await;
                             }
                         }
@@ -276,15 +298,27 @@ impl Website {
                 let semaphore = Arc::new(Semaphore::new(spawn_limit / 4)); // 4x less than spawns
                 let mut join_handles = Vec::new();
 
+                let p_handle = p_handle.clone();
+
                 let soft_spawn = task::spawn(async move {
                     while let Some(i) = rxx.recv().await {
+
+                        if p_handle.load(Ordering::Relaxed) {
+                            let mut interval = tokio::time::interval(Duration::from_millis(500));
+
+                            while p_handle.load(Ordering::Relaxed) {
+                                interval.tick().await;
+                            }
+                        }
+
                         let (link, _, __) = i;
 
                         let txxx = txxx.clone();
                         let client = client_sem.clone();
                         let link = link.clone();
-                        let permit = semaphore.clone().acquire_owned().await.unwrap();
                         let path = path1.clone();
+
+                        let permit = semaphore.clone().acquire_owned().await.unwrap();
 
                         join_handles.push(tokio::spawn(async move {
                             let json = fetch_page_html(&link, &client, &path).await;
@@ -307,7 +341,7 @@ impl Website {
             drop(tx);
         });
 
-        store_fs_io_matching(&self.engine.campaign, rx, global_thread_count).await;
+        store_fs_io_matching(&self.engine.campaign, rx, global_thread_count, pause_handle).await;
 
         handle.await.unwrap();
     }
