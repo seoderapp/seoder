@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@astrojs/image": "^0.10.0",
+    "@astrojs/partytown": "^1.0.1",
     "@astrojs/react": "^1.2.1",
     "@astrojs/sitemap": "^1.0.0",
     "@astrojs/vercel": "^2.3.1",

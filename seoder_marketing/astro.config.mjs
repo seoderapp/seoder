@@ -8,14 +8,14 @@ import sitemap from "@astrojs/sitemap";
 import image from "@astrojs/image";
 
 // https://astro.build/config
+import partytown from "@astrojs/partytown";
+
+// https://astro.build/config
 export default defineConfig({
   site: "https://seoder.io",
   output: "server",
   adapter: vercel(),
-  integrations: [
-    react(),
-    robotsTxt(),
-    sitemap(),
-    image({ serviceEntryPoint: "@astrojs/image/sharp" }),
-  ],
+  integrations: [react(), robotsTxt(), sitemap(), image({
+    serviceEntryPoint: "@astrojs/image/sharp"
+  }), partytown()]
 });
