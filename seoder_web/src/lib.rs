@@ -479,7 +479,7 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
                     list_ticket = list_ticket + 1;
                 } else {
                     list_ticket = list_ticket + 1;
-                    if list_ticket == 12 {
+                    if list_ticket == 15 {
                         list_ticket = 0;
                     }
                 }

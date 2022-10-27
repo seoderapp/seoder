@@ -109,6 +109,3 @@ export const setStatus = action(
     }
   }
 );
-
-// files for uploading
-export const fileMap = new Map();

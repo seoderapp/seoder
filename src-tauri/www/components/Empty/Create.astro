@@ -24,13 +24,15 @@
 
 <script>
   const campaignCreateForm = document.getElementById("campaign-create-form");
+  const empty = document.getElementById("empty-list");
+
   function addCampaign() {
     if (campaignCreateForm) {
       campaignCreateForm.className = "block";
     }
   }
-  document
-    .getElementById("empty-list")
-    .querySelector("button")
-    .addEventListener("click", addCampaign);
+
+  if (empty) {
+    empty.querySelector("button").addEventListener("click", addCampaign);
+  }
 </script>

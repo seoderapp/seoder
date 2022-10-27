@@ -1,0 +1,230 @@
+<script type="text/partytown">
+  const cpuCanvas = document.getElementById("cpu-stats");
+  const memCanvas = document.getElementById("memory-stats");
+  const netstats = document.getElementById("network-stats");
+  const netstatsUp = document.getElementById("network-stats-up");
+  const netstatsTotal = document.getElementById("network-stats-total");
+
+  const ctx = cpuCanvas.getContext("2d");
+  const ctx2 = memCanvas.getContext("2d");
+
+  ctx && createCanv(ctx);
+  ctx2 && createCanv(ctx2);
+
+  // settings
+  const settingsContainer = document.getElementById("settings-container");
+  const settingsBtn = document.getElementById("settings-button");
+  // modals first button adds close event
+  const settingsBtnCls = document.querySelectorAll(".settings-bar button");
+  // new create
+  const campaignCreateForm = document.getElementById("campaign-create-form");
+  // file upload form
+  const uploadform = document.getElementById("uploadform");
+  // selectors
+  const torSelect = document.getElementById("tor-select");
+  const proxySelect = document.getElementById("proxy-select");
+  const lowpowerSelect = document.getElementById("lowpower-select");
+  const targetSelect = document.getElementById("target-select");
+
+  const estats = "{" + '"' + "stats"; // os stats
+  const bftc = "{" + '"' + "buffer" + '"'; // buffer
+  const dfpath = "{" + '"' + "dfpath" + '"'; // deleted file
+  const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"'; // selected file
+
+  const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]; // db measuring units
+
+  // init options set
+  let defaultOptionSet = false;
+
+  function createCanv(r) {
+    r.font = "2rem SF Mono";
+    r.lineWidth = 17;
+    r.fontWeight = 700;
+    r.fillStyle = "#2f2768";
+    r.strokeStyle = "#E8C01A";
+    r.textAlign = "center";
+  }
+
+  function setProgress(ele, diff) {
+    let cw = ele.canvas.width;
+    let ch = ele.canvas.height;
+    ele.clearRect(0, 0, cw, ch);
+    ele.fillText(diff.toFixed(0) + "%", cw * 0.52, ch * 0.5 + 5, cw + 12);
+    ele.beginPath();
+    ele.arc(100, 100, 75, 0, (Math.PI * diff) / 50);
+    ele.stroke();
+  }
+
+  function slowBytes(x) {
+    let l = 0;
+    let n = parseInt(x, 10) || 0;
+
+    while (n >= 1024 && ++l) {
+      n = n / 1024;
+    }
+
+    return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+  }
+
+  // files for uploading
+  const fileMap = new Map();
+
+  // mutate selected option element mutate list.
+  const selectedFileOptionMutate = ({ path, fileSelect: f }) => {
+    if (!fileMap.has(path)) {
+      fileMap.set(path, {});
+      // file select
+      const fileSelect = f ?? document.getElementById("target-select");
+
+      for (const [key, _] of fileMap) {
+        const kid = "fskeys_" + key;
+        const item = document.getElementById(kid);
+
+        if (!item && fileSelect) {
+          const cellSelect = document.createElement("option");
+
+          cellSelect.id = kid;
+          // @ts-ignore
+          cellSelect.name = "fsselect";
+          cellSelect.value = key;
+          cellSelect.innerText = key;
+
+          fileSelect.appendChild(cellSelect);
+        }
+      }
+    }
+  };
+
+  const eventSub = (event) => {
+    const raw = event.data;
+
+    if (raw.startsWith(estats)) {
+      const data = JSON.parse(raw);
+      const {
+        cpu_usage,
+        // load_avg_min,
+        network_received,
+        network_transmited,
+        network_total_transmitted,
+        memory_free,
+        // memory_used,
+        memory_total,
+      } = data.stats;
+
+      if (ctx) {
+        setProgress(ctx, cpu_usage);
+      }
+      if (ctx2) {
+        setProgress(ctx2, (memory_free / memory_total) * 100);
+      }
+
+      if (netstats) {
+        netstats.innerHTML = `${slowBytes(network_received)} / s`;
+      }
+
+      if (netstatsUp) {
+        netstatsUp.innerHTML = `${slowBytes(network_transmited)} / s`;
+      }
+
+      if (netstatsTotal) {
+        netstatsTotal.innerHTML = slowBytes(network_total_transmitted);
+      }
+
+      return;
+    }
+
+    // settings
+    if (!defaultOptionSet && raw.startsWith(bftc)) {
+      const np = JSON.parse(raw);
+
+      defaultOptionSet = true;
+
+      if (proxySelect) {
+        proxySelect.checked = np.proxy;
+      }
+
+      if (lowpowerSelect) {
+        lowpowerSelect.checked = !!np.buffer;
+      }
+
+      if (torSelect) {
+        torSelect.checked = np.tor;
+      }
+
+      if (targetSelect) {
+        targetSelect.value = np.target;
+      }
+
+      return;
+    }
+
+    if (raw.startsWith(dfpath)) {
+      const np = JSON.parse(raw);
+      const path = np && np.dfpath;
+      const kid = "fskeys_" + path;
+
+      const cell = document.getElementById(kid);
+
+      if (cell) {
+        cell.remove();
+      }
+      return;
+    }
+
+    if (raw.startsWith(selectFile)) {
+      const np = JSON.parse(raw);
+      const path = np && np.fpath;
+
+      return selectedFileOptionMutate({
+        path,
+        fileSelect,
+      });
+    }
+  };
+
+  const sockets = new WebSocket("ws://127.0.0.1:8089");
+
+  sockets.addEventListener("open", () => {
+    sockets.send("loop");
+  });
+
+  sockets.addEventListener("message", eventSub);
+
+  settingsBtn?.addEventListener("click", () => {
+    settingsContainer.className = "block";
+  });
+
+  settingsBtn?.addEventListener("click", () => {
+    settingsContainer.className = "block";
+  });
+
+  uploadform?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const url = "http://localhost:7050/upload";
+    const request = new XMLHttpRequest();
+
+    request.open("POST", url, true);
+    request.onload = function () {};
+    request.onerror = function () {};
+
+    const fileValue = event.target["file"].value;
+
+    if (fileValue) {
+      request.send(new FormData(event.target));
+
+      const optimisticPath = fileValue.replace(/^.*[\\\/]/, "");
+
+      selectedFileOptionMutate({
+        path: optimisticPath,
+      });
+    }
+  });
+
+  // set all close buttons to close menu
+  for (let i = 0; i < settingsBtnCls.length; i++) {
+    settingsBtnCls[i].addEventListener("click", function () {
+      settingsContainer.className = "hidden";
+      campaignCreateForm.className = "hidden";
+    });
+  }
+</script>
