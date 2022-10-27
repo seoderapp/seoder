@@ -1,0 +1,57 @@
+<div data-tauri-drag-region class="titlebar">
+  <div class="titlebar-button red" id="titlebar-minimize"></div>
+  <div class="titlebar-button yellow" id="titlebar-maximize"></div>
+  <div class="titlebar-button green" id="titlebar-close"></div>
+</div>
+
+<script>
+  document
+    .getElementById("titlebar-minimize")
+    .addEventListener("click", () =>
+      window.__TAURI__.window.appWindow.minimize()
+    );
+  document
+    .getElementById("titlebar-maximize")
+    .addEventListener("click", () =>
+      window.__TAURI__.window.appWindow.toggleMaximize()
+    );
+  document
+    .getElementById("titlebar-close")
+    .addEventListener("click", () => window.__TAURI__.window.appWindow.close());
+</script>
+
+<style>
+  .titlebar {
+    max-height: 28px;
+    user-select: none;
+    display: flex;
+    justify-content: flex-start;
+    place-items: center;
+    position: fixed;
+    padding: 8px;
+    gap: 8px;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  .titlebar-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+    width: 12px;
+    height: 12px;
+  }
+  .titlebar-button:hover {
+    opacity: 0.9;
+  }
+  .red {
+    background-color: #f96057;
+  }
+  .yellow {
+    background-color: #f8ce52;
+  }
+  .green {
+    background-color: #5fcf65;
+  }
+</style>
