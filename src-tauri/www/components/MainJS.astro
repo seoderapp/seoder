@@ -16,6 +16,11 @@ declare global {
   } from "../stores/engine";
   import { socket, socketRuntime, initSockets } from "../events/sockets";
   import { CellStatus } from "./CampaignCell";
+  import {
+    baseConfig,
+    fileMap,
+    selectedFileOptionMutate,
+  } from "../utils/file-set";
 
   initSockets();
 
@@ -29,21 +34,77 @@ declare global {
     elicense.className = "row block";
   }
 
+  const cpuCanvas = document.getElementById("cpu-stats") as HTMLCanvasElement;
+  const memCanvas = document.getElementById(
+    "memory-stats"
+  ) as HTMLCanvasElement;
+
+  const ctx = cpuCanvas?.getContext("2d");
+  const ctx2 = memCanvas?.getContext("2d");
+
+  function createCanv(r) {
+    r.font = "2rem SF Mono";
+    r.lineWidth = 17;
+    r.fontWeight = 700;
+    r.fillStyle = "#2f2768";
+    r.strokeStyle = "#E8C01A";
+    r.textAlign = "center";
+  }
+
+  if (ctx) {
+    createCanv(ctx);
+  }
+  if (ctx2) {
+    createCanv(ctx2);
+  }
+
+  function setProgress(ele, diff) {
+    let cw = ele.canvas.width;
+    let ch = ele.canvas.height;
+    ele.clearRect(0, 0, cw, ch);
+    ele.fillText(diff.toFixed(0) + "%", cw * 0.52, ch * 0.5 + 5, cw + 12);
+    ele.beginPath();
+    ele.arc(100, 100, 75, 0, (Math.PI * diff) / 50);
+    ele.stroke();
+  }
+
+  const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+  function slowBytes(x) {
+    let l = 0;
+    let n = parseInt(x, 10) || 0;
+
+    while (n >= 1024 && ++l) {
+      n = n / 1024;
+    }
+
+    return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+  }
+
   socketRuntime.addEventListener("open", () => {
     socketRuntime.send("loop");
   });
 
   socket.addEventListener("open", () => {
+    socket.send("config");
+    socket.send("list-files");
     socket.send("list-engines");
     socket.send("list-totals");
-    socket.send("list-files");
-    socket.send("feed");
-    socket.send("config");
 
     setTimeout(() => {
       socket.send("list-campaign-stats");
     });
   });
+
+  const netstats = document.getElementById("network-stats");
+  const netstatsUp = document.getElementById("network-stats-up");
+  const netstatsTotal = document.getElementById("network-stats-total");
+
+  // settings
+  const settingsContainer = document.getElementById("settings-container");
+  const settingsBtn = document.getElementById("settings-button");
+  // modals first button adds close event
+  const settingsBtnCls = document.querySelectorAll(".settings-bar button");
 
   // new create
   const campaignCreateForm = document.getElementById("campaign-create-form");
@@ -59,13 +120,36 @@ declare global {
   const fileSelect = document.getElementById(
     "target-select"
   ) as HTMLInputElement;
+  const targetSelect = document.getElementById(
+    "target-select"
+  ) as HTMLInputElement;
+
+  settingsBtn?.addEventListener("click", () => {
+    settingsContainer.className = "block";
+  });
+
+  settingsBtn?.addEventListener("click", () => {
+    settingsContainer.className = "block";
+  });
+
+  // set all close buttons to close menu
+  for (let i = 0; i < settingsBtnCls.length; i++) {
+    settingsBtnCls[i].addEventListener("click", function () {
+      settingsContainer.className = "hidden";
+      campaignCreateForm.className = "hidden";
+    });
+  }
 
   /*
    * List of web socket matchers * special for high performance
    */
+  const estats = "{" + '"' + "stats"; // os stats
+  const bftc = "{" + '"' + "buffer" + '"'; // buffer
   const ptp = "{" + '"' + "pengine" + '"' + ":" + '"'; // engine
+  const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"'; // selected file
   const ptpe = "{" + '"' + "epath" + '"' + ":" + '"'; // engine created
   const ptc = "{" + '"' + "count" + '"'; // file count
+  const dfpath = "{" + '"' + "dfpath" + '"'; // deleted file
   const deptc = "{" + '"' + "depath" + '"'; // deleted campaign
   const cfin = "{" + '"' + "finished" + '"'; // crawl finished
   const vpaths = "{" + '"' + "path" + '"' + ":" + '"'; // valid paths
@@ -75,6 +159,8 @@ declare global {
   const cstarted = "{" + '"' + "started"; // started campaigns from pause
   const cpaused = "{" + '"' + "paused"; // paused campaigns from pause
 
+  // defaults for program entry
+  let defaultOptionSet = false;
   let firstCheck = false;
 
   function determineFinished(item: EngineProps) {
@@ -120,6 +206,50 @@ declare global {
       if (!firstCheck) {
         firstCheck = true;
       }
+    }
+
+    if (raw.startsWith(selectFile)) {
+      const np = JSON.parse(raw);
+
+      return selectedFileOptionMutate({
+        path: np.fpath,
+        fileSelect,
+      });
+    }
+
+    if (raw.startsWith(estats)) {
+      const data = JSON.parse(raw);
+      const {
+        cpu_usage,
+        // load_avg_min,
+        network_received,
+        network_transmited,
+        network_total_transmitted,
+        memory_free,
+        // memory_used,
+        memory_total,
+      } = data.stats;
+
+      if (ctx) {
+        setProgress(ctx, cpu_usage);
+      }
+      if (ctx2) {
+        setProgress(ctx2, (memory_free / memory_total) * 100);
+      }
+
+      if (netstats) {
+        netstats.innerHTML = `${slowBytes(network_received)} / s`;
+      }
+
+      if (netstatsUp) {
+        netstatsUp.innerHTML = `${slowBytes(network_transmited)} / s`;
+      }
+
+      if (netstatsTotal) {
+        netstatsTotal.innerHTML = slowBytes(network_total_transmitted);
+      }
+
+      return;
     }
 
     if (raw.startsWith(cfin)) {
@@ -269,6 +399,46 @@ declare global {
 
         if (determineFinished(item)) {
           setStatus(path, CellStatus.FINISHED);
+        }
+      }
+      return;
+    }
+
+    if (raw.startsWith(dfpath)) {
+      const np = JSON.parse(raw);
+      const path = np && np.dfpath;
+
+      if (fileMap.has(path)) {
+        const kid = "fskeys_" + path;
+        const cell = document.getElementById(kid);
+        cell.remove();
+        fileMap.delete(path);
+      }
+      return;
+    }
+
+    // settings
+    if (raw.startsWith(bftc)) {
+      const np = JSON.parse(raw);
+
+      if (!defaultOptionSet) {
+        defaultOptionSet = true;
+
+        if (proxySelect) {
+          proxySelect.checked = np.proxy;
+        }
+
+        if (lowpowerSelect) {
+          lowpowerSelect.checked = !!np.buffer;
+        }
+
+        if (torSelect) {
+          torSelect.checked = np.tor;
+        }
+
+        if (targetSelect) {
+          targetSelect.value = np.target;
+          baseConfig.initialTarget = np.target;
         }
       }
       return;
