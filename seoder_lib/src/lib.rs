@@ -44,10 +44,14 @@ lazy_static! {
 /// determine action
 #[derive(PartialEq, Debug)]
 pub enum Handler {
+    /// crawl start state
     Start,
+    /// crawl pause state
     Pause,
-    Shutdown,
+    /// crawl resume
     Resume,
+    /// crawl shutdown
+    Shutdown,
 }
 
 lazy_static! {
