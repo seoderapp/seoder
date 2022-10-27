@@ -237,11 +237,7 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
                 let mut nml = 0;
 
                 // target file length
-                match OpenOptions::new()
-                    .read(true)
-                    .open(target)
-                    .await
-                {
+                match OpenOptions::new().read(true).open(target).await {
                     Ok(file) => {
                         let reader = BufReader::new(file);
                         let mut lines = reader.lines();

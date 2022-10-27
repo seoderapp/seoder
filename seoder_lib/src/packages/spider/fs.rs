@@ -7,9 +7,9 @@ use crate::ENTRY_PROGRAM;
 use regex::RegexSet;
 use scraper::Html;
 use scraper::Selector;
+use std::sync::atomic::{AtomicI8, Ordering};
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tokio::fs::read_dir;
 use tokio::fs::File;
@@ -22,12 +22,40 @@ pub async fn create_file(path: &str) -> File {
     File::create(&path).await.unwrap()
 }
 
+/// build file target directorys
+pub async fn create_run_files(e: &str) -> (File, File, File) {
+    match tokio::fs::metadata(&e).await {
+        Ok(_) => (),
+        _ => {
+            tokio::fs::create_dir(&e).await.unwrap_or_default();
+            ()
+        }
+    }
+
+    let cmp_base = string_concat!(&e, "/valid");
+    let cmp_invalid = string_concat!(&e, "/invalid");
+    let cmp_errors = string_concat!(&e, "/errors");
+
+    tokio::fs::create_dir(&&cmp_base).await.unwrap_or_default();
+    tokio::fs::create_dir(&&cmp_invalid)
+        .await
+        .unwrap_or_default();
+    tokio::fs::create_dir(&&cmp_errors)
+        .await
+        .unwrap_or_default();
+
+    let o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
+    let oo = create_file(&string_concat!(&cmp_invalid, "/links.txt")).await;
+    let oe = create_file(&string_concat!(&cmp_errors, "/links.txt")).await;
+
+    (o, oo, oe)
+}
 /// store the content to file system
 pub async fn store_fs_io_matching(
     campaign: &Campaign,
     mut rx: UnboundedReceiver<Message>,
     global_thread_count: Arc<Mutex<usize>>,
-    pause_handle: Arc<AtomicBool>
+    chandle: Arc<AtomicI8>,
 ) {
     // todo: conditional lazy static
     lazy_static! {
@@ -47,140 +75,103 @@ pub async fn store_fs_io_matching(
     })
     .unwrap();
 
+    let mut interval = tokio::time::interval(Duration::from_millis(10));
+
     // if campaign is empty loop through all folders and spawn custom threads
     if path.is_empty() {
         let mut entries = match read_dir(&ENTRY_PROGRAM.0).await {
             Ok(dir) => dir,
             Err(_) => {
                 logd("No Campaigns found!");
-                // todo: print error
                 return;
             }
         };
 
         while let Some(entry) = entries.next_entry().await.unwrap() {
-            let e = entry.path().to_str().unwrap().to_owned();
-            let cmp_base = string_concat!(&e, "/valid");
-            let cmp_invalid = string_concat!(&e, "/invalid");
-            let cmp_errors = string_concat!(&e, "/errors");
+            if entry.metadata().await.unwrap().is_dir() {
+                let e = entry.path().to_str().unwrap().to_owned();
 
-            // only iterate through directory contents
-            if !match tokio::fs::metadata(&cmp_base).await {
-                Ok(dir) => dir.is_dir(),
-                _ => false,
-            } {
-                continue;
-            }
+                let (mut o, mut oo, mut oe) = create_run_files(&e).await;
 
-            let mut o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
-            let mut oo = create_file(&string_concat!(&cmp_invalid, "/links.txt")).await;
-            let mut oe = create_file(&string_concat!(&cmp_errors, "/links.txt")).await;
-
-            while let Some(i) = rx.recv().await {
-
-                if pause_handle.load(Ordering::Relaxed) {
-                    let mut interval = tokio::time::interval(Duration::from_millis(500));
-                    // loop until unlocked
-                    while pause_handle.load(Ordering::Relaxed) {
+                while let Some(i) = rx.recv().await {
+                    while chandle.load(Ordering::Relaxed) == 1 {
                         interval.tick().await;
                     }
-                }
-
-                let (link, jor, spawned) = i;
-                let (response, _) = jor;
-
-                if spawned && *global_thread_count.lock().unwrap() > 0 {
-                    *global_thread_count.lock().unwrap() -= 1;
-                }
-
-                let error = response.starts_with("- error ");
-                let link = string_concat!(link, "\n");
-
-                // errors
-                if response == "" || error {
-                    oe.write(&link.as_bytes()).await.unwrap();
-                    continue;
-                }
-
-                let response = response.clone();
-                let rgx = rgx.clone();
-
-                if source_match {
-                    let result = rgx.is_match(&response);
-                    if result {
-                        o.write(&link.as_bytes()).await.unwrap();
-                    } else {
-                        oo.write(&link.as_bytes()).await.unwrap();
-                        task::yield_now().await;
+                    if chandle.load(Ordering::Relaxed) == 2 {
+                        break;
                     }
-                    continue;
-                }
 
-                let (tx, rxx) = tokio::sync::oneshot::channel();
+                    let (link, jor, spawned) = i;
+                    let (response, _) = jor;
 
-                task::spawn(async move {
+                    if spawned && *global_thread_count.lock().unwrap() > 0 {
+                        *global_thread_count.lock().unwrap() -= 1;
+                    }
+
+                    let error = response.starts_with("- error ");
+                    let link = string_concat!(link, "\n");
                     task::yield_now().await;
-                    let doc = Html::parse_document(&response);
-                    let items = doc.select(&SELECTOR);
-                    let mut senders: Vec<String> = Vec::with_capacity(items.size_hint().0);
 
-                    for element in items {
-                        senders.push(element.text().map(|s| s.chars()).flatten().collect());
+                    // errors
+                    if response == "" || error {
+                        oe.write(&link.as_bytes()).await.unwrap();
+                        continue;
                     }
 
-                    if let Err(_) = tx.send(senders) {
-                        logd("the receiver dropped");
-                    }
-                });
+                    let response = response.clone();
+                    let rgx = rgx.clone();
 
-                match rxx.await {
-                    Ok(v) => {
-                        let result = rgx.is_match(&v.join(""));
-                        task::yield_now().await;
+                    if source_match {
+                        let result = rgx.is_match(&response);
                         if result {
                             o.write(&link.as_bytes()).await.unwrap();
                         } else {
                             oo.write(&link.as_bytes()).await.unwrap();
                         }
+                        continue;
                     }
-                    Err(_) => logd("the sender dropped"),
+
+                    let (tx, rxx) = tokio::sync::oneshot::channel();
+
+                    task::spawn(async move {
+                        let doc = Html::parse_document(&response);
+                        let items = doc.select(&SELECTOR);
+                        let mut senders: Vec<String> = Vec::with_capacity(items.size_hint().0);
+
+                        for element in items {
+                            senders.push(element.text().map(|s| s.chars()).flatten().collect());
+                        }
+
+                        if let Err(_) = tx.send(senders) {
+                            logd("the receiver dropped");
+                        }
+                    });
+
+                    match rxx.await {
+                        Ok(v) => {
+                            let result = rgx.is_match(&v.join(""));
+                            if result {
+                                o.write(&link.as_bytes()).await.unwrap();
+                            } else {
+                                oo.write(&link.as_bytes()).await.unwrap();
+                            }
+                        }
+                        Err(_) => logd("the sender dropped"),
+                    }
                 }
             }
         }
     } else {
+        // pass in the entry program path
         let cmp = string_concat!(ENTRY_PROGRAM.0, &path);
-
-        match tokio::fs::metadata(&cmp).await {
-            Ok(_) => (),
-            _ => {
-                tokio::fs::create_dir(&cmp).await.unwrap_or_default();
-                ()
-            }
-        }
-
-        let cmp_base = string_concat!(&cmp, "/valid");
-        let cmp_invalid = string_concat!(&cmp, "/invalid");
-        let cmp_errors = string_concat!(&cmp, "/errors");
-
-        tokio::fs::create_dir(&&cmp_base).await.unwrap_or_default();
-        tokio::fs::create_dir(&&cmp_invalid)
-            .await
-            .unwrap_or_default();
-        tokio::fs::create_dir(&&cmp_errors)
-            .await
-            .unwrap_or_default();
-        let mut o = create_file(&&string_concat!(&cmp_base, "/links.txt")).await;
-        let mut oo = create_file(&&string_concat!(&cmp_invalid, "/links.txt")).await;
-        let mut oe = create_file(&&string_concat!(&cmp_errors, "/links.txt")).await;
+        let (mut o, mut oo, mut oe) = create_run_files(&cmp).await;
 
         while let Some(i) = rx.recv().await {
-
-            if pause_handle.load(Ordering::Relaxed) {
-                let mut interval = tokio::time::interval(Duration::from_millis(500));
-                // loop until unlocked
-                while pause_handle.load(Ordering::Relaxed) {
-                    interval.tick().await;
-                }
+            while chandle.load(Ordering::Relaxed) == 1 {
+                interval.tick().await;
+            }
+            if chandle.load(Ordering::Relaxed) == 2 {
+                break;
             }
 
             let (link, jor, spawned) = i;
@@ -192,6 +183,7 @@ pub async fn store_fs_io_matching(
 
             let error = response.starts_with("- error ");
             let link = string_concat!(&link, "\n");
+            task::yield_now().await;
 
             if response == "" || error {
                 oe.write(&link.as_bytes()).await.unwrap();
@@ -200,7 +192,6 @@ pub async fn store_fs_io_matching(
 
             if source_match {
                 let result = rgx.is_match(&response);
-                task::yield_now().await;
                 if result {
                     o.write(&link.as_bytes()).await.unwrap();
                 } else {
@@ -214,7 +205,7 @@ pub async fn store_fs_io_matching(
                 task::spawn(async move {
                     let doc = Html::parse_document(&ssource);
                     let items = doc.select(&SELECTOR);
-                    
+
                     let mut senders: Vec<String> = Vec::with_capacity(items.size_hint().0);
 
                     for element in items {
@@ -229,7 +220,6 @@ pub async fn store_fs_io_matching(
                 match rxx.await {
                     Ok(v) => {
                         let result = rgx.is_match(&v.join(""));
-                        task::yield_now().await;
                         if result {
                             o.write(&link.as_bytes()).await.unwrap();
                         } else {

@@ -1,24 +1,23 @@
-use crate::{ENTRY_PROGRAM, SEND, Handler};
+use crate::ENTRY_PROGRAM;
 
 use super::configuration::{setup, Configuration};
 use super::fs::store_fs_io_matching;
-use super::utils::fetch_page_html;
 use super::utils::log;
+use super::utils::{fetch_page_html, Handler, CONTROLLER};
 use super::ResponseOutFileType;
 
 use reqwest::header::HeaderMap;
 use reqwest::Client;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicI8, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
-use tokio::sync::{Semaphore};
+use tokio::sync::Semaphore;
 use tokio::task;
 use tokio_stream::StreamExt;
-
 
 /// Represents a a web crawler for gathering links.
 /// ```rust
@@ -33,7 +32,7 @@ pub struct Website {
     /// Path to list of files.
     pub path: String,
     /// custom engine to run
-    pub engine: Engine
+    pub engine: Engine,
 }
 
 /// link, (res, code), spawned
@@ -159,20 +158,53 @@ impl Website {
         client.build().unwrap_or_default()
     }
 
+    /// setup atomic controller
+    async fn configure_handler(&self) -> Arc<AtomicI8> {
+        let paused = Arc::new(AtomicI8::new(0));
+        let handle = paused.clone();
+        let domain = self.engine.campaign.name.clone();
+
+        tokio::spawn(async move {
+            let mut l = CONTROLLER.lock().await.1.to_owned();
+
+            while l.changed().await.is_ok() {
+                let n = &*l.borrow();
+                let (name, rest) = n;
+
+                if &domain == name {
+                    if rest == &Handler::Resume {
+                        paused.store(0, Ordering::Relaxed);
+                    }
+                    if rest == &Handler::Pause {
+                        paused.store(1, Ordering::Relaxed);
+                    }
+                    if rest == &Handler::Shutdown {
+                        paused.store(2, Ordering::Relaxed);
+                    }
+                }
+            }
+        });
+
+        handle
+    }
+
     /// setup config for crawl
-    pub async fn setup(&mut self) -> Client {
-        self.configure_http_client().await
+    pub async fn setup(&mut self) -> (Client, Arc<AtomicI8>) {
+        let client = self.configure_http_client().await;
+        let handle = self.configure_handler().await;
+
+        (client, handle)
     }
 
     /// Start to crawl with async conccurency
     pub async fn crawl(&mut self) {
-        let client = self.setup().await;
+        let (client, handle) = self.setup().await;
 
-        self.crawl_concurrent(client).await;
+        self.crawl_concurrent(client, handle).await;
     }
 
     /// Start to crawl website concurrently using gRPC callback
-    async fn crawl_concurrent(&mut self, client: Client) {
+    async fn crawl_concurrent(&mut self, client: Client, p_handle: Arc<AtomicI8>) {
         let spawn_limit = if CONFIG.2 {
             num_cpus::get() / 2
         } else {
@@ -205,33 +237,8 @@ impl Website {
 
         let txxx = tx.clone();
 
-        let campaign_name = &self.engine.campaign.name;
-        let campaign_name = campaign_name.clone();
-        let cname = campaign_name.clone();
+        let pp_handle = p_handle.clone();
 
-        let paused = Arc::new(AtomicBool::new(false));
-
-        let pause_handle = paused.clone();
-        let p_handle = pause_handle.clone();
-
-        tokio::spawn(async move {
-            let mut l = SEND.lock().await.1.to_owned();
-            
-            while l.changed().await.is_ok() {
-                let n = &*l.borrow();
-                let (name, rest) = n;
-
-                if &cname == name {
-                    if rest == &Handler::Pause {
-                        paused.store(true, Ordering::Relaxed);
-                    }
-                    if rest == &Handler::Resume {
-                        paused.store(false, Ordering::Relaxed);
-                    }
-                }
-            }
-        });
-                
         let handle = tokio::spawn(async move {
             while let Some(path) = st.next().await {
                 // soft
@@ -247,24 +254,25 @@ impl Website {
 
                 let path = path.clone();
                 let path1 = path.clone();
-                let w_handle = p_handle.clone();
 
                 let f = File::open(string_concat!(&ENTRY_PROGRAM.1, &p))
                     .await
                     .unwrap();
+
+                let mut interval = tokio::time::interval(Duration::from_millis(10));
+
+                let chandle = p_handle.clone();
 
                 task::spawn(async move {
                     let reader = BufReader::new(f);
                     let mut lines = reader.lines();
 
                     while let Some(link) = lines.next_line().await.unwrap() {
-
-                        if w_handle.load(Ordering::Relaxed) {
-                            let mut interval = tokio::time::interval(Duration::from_millis(500));
-                            // loop until unlocked
-                            while w_handle.load(Ordering::Relaxed) {
-                                interval.tick().await;
-                            }
+                        while chandle.load(Ordering::Relaxed) == 1 {
+                            interval.tick().await;
+                        }
+                        if chandle.load(Ordering::Relaxed) == 2 {
+                            break;
                         }
 
                         if *thread_count.lock().unwrap() < spawn_limit {
@@ -298,17 +306,14 @@ impl Website {
                 let semaphore = Arc::new(Semaphore::new(spawn_limit / 4)); // 4x less than spawns
                 let mut join_handles = Vec::new();
 
-                let p_handle = p_handle.clone();
+                let pp_handle = p_handle.clone();
+
+                let mut interval = tokio::time::interval(Duration::from_millis(10));
 
                 let soft_spawn = task::spawn(async move {
                     while let Some(i) = rxx.recv().await {
-
-                        if p_handle.load(Ordering::Relaxed) {
-                            let mut interval = tokio::time::interval(Duration::from_millis(500));
-
-                            while p_handle.load(Ordering::Relaxed) {
-                                interval.tick().await;
-                            }
+                        while pp_handle.load(Ordering::Relaxed) == 1 {
+                            interval.tick().await;
                         }
 
                         let (link, _, __) = i;
@@ -341,7 +346,7 @@ impl Website {
             drop(tx);
         });
 
-        store_fs_io_matching(&self.engine.campaign, rx, global_thread_count, pause_handle).await;
+        store_fs_io_matching(&self.engine.campaign, rx, global_thread_count, pp_handle).await;
 
         handle.await.unwrap();
     }

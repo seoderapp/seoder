@@ -19,13 +19,7 @@ pub extern crate string_concat;
 extern crate lazy_static;
 pub use packages::spider::website::Website;
 use std::path::Path;
-use std::sync::Arc;
 use tokio::fs::create_dir_all;
-use tokio::sync::Mutex;
-// use tokio::sync::{Receiver, Sender};
-use tokio::sync::watch;
-use tokio::sync::watch::Receiver;
-use tokio::sync::watch::Sender;
 
 lazy_static! {
     /// engines, files, config.txt, and the data directory
@@ -41,24 +35,6 @@ lazy_static! {
     };
 }
 
-/// determine action
-#[derive(PartialEq, Debug)]
-pub enum Handler {
-    /// crawl start state
-    Start,
-    /// crawl pause state
-    Pause,
-    /// crawl resume
-    Resume,
-    /// crawl shutdown
-    Shutdown,
-}
-
-lazy_static! {
-    /// mutable sender across realms
-    pub static ref SEND: Arc<Mutex<(Sender<(String, Handler)>, Receiver<(String, Handler)>)>> = Arc::new(Mutex::new(watch::channel(("handles".to_string(), Handler::Start))));
-}
-
 /// init entry dirs for prog
 pub async fn init() {
     if !Path::new(&ENTRY_PROGRAM.0).is_dir() {
@@ -68,8 +44,9 @@ pub async fn init() {
     if !Path::new(&ENTRY_PROGRAM.1).is_dir() {
         create_dir_all(&ENTRY_PROGRAM.1).await.unwrap();
     }
-    // copy files from build step TODO:
+    // copy files from build step TODO: get auto generated unique list
     if cfg!(debug_assertions) {
+        //
         let bs_url_input = string_concat!(ENTRY_PROGRAM.1, "urls-input.txt");
 
         if !Path::new(&bs_url_input).is_file() {
