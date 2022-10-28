@@ -1,0 +1,84 @@
+---
+import Download from "../components/Download.astro";
+import Footer from "../components/Footer.astro";
+import Navbar from "../components/Navbar.astro";
+import Title from "../components/Typo/Title.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="Seoder - Frequently Asked Questions"
+  description={"Frequently asked questions and answers to help you with using Seoder."}
+>
+  <main>
+    <Navbar target={"faq"} />
+    <div class="prog">
+      <section class={"center-container"}>
+        <Title>Frequently Asked Questions</Title>
+        <h2>Command questions and answers</h2>
+        <ul>
+          <li>
+            <h3>License machine limits?</h3>
+            <p>
+              Currently each license allows usage on one machine. If you need to
+              run on another machine you need to purchase another license.
+            </p>
+          </li>
+          <li>
+            <h3>Update Frequency</h3>
+            <p>
+              We roll out changes often and try to make each update compatible
+              across all future system updates.
+            </p>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </main>
+  <div class={"space"}></div>
+  <Footer />
+</Layout>
+
+<style>
+  .space {
+    height: 11rem;
+  }
+  h2 {
+    color: #2f2768;
+    max-width: 20rem;
+    font-weight: normal;
+    text-align: center;
+  }
+  .instructions strong {
+    color: rgb(var(--accent));
+  }
+  .link-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+    gap: 1rem;
+    padding: 0;
+  }
+  .center-container {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+  }
+  .button-container {
+    padding-top: 0.8rem;
+    padding-bottom: 5rem;
+  }
+  .button-container button {
+    text-transform: uppercase;
+    color: #2f2768;
+    border: none;
+    padding: 0.85rem 0.8rem;
+    border-radius: 0.3rem;
+    min-width: 16.8rem;
+    margin: 0;
+    background-color: #e8c01a;
+    font-weight: 700;
+  }
+  .button-container button:hover {
+    background-color: #e9c73e;
+  }
+</style>

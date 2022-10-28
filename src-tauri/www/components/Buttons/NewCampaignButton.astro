@@ -1,21 +1,29 @@
-<button
-  id="new-campaign-button"
-  class="panel-btn button btn-primary full-w campaign-button center"
->
-  <img src="/assets/new.svg" alt="" />
-  <div>New Campaign</div>
+---
+export interface Props {
+  title: string;
+  icon?: boolean;
+}
+
+const { title, icon } = Astro.props;
+---
+
+<button class="panel-btn button btn-primary full-w campaign-button center">
+  {icon ? <img src="/assets/new.svg" alt="" /> : null}
+  <div>{title}</div>
 </button>
 
 <script>
   // new create
-  const newCampaignButton = document.getElementById("new-campaign-button");
+  const newCampaignButton = document.querySelectorAll(".campaign-button");
   const campaignCreateForm = document.getElementById("campaign-create-form");
 
-  newCampaignButton?.addEventListener("click", () => {
-    if (campaignCreateForm) {
-      campaignCreateForm.className = "block";
-    }
-  });
+  for (const item of newCampaignButton) {
+    item?.addEventListener("click", () => {
+      if (campaignCreateForm) {
+        campaignCreateForm.className = "block";
+      }
+    });
+  }
 </script>
 <style>
   .campaign-button {
