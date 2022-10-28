@@ -2,6 +2,8 @@
 import Download from "../components/Download.astro";
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
+import Section from "../components/Section.astro";
+import SubTitle from "../components/Typo/SubTitle.astro";
 import Title from "../components/Typo/Title.astro";
 import Layout from "../layouts/Layout.astro";
 
@@ -15,9 +17,9 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
   <main>
     <Navbar target={"payments"} />
     <div class="prog">
-      <section class={"center-container"}>
+      <Section center>
         <Title>Purchase License</Title>
-        <h2>The license is active for 1 year on one machine</h2>
+        <SubTitle>The license is active for 1 year on one machine</SubTitle>
         <form id="register">
           <div>
             <label for="first-name">First name</label>
@@ -63,11 +65,12 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
             <button type="submit">Buy Now</button>
           </div>
         </form>
-      </section>
-      <Download sub />
+      </Section>
+      <Section>
+        <Download sub />
+      </Section>
     </div>
   </main>
-  <div class={"space"}></div>
   <Footer />
 </Layout>
 
@@ -125,24 +128,6 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
 </script>
 
 <style>
-  .space {
-    height: 11rem;
-  }
-  h2 {
-    color: #2f2768;
-    max-width: 20rem;
-    font-weight: normal;
-    text-align: center;
-  }
-  .instructions strong {
-    color: rgb(var(--accent));
-  }
-  .link-card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
-    gap: 1rem;
-    padding: 0;
-  }
   form {
     padding: 0.6rem 0;
     text-align: left;
@@ -161,11 +146,6 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
     padding: 0.5rem 0.8rem;
     border: 2px solid #2f2768;
     min-width: 15rem;
-  }
-  .center-container {
-    display: flex;
-    flex-direction: column;
-    place-items: center;
   }
   .button-container {
     padding-top: 0.8rem;

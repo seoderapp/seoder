@@ -1,7 +1,7 @@
 ---
-import Download from "../components/Download.astro";
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
+import SubTitle from "../components/Typo/SubTitle.astro";
 import Title from "../components/Typo/Title.astro";
 import Layout from "../layouts/Layout.astro";
 ---
@@ -15,7 +15,7 @@ import Layout from "../layouts/Layout.astro";
     <div class="prog">
       <section class={"center-container"}>
         <Title>Frequently Asked Questions</Title>
-        <h2>Common questions and answers</h2>
+        <SubTitle>Common questions and answers</SubTitle>
         <ul>
           <li>
             <h3>License Machine limits</h3>
@@ -36,7 +36,7 @@ import Layout from "../layouts/Layout.astro";
             <p>
               If you are not happy with the state of Seoder at anytime during
               the first 7 days we will offer a full refund by reaching out to <a
-                href="mailto:support@seoder.io">Support</a
+                href="mailto:support@seoder.io">support</a
               >.
             </p>
           </li>
@@ -51,12 +51,6 @@ import Layout from "../layouts/Layout.astro";
 <style>
   .space {
     height: 11rem;
-  }
-  h2 {
-    color: #2f2768;
-    max-width: 20rem;
-    font-weight: normal;
-    text-align: center;
   }
   .instructions strong {
     color: rgb(var(--accent));

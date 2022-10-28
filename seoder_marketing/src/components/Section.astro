@@ -1,0 +1,22 @@
+---
+export interface Props {
+  center?: boolean;
+}
+
+const { center } = Astro.props;
+---
+
+<section class={center ? "center-container" : ""}>
+  <slot />
+</section>
+
+<style>
+  section {
+    padding-bottom: 4rem;
+  }
+  .center-container {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+  }
+</style>
