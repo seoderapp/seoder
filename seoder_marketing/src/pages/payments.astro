@@ -1,6 +1,7 @@
 ---
 import Download from "../components/Download.astro";
 import Footer from "../components/Footer.astro";
+import MoneyBack from "../components/Money/MoneyBack.astro";
 import Navbar from "../components/Navbar.astro";
 import Section from "../components/Section.astro";
 import SubTitle from "../components/Typo/SubTitle.astro";
@@ -65,6 +66,7 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
             <button type="submit">Buy Now</button>
           </div>
         </form>
+        <MoneyBack />
       </Section>
       <Section>
         <Download sub />
