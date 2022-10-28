@@ -6,8 +6,9 @@
 extern crate seoder_web;
 
 use seoder_web::tokio;
-use tauri::Manager;
 
+#[cfg(target_os = "macos")]
+use tauri::Manager;
 #[cfg(target_os = "macos")]
 use tauri::Window;
 
