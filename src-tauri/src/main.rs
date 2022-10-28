@@ -5,7 +5,6 @@
 
 extern crate seoder_web;
 
-use cocoa::appkit::{NSWindow, NSWindowStyleMask};
 use seoder_web::tokio;
 use tauri::Manager;
 use tauri::Window;
@@ -13,6 +12,7 @@ use tauri::Window;
 #[cfg(target_os = "macos")]
 fn set_transparent_titlebar(win: Window, transparent: bool) {
     use cocoa::appkit::NSWindowTitleVisibility;
+    use cocoa::appkit::{NSWindow, NSWindowStyleMask};
 
     unsafe {
         let id = win.ns_window().unwrap() as cocoa::base::id;
