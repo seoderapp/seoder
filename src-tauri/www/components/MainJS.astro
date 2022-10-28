@@ -162,8 +162,9 @@ declare global {
 
   function determineFinished(item: EngineProps) {
     return (
+      item.total &&
       item.errorUrls.size + item.invalidUrls.size + item.urls.size ===
-      item.total
+        item.total
     );
   }
 
