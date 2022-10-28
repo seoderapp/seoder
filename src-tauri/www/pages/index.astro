@@ -14,6 +14,8 @@ import { Tabs } from "../components/Tabs";
 declare global {
   var __TAURI__: any;
 }
+
+const mac = import.meta.env.MAC_OS || "";
 ---
 
 <Layout title="Seoder - The marketing lead generation tool">
@@ -25,7 +27,7 @@ declare global {
         <Campaign />
       </Fragment>
       <Fragment slot="right">
-        <Tabs client:visible />
+        <Tabs client:visible macOs={mac} />
         <Stats />
       </Fragment>
     </Program>

@@ -8,7 +8,7 @@ enum TabType {
   "errors",
 }
 
-export const Tabs = () => {
+export const Tabs = ({ macOs }: { macOs?: boolean }) => {
   const [focused, setFocused] = useState<TabType>(TabType.valid);
 
   const onClickValid = () => setFocused(TabType.valid);
@@ -19,16 +19,23 @@ export const Tabs = () => {
   const invalidFocused = focused === TabType.invalid;
   const errorFocused = focused === TabType.errors;
 
+  const baseProps = macOs
+    ? {
+        "data-tauri-drag-region": 1,
+      }
+    : {};
+
   return (
     <div className={"feed"}>
       <div className={"flex-row"} role="tablist">
         <button
           className={`tab${validFocused ? " tab-active" : ""}`}
           onClick={onClickValid}
-          type="button"
-          role="tab"
           id={"tab-console"}
           aria-selected={validFocused}
+          type="button"
+          role="tab"
+          {...baseProps}
         >
           Valids
         </button>
@@ -39,6 +46,7 @@ export const Tabs = () => {
           role="tab"
           id={"tab-error"}
           aria-selected={invalidFocused}
+          {...baseProps}
         >
           Invalids
         </button>
@@ -49,6 +57,7 @@ export const Tabs = () => {
           role="tab"
           id={"tab-invalid"}
           aria-selected={errorFocused}
+          {...baseProps}
         >
           Errors
         </button>

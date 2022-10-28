@@ -1,6 +1,13 @@
+---
+const mac = import.meta.env.MAC_OS || "";
+---
+
 <div class="row hidden full" id="appProgram">
   <div class="panel panel-left">
-    <slot name="left" />
+    {mac ? <div data-tauri-drag-region class="titlebar" /> : null}
+    <div class="panel-left-container">
+      <slot name="left" />
+    </div>
   </div>
   <div class="panel">
     <slot name="right" />
@@ -14,11 +21,22 @@
     flex-direction: column;
     padding-left: 0.25rem;
     height: 100%;
+    position: relative;
+    overflow: hidden;
   }
 
   .panel-left {
     flex: 0.6;
+  }
+  .panel-left-container {
     padding-left: 0.25rem;
     padding-right: 0.25rem;
+  }
+
+  .titlebar {
+    height: 28px;
+    position: fixed;
+    left: 0;
+    right: 0;
   }
 </style>

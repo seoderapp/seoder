@@ -6,7 +6,6 @@ export interface Props {
 }
 
 const { title } = Astro.props;
-const mac = import.meta.env.MAC_OS || "";
 ---
 
 <!DOCTYPE html>
@@ -19,7 +18,6 @@ const mac = import.meta.env.MAC_OS || "";
     <title>{title}</title>
   </head>
   <body>
-    {mac ? <div data-tauri-drag-region class="titlebar" /> : null}
     <slot />
     <style is:global>
       :root {
@@ -41,12 +39,6 @@ const mac = import.meta.env.MAC_OS || "";
         margin: 0;
         overflow: hidden;
         height: 100%;
-      }
-      .titlebar {
-        height: 28px;
-        position: fixed;
-        left: 0;
-        right: 0;
       }
     </style>
   </body>
