@@ -3207,6 +3207,7 @@ dependencies = [
 name = "seoder_app"
 version = "0.0.1"
 dependencies = [
+ "cocoa",
  "seoder_web",
  "serde",
  "serde_json",

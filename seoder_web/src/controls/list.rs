@@ -302,7 +302,7 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
                     if h0 == "tor" {
                         tor = h1.parse::<bool>().unwrap_or(false);
                     }
-                    
+
                     if h0 == "target" {
                         let path = std::path::Path::new(&h1);
                         let filename = path.file_name().unwrap();
@@ -316,7 +316,6 @@ pub async fn config(mut outgoing: OutGoing) -> OutGoing {
                     if h0 == "license" && h1 != "false" {
                         license = h1;
                     }
-
                 }
             }
         }
