@@ -3,47 +3,40 @@ import ArrowDown from "./Svgs/ArrowDown.astro";
 import ArrowUp from "./Svgs/ArrowUp.astro";
 ---
 
-<div class="container">
-  <div class="flex-row spaceless stats">
-    <div class="text-center ph cpu-box relative">
-      <div class="gutter stats-head absolute">CPU</div>
-      <canvas id="cpu-stats" width="200" height="200"></canvas>
-    </div>
-    <div class="text-center ph cpu-box relative">
-      <div class="gutter stats-head absolute">Memory</div>
-      <canvas id="memory-stats" width="200" height="200"></canvas>
-    </div>
-    <div class="stats-box ph">
-      <div class="gutter stats-head">Network</div>
-      <div class="stats-bar gutter net-row space">
-        <div class="net-row space-s net-cell">
-          <div id="network-stats"></div>
-          <ArrowDown />
-        </div>
-        <div class="net-row space-s net-cell">
-          <ArrowUp />
-          <div id="network-stats-up"></div>
-        </div>
+<div class="flex-row spaceless stats">
+  <div class="text-center ph cpu-box relative">
+    <div class="gutter stats-head absolute">CPU</div>
+    <canvas id="cpu-stats" width="200" height="200"></canvas>
+  </div>
+  <div class="text-center ph cpu-box relative">
+    <div class="gutter stats-head absolute">Memory</div>
+    <canvas id="memory-stats" width="200" height="200"></canvas>
+  </div>
+  <div class="stats-box ph">
+    <div class="gutter stats-head">Network</div>
+    <div class="stats-bar gutter net-row space">
+      <div class="net-row space-s net-cell">
+        <div id="network-stats"></div>
+        <ArrowDown />
       </div>
-      <div class="stats-bar gutter net-row">
-        <div class="net-cell">
-          <div id="network-stats-total"></div>
-        </div>
-        <div>Total</div>
+      <div class="net-row space-s net-cell">
+        <ArrowUp />
+        <div id="network-stats-up"></div>
       </div>
+    </div>
+    <div class="stats-bar gutter net-row">
+      <div class="net-cell">
+        <div id="network-stats-total"></div>
+      </div>
+      <div>Total</div>
     </div>
   </div>
 </div>
 
 <style>
-  .container {
-    flex: 0.2;
-    padding-top: 0.2rem;
-  }
   .stats {
     gap: 1rem;
     border: 1px solid #ebecf2;
-    padding-bottom: 0.5rem;
     align-items: center;
     display: flex;
     padding-left: 0.5rem;
@@ -78,17 +71,29 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
   }
   .stats-head {
     font-weight: bold;
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
   }
   .absolute {
-    position: relative;
-    top: 1.6rem;
+    position: absolute;
+    top: 1.345rem;
+    margin: auto;
+    text-align: center;
+    display: inline;
   }
   .space {
     gap: 1rem;
   }
   .space-s {
     gap: 0.15rem;
+  }
+  .cpu-box {
+    position: relative;
+    place-content: center;
+    justify-content: center;
+    display: flex;
+    padding: 0.5rem;
+    width: 100px;
+    color: #2f2768;
   }
 </style>

@@ -1,6 +1,6 @@
 .feed {
   color: #ccc;
-  /* flex: 0.8; */
+  /* flex: 1; */
   background-color: #0e1116;
   overflow: hidden;
 }
@@ -16,7 +16,7 @@
   list-style-type: none;
   font-family: "SF Mono";
   overflow: auto;
-  height: calc(80vh - 5.188rem);
+  height: calc(100vh - 10.063rem);
 }
 
 .log li {

@@ -58,11 +58,12 @@ declare global {
     createCanv(ctx2);
   }
 
+  let cw = ctx.canvas.width;
+  let ch = ctx.canvas.height;
+
   function setProgress(ele, diff) {
-    let cw = ele.canvas.width;
-    let ch = ele.canvas.height;
     ele.clearRect(0, 0, cw, ch);
-    ele.fillText(diff.toFixed(0) + "%", cw * 0.52, ch * 0.5 + 5, cw + 12);
+    ele.fillText(diff.toFixed(0) + "%", cw * 0.52, ch * 0.5 + 12, cw + 12);
     ele.beginPath();
     ele.arc(100, 100, 75, 0, (Math.PI * diff) / 50);
     ele.stroke();
