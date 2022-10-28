@@ -7,6 +7,8 @@ extern crate seoder_web;
 
 use seoder_web::tokio;
 use tauri::Manager;
+
+#[cfg(target_os = "macos")]
 use tauri::Window;
 
 #[cfg(target_os = "macos")]
@@ -45,8 +47,11 @@ async fn main() {
     tauri::Builder::default()
         .setup(|app| {
             tauri::async_runtime::spawn(async move { seoder_web::start().await.unwrap() });
-            let win = app.get_window("main").unwrap();
-            set_transparent_titlebar(win, true);
+
+            if cfg!(target_os = "macos") {
+                let win = app.get_window("main").unwrap();
+                set_transparent_titlebar(win, true);
+            }
 
             Ok(())
         })
