@@ -44,15 +44,25 @@ fn set_transparent_titlebar(win: Window, transparent: bool) {
 }
 
 #[tokio::main]
+#[cfg(target_os = "macos")]
 async fn main() {
     tauri::Builder::default()
         .setup(|app| {
             tauri::async_runtime::spawn(async move { seoder_web::start().await.unwrap() });
+            let win = app.get_window("main").unwrap();
+            set_transparent_titlebar(win, true);
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
 
-            if cfg!(target_os = "macos") {
-                let win = app.get_window("main").unwrap();
-                set_transparent_titlebar(win, true);
-            }
+#[tokio::main]
+#[cfg(not(target_os = "macos"))]
+async fn main() {
+    tauri::Builder::default()
+        .setup(|_| {
+            tauri::async_runtime::spawn(async move { seoder_web::start().await.unwrap() });
 
             Ok(())
         })
