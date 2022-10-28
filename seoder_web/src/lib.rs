@@ -46,7 +46,7 @@ use tokio_cron_scheduler::{Job, JobScheduler};
 use utils::validate_program;
 
 extern crate lazy_static;
-extern crate mac_address;
+extern crate machine_uid;
 extern crate tera;
 
 mod builder;

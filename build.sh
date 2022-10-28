@@ -2,9 +2,15 @@
 
 # prep images locally
 
-SEODER_PROGRAM=app RUST_LOG=info cargo tauri build --target universal-apple-darwin
+mac=""
+
+if [ "$(uname)" == "Darwin" ]; then
+    mac="true"
+fi
+
+MAC_OS=$mac SEODER_PROGRAM=app cargo tauri build --target universal-apple-darwin
 echo "Created mac universal build"
-SEODER_PROGRAM=app RUST_LOG=info cargo tauri build
+MAC_OS=$mac SEODER_PROGRAM=app cargo tauri build
 echo "Created m1 build"
 
 cp ./target/universal-apple-darwin/release/bundle/dmg/Seoder_*_universal.dmg ./seoder_marketing/public/releases

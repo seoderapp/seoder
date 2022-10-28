@@ -15,8 +15,6 @@ use seoder_lib::ENTRY_PROGRAM;
 use tokio::fs::File;
 use tokio::fs::OpenOptions;
 
-use mac_address::get_mac_address;
-
 /// read a file line by line to a vector
 pub async fn lines_to_vec(pt: String) -> Vec<String> {
     let mut builder: Vec<String> = Vec::new();
@@ -126,14 +124,8 @@ pub async fn validate_program(key: &str) -> bool {
         };
     }
 
-    let id = match get_mac_address() {
-        Ok(Some(ma)) => ma,
-        Ok(None) => Default::default(),
-        Err(e) => {
-            log("mac error", &e.to_string());
-            Default::default()
-        }
-    };
+    // hardware uid
+    let id: String = machine_uid::get().unwrap();
 
     let json = json!({
         "key": key,
