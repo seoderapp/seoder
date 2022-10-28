@@ -37,13 +37,13 @@ import Section from "../components/Section.astro";
             <Image
               src="/screens/App-Landing-Screenshot.png"
               srcset={`
-              /screens/App-Landing-Screenshot@3x.png 1818w,
-              /screens/App-Landing-Screenshot@2x.png 1212w,
-              /screens/App-Landing-Screenshot.png 606w
-            `}
+                /screens/App-Landing-Screenshot@3x.png 1818w,
+                /screens/App-Landing-Screenshot@2x.png 1212w,
+                /screens/App-Landing-Screenshot.png 606w
+              `}
               sizes={`((min-width: 50em) and (max-width: 60em)) 50em,
-            ((min-width: 30em) and (max-width: 50em)) 30em,
-            (max-width: 30em) 20em`}
+              ((min-width: 30em) and (max-width: 50em)) 30em,
+              (max-width: 30em) 20em`}
               class="bg"
               height={460}
               width={630}
@@ -52,54 +52,54 @@ import Section from "../components/Section.astro";
             />
           </div>
         </div>
-
-        <Section>
-          <div class="row features">
-            <div class="features">
-              <p class="highlight">Features</p>
-              <h2 class="text-primary sub-heading">
-                Beyond fast keyword searcher
-              </h2>
-              <Search />
-            </div>
-            <ul role="list" class="link-card-grid link-card-grid-feat">
-              <Feature
-                title={"Bulk upload urls"}
-                body={`Custom import as many urls as you’d like to scan against`}
-                img={"/icons/bulk.svg"}
-              />
-              <Feature
-                title={"Export to csv"}
-                body={`Easily export your data for each scan`}
-                img={"/icons/feature.svg"}
-              />
-              <Feature
-                title={"Use Tor and Proxy"}
-                body={`Prevent tracking and anonymously crawl domains using Tor or rotating proxy servers`}
-                img={"/icons/eye.svg"}
-              />
-              <Feature
-                title={"Find contact emails"}
-                body={`Reach out to prospective leads automatically with our automatic email finder`}
-                img={"/icons/contact.svg"}
-                soon
-              />
-              <Feature
-                title={"Install on any System"}
-                body={`Take the application home on any OS without any hard usage limits`}
-                img={"/icons/computer.svg"}
-              />
-              <Feature
-                title={"Search over 200+ million domains"}
-                body={`Scan over 200+ million active domains or choose specific top level domains`}
-                img={"/icons/world.svg"}
-                soon
-              />
-            </ul>
+      </Section>
+      <Section>
+        <div class="row features">
+          <div class="features">
+            <p class="highlight">Features</p>
+            <h2 class="text-primary sub-heading">
+              Beyond fast keyword searcher
+            </h2>
+            <Search />
           </div>
-
-          <Download />
-        </Section>
+          <ul role="list" class="link-card-grid link-card-grid-feat">
+            <Feature
+              title={"Bulk upload urls"}
+              body={`Custom import as many urls as you’d like to scan against`}
+              img={"/icons/bulk.svg"}
+            />
+            <Feature
+              title={"Export to csv"}
+              body={`Easily export your data for each scan`}
+              img={"/icons/feature.svg"}
+            />
+            <Feature
+              title={"Use Tor and Proxy"}
+              body={`Prevent tracking and anonymously crawl domains using Tor or rotating proxy servers`}
+              img={"/icons/eye.svg"}
+            />
+            <Feature
+              title={"Find contact emails"}
+              body={`Reach out to prospective leads automatically with our automatic email finder`}
+              img={"/icons/contact.svg"}
+              soon
+            />
+            <Feature
+              title={"Install on any System"}
+              body={`Take the application home on any OS without any hard usage limits`}
+              img={"/icons/computer.svg"}
+            />
+            <Feature
+              title={"Search over 200+ million domains"}
+              body={`Scan over 200+ million active domains or choose specific top level domains`}
+              img={"/icons/world.svg"}
+              soon
+            />
+          </ul>
+        </div>
+      </Section>
+      <Section>
+        <Download />
       </Section>
     </div>
   </main>
