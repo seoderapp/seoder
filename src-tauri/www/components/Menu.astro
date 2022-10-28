@@ -4,10 +4,12 @@ import RunAllButton from "./Buttons/RunAllButton.astro";
 import { RunSelectedButton } from "./Buttons/RunSelectedButton";
 import SettingsButton from "./Buttons/SettingsButton.astro";
 import LogoLight from "./Logos/LogoLight.astro";
+
+const mac = import.meta.env.MAC_OS || "";
 ---
 
 <div class="space">
-  <div class="flex-row spaceless full-w center top-space">
+  <div class={`flex-row spaceless full-w center${mac ? " top-space" : ""}`}>
     <div class="panel-btn-ctn">
       <LogoLight />
     </div>
@@ -32,6 +34,6 @@ import LogoLight from "./Logos/LogoLight.astro";
     padding-bottom: 0.8rem;
   }
   .top-space {
-    padding-top: 1rem;
+    padding-top: 1.3rem;
   }
 </style>
