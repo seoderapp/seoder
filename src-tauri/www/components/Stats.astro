@@ -16,8 +16,8 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
     <div class="gutter stats-head">Network</div>
     <div class="stats-bar gutter net-row space">
       <div class="net-row space-s net-cell">
-        <div id="network-stats"></div>
         <ArrowDown />
+        <div id="network-stats"></div>
       </div>
       <div class="net-row space-s net-cell">
         <ArrowUp />
@@ -25,10 +25,10 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
       </div>
     </div>
     <div class="stats-bar gutter net-row">
+      <div>Total</div>
       <div class="net-cell">
         <div id="network-stats-total"></div>
       </div>
-      <div>Total</div>
     </div>
   </div>
 </div>
@@ -55,6 +55,7 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
     flex-direction: row;
     place-items: center;
     overflow: hidden;
+    gap: 0.35rem;
   }
   .net-cell div {
     width: 3.5rem;
@@ -73,6 +74,7 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
     font-weight: bold;
     font-size: 0.75rem;
     text-transform: uppercase;
+    font-family: "SF Mono";
   }
   .absolute {
     position: absolute;
@@ -85,7 +87,7 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
     gap: 1rem;
   }
   .space-s {
-    gap: 0.15rem;
+    gap: 0.35rem;
   }
   .cpu-box {
     position: relative;

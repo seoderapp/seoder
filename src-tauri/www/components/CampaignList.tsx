@@ -6,8 +6,6 @@ export const CampaignList = ({ children }) => {
   const $list = useStore(enginesList);
   const engineItems = engines.get();
 
-  const emptyStyle = $list.length ? "hidden" : "block";
-
   return (
     <>
       <ul className={"list"}>
@@ -15,7 +13,7 @@ export const CampaignList = ({ children }) => {
           <CampaignCell item={engineItems[item]} key={item} path={item} />
         ))}
       </ul>
-      <div className={emptyStyle}>{children}</div>
+      <div className={$list.length ? "hidden" : "full-center"}>{children}</div>
     </>
   );
 };

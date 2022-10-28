@@ -28,6 +28,8 @@ button {
 
 #appProgram {
   height: 100%;
+  padding-bottom: 0.4rem;
+  overflow: hidden;
 }
 
 .gutter {
@@ -367,12 +369,6 @@ button {
   padding-right: 2px;
 }
 
-#empty-list {
-  background: rgba(217, 217, 217, 0.4);
-  border-radius: 0.4rem;
-  color: #111111;
-}
-
 .grid-space {
   padding-top: 2rem;
 }
@@ -434,6 +430,11 @@ button {
 .full {
   height: 100%;
   justify-content: flex-start;
+}
+
+.full-center {
+  height: 100%;
+  justify-content: center;
 }
 
 .submit {
