@@ -1,4 +1,12 @@
-<h1 class="text-primary title">
+---
+export interface Props {
+  center?: boolean;
+}
+
+const { center } = Astro.props;
+---
+
+<h1 class={`text-primary title${center ? " text-center" : ""}`}>
   <slot />
 </h1>
 
@@ -19,5 +27,8 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-fill-color: transparent;
+  }
+  .text-center {
+    text-align: center;
   }
 </style>

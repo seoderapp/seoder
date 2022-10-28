@@ -1,6 +1,7 @@
 ---
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
+import Section from "../components/Section.astro";
 import SubTitle from "../components/Typo/SubTitle.astro";
 import Title from "../components/Typo/Title.astro";
 import Layout from "../layouts/Layout.astro";
@@ -13,8 +14,8 @@ import Layout from "../layouts/Layout.astro";
   <main>
     <Navbar target={"faq"} />
     <div class="prog">
-      <section class={"center-container"}>
-        <Title>Frequently Asked Questions</Title>
+      <Section center>
+        <Title center>Frequently Asked Questions</Title>
         <SubTitle>Common questions and answers</SubTitle>
         <ul>
           <li>
@@ -41,7 +42,7 @@ import Layout from "../layouts/Layout.astro";
             </p>
           </li>
         </ul>
-      </section>
+      </Section>
     </div>
   </main>
   <div class={"space"}></div>
@@ -60,11 +61,6 @@ import Layout from "../layouts/Layout.astro";
     grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
     gap: 1rem;
     padding: 0;
-  }
-  .center-container {
-    display: flex;
-    flex-direction: column;
-    place-items: center;
   }
   .button-container {
     padding-top: 0.8rem;
