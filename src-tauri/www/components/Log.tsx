@@ -7,31 +7,31 @@ export interface Props {
   id?: string;
   emptyId?: string;
   logs?: string[];
-  scrolling?: boolean;
+  focused?: boolean;
   atom?: WritableAtom<string[]>;
 }
 
 const LogItem = ({ children }) => <li>{children}</li>;
 
 // scroll to bottom hook
-const useScrolling = ({ divRef, list, scrolling, atom }) => {
-  const [scrollEnabled, setScrolling] = useState<boolean>(scrolling);
+const useScrolling = ({ divRef, list, focused, atom }) => {
+  const [scrollEnabled, setScrolling] = useState<boolean>(focused);
 
   useEffect(() => {
     const listener = atom.listen((v) => {
-      if (scrolling && v.length > list.length) {
+      if (scrollEnabled && v.length > list.length) {
         divRef?.current?.scrollIntoView();
       }
     });
     return () => {
       listener();
     };
-  }, [list, scrolling]);
+  }, [list, scrollEnabled]);
 
   // todo: control scroll state from parent
   useEffect(() => {
-    setScrolling(scrolling);
-  }, [scrolling]);
+    setScrolling(focused);
+  }, [focused]);
 
   const onToggleScrolling = () => setScrolling((v) => !v);
 
@@ -59,6 +59,7 @@ function ScrollButton({ empty, divRef, scrollEnabled, onToggleScrolling }) {
   );
 }
 
+// empty panel display center
 const EmptyCell = ({ emptyId, empty }) => {
   return (
     <li
@@ -72,7 +73,7 @@ const EmptyCell = ({ emptyId, empty }) => {
 };
 
 // log panel
-export function Log({ id, emptyId, scrolling, atom }: Props) {
+export function Log({ id, emptyId, focused, atom }: Props) {
   const $list = useStore(atom);
   const divRef = useRef(null);
   const empty = !$list.length;
@@ -80,42 +81,45 @@ export function Log({ id, emptyId, scrolling, atom }: Props) {
   const { scrollEnabled, onToggleScrolling } = useScrolling({
     divRef,
     list: $list,
-    scrolling: scrolling,
+    focused,
     atom,
   });
 
   return (
-    <div className="log">
-      <ul id={id} role={"list"}>
-        <EmptyCell empty={empty} emptyId={emptyId} />
-        {$list.map((item: string) => (
-          <LogItem key={item}>{item}</LogItem>
-        ))}
-        <ScrollButton
-          empty={empty}
-          scrollEnabled={scrollEnabled}
-          divRef={divRef}
-          onToggleScrolling={onToggleScrolling}
-        />
-      </ul>
+    <div
+      className={focused ? "" : "hidden"}
+      role="tabpanel"
+      aria-labelledby="tab-console"
+    >
+      <div className="log">
+        <ul id={id} role={"list"}>
+          <EmptyCell empty={empty} emptyId={emptyId} />
+          {$list.map((item: string) => (
+            <LogItem key={item}>{item}</LogItem>
+          ))}
+          <ScrollButton
+            empty={empty}
+            scrollEnabled={scrollEnabled}
+            divRef={divRef}
+            onToggleScrolling={onToggleScrolling}
+          />
+        </ul>
+      </div>
     </div>
   );
 }
 
-export function LogValid({ id, emptyId, scrolling }: Props) {
-  return (
-    <Log id={id} emptyId={emptyId} scrolling={scrolling} atom={validLogs} />
-  );
+// valid list
+export function LogValid({ id, emptyId, focused }: Props) {
+  return <Log id={id} emptyId={emptyId} focused={focused} atom={validLogs} />;
 }
 
-export function LogInvalid({ id, emptyId, scrolling }: Props) {
-  return (
-    <Log id={id} emptyId={emptyId} scrolling={scrolling} atom={invalidLogs} />
-  );
+// invalid list
+export function LogInvalid({ id, emptyId, focused }: Props) {
+  return <Log id={id} emptyId={emptyId} focused={focused} atom={invalidLogs} />;
 }
 
-export function LogErrors({ id, emptyId, scrolling }: Props) {
-  return (
-    <Log id={id} emptyId={emptyId} scrolling={scrolling} atom={errorLogs} />
-  );
+// error list
+export function LogErrors({ id, emptyId, focused }: Props) {
+  return <Log id={id} emptyId={emptyId} focused={focused} atom={errorLogs} />;
 }

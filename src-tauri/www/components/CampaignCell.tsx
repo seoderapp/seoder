@@ -144,12 +144,17 @@ export const CampaignCell = ({
     engines.notify(path);
   };
 
-  const onDeletePress = (event) => {
+  const onDeletePress = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    onDeleteEvent(path);
-    if ($selected === path) {
-      selectAction(path);
+
+    if (
+      await window.confirm("Are you sure you want to delete this campaign?")
+    ) {
+      onDeleteEvent(path);
+      if ($selected === path) {
+        selectAction(path);
+      }
     }
   };
 
