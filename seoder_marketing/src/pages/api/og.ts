@@ -907,6 +907,8 @@ const data = new Uint8Array([
   66, 96, 130,
 ]);
 
+const blob = new Blob([data], { type: "image/png" });
+
 // todo: try to improve og images or add default images per route
 export async function get({ request }) {
   // const { searchParams } = new URL(request.url);
@@ -915,8 +917,6 @@ export async function get({ request }) {
   //   ? searchParams.get("title")?.slice(0, 100)
   //   : "Seoder Marketing Tool";
   // todo: merge image with text blob title
-
-  const blob = new Blob([data], { type: "image/png" });
 
   return new Response(blob, {
     headers: {
