@@ -13,7 +13,15 @@ export default defineConfig({
   integrations: [
     react(),
     robotsTxt(),
-    sitemap(),
+    sitemap({
+      customPages: [
+        "/",
+        "/payments",
+        "/faq",
+        "/privacy-policy",
+        "/terms-of-service",
+      ],
+    }),
     image({
       serviceEntryPoint: "@astrojs/image/sharp",
     }),

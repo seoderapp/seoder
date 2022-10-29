@@ -22,5 +22,9 @@
     "react-dom": "^18.2.0",
     "sharp": ">=0.31.0",
     "stripe": "^10.15.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.24",
+    "@types/react-dom": "^18.0.8"
   }
 }
