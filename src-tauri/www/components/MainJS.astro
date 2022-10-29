@@ -106,7 +106,6 @@ declare global {
   const settingsBtn = document.getElementById("settings-button");
   // modals first button adds close event
   const settingsBtnCls = document.querySelectorAll(".settings-bar button");
-
   // new create
   const campaignCreateForm = document.getElementById("campaign-create-form");
 
@@ -457,7 +456,6 @@ declare global {
   socket.addEventListener("message", eventSub);
   socketRuntime.addEventListener("message", eventSub);
 
-  const eform = document.getElementById("eform");
   const bufferform = document.getElementById("bufferform");
   const fsDelete = document.getElementById("fs-delete");
 
@@ -504,36 +502,5 @@ declare global {
         socket.send("delete-file " + selected);
       }
     }
-  });
-
-  eform?.addEventListener("submit", (event) => {
-    const engine: HTMLInputElement = eform.querySelector('input[name="ename"]');
-    const epaths: HTMLInputElement = eform.querySelector(
-      'input[name="epaths"]'
-    );
-    const epatterns: HTMLInputElement = eform.querySelector(
-      'input[name="epatterns"]'
-    );
-
-    if (engine && engine.value) {
-      const m = JSON.stringify({
-        name: engine.value,
-        paths: epaths.value,
-        patterns: epatterns.value,
-      });
-
-      campaignCreateForm.className = "hidden";
-
-      if (engines.get()[m]) {
-        window.alert("Please enter a different engine name.");
-      } else {
-        // todo: send new engine created on submit or add optimistic update
-        socket.send("create-engine " + m);
-        socket.send("list-engines");
-      }
-    } else {
-      window.alert("Please enter a engine name.");
-    }
-    event.preventDefault();
   });
 </script>

@@ -6,7 +6,6 @@ import SettingsBar from "./SettingsBar.astro";
   <div class="modal-outer">
     <div class="modal">
       <SettingsBar title={"New Campaign"} />
-
       <div>
         <form id="eform">
           <div class="form-container">
@@ -20,19 +19,24 @@ import SettingsBar from "./SettingsBar.astro";
               />
             </div>
             <div>
-              <label for="epaths">Paths</label>
-              <input
-                name="epaths"
-                placeholder="/home, /welcome, /about"
-                type="text"
-                class="form-control"
-              />
-            </div>
-            <div>
               <label for="epatterns">Patterns</label>
               <input
                 name="epatterns"
                 placeholder="bitcoin, motorcycles, *cats*"
+                type="text"
+                class="form-control"
+              />
+            </div>
+            <div class="seperator">
+              <span></span>
+            </div>
+            <div class="optional">Optional</div>
+            <div class="seperator-sm"></div>
+            <div>
+              <label for="epaths">Paths</label>
+              <input
+                name="epaths"
+                placeholder="/home, /welcome, /about"
                 type="text"
                 class="form-control"
               />
@@ -49,6 +53,44 @@ import SettingsBar from "./SettingsBar.astro";
   </div>
 </div>
 
+<script>
+  import { socket } from "../events/sockets";
+  import { engines } from "../stores/engine";
+
+  const eform = document.getElementById("eform");
+  const campaignCreateForm = document.getElementById("campaign-create-form");
+
+  eform?.addEventListener("submit", (event) => {
+    const engine: HTMLInputElement = eform.querySelector('input[name="ename"]');
+    const epaths: HTMLInputElement = eform.querySelector(
+      'input[name="epaths"]'
+    );
+    const epatterns: HTMLInputElement = eform.querySelector(
+      'input[name="epatterns"]'
+    );
+
+    if (engine && engine.value) {
+      const m = JSON.stringify({
+        name: engine.value,
+        paths: epaths.value.length ? epaths.value : "/",
+        patterns: epatterns.value,
+      });
+
+      campaignCreateForm.className = "hidden";
+
+      if (engines.get()[m]) {
+        window.alert("Please enter a different engine name.");
+      } else {
+        socket.send("create-engine " + m);
+        // todo: send new engine created on submit or add optimistic update
+        socket.send("list-engines");
+      }
+    } else {
+      window.alert("Please enter the engine name.");
+    }
+    event.preventDefault();
+  });
+</script>
 <style>
   .modal {
     min-width: 20rem;
@@ -86,5 +128,33 @@ import SettingsBar from "./SettingsBar.astro";
 
   .form-control {
     width: 90%;
+  }
+
+  .seperator {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .seperator-sm {
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .seperator span {
+    height: 1px;
+    background-color: #2f2768;
+    width: 100%;
+  }
+
+  .optional {
+    font-size: 0.8rem;
+    color: #2f2768;
+    border-radius: 0.3rem;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid #2f2768;
+    text-align: center;
+    display: inline;
   }
 </style>

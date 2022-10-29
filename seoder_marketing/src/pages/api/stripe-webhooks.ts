@@ -100,16 +100,22 @@ export async function post({ request }) {
       // Let Stripe know the event was received successfully.
       if (data && data.attributes.status === "ACTIVE") {
         await transport.sendMail({
-          from: "support@seoder.io", // sender address
-          to: stripeCustomer.email, // list of receivers
-          subject: "Seoder Astro SSR License✔", // Subject line
-          text: "License key test", // plain text body
+          from: "support@seoder.io",
+          to: stripeCustomer.email,
+          subject: "Seoder One Year License✔",
+          text: "License key for the application.",
           html: `
           <div>
             <h1>Thank you for purchasing Seoder<h1>
             <h2>License Key<h2/>
             <b>${data.attributes.key}</b>
             <h3>Number of Machines ${data.attributes.maxMachines}<h3/>
+            <div style="padding-bottom: 2rem;">
+              <p>Please do not share the key. Only one machine is allowed per license.</p>
+            </div>
+            <div style="padding-bottom: 3rem;">
+              <a href="https://seoder.com">Seoder</a>
+            </div>
           </div>`, // html body
         });
       }
