@@ -31,6 +31,7 @@ export async function get({ request }) {
       status: 200,
       headers: {
         "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, immutable, no-transform, max-age=31536000",
       },
     }
   );
