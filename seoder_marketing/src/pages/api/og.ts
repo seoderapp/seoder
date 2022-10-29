@@ -1,3 +1,7 @@
+export const config = {
+  runtime: "experimental-edge",
+};
+
 // todo: try to improve og images or add default images per route
 export async function get({ request }) {
   // const { searchParams } = new URL(request.url);
