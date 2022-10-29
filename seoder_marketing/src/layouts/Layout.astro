@@ -19,6 +19,10 @@ const { title, description } = Astro.props;
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content={"seoderio"} />
     <meta name="twitter:creator" content={"seoderio"} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    {description ? <meta name="og:description" content={description} /> : null}
+    <meta property="og:site_name" content={"Seoder"} />
   </head>
   <body>
     <slot />
