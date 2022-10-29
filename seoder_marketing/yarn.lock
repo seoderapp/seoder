@@ -25,10 +25,10 @@
   resolved "https://registry.yarnpkg.com/@astrojs/compiler/-/compiler-0.28.1.tgz#06a547d32d675d0be5a54bf45912ab38fd1ea548"
   integrity sha512-rcuQs5kcT6OshfJxXkZ2Tn61V4/5UAmvZKma/qmNhpAdBkGk6J/1gJ/Gxa2sAS6WNUjUyVo5BRrdsNGW36qkoQ==
 
-"@astrojs/image@^0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@astrojs/image/-/image-0.10.0.tgz#aa07f097bfd563126a6d971e6f1fcb53cda3ef7b"
-  integrity sha512-/lkQ8YbqwHEA3bU6W7igEHqqQs6V6sx4rMbhkur4qWQP61kAOnvacSSKN7GJ+YswZOiUhPGY9DTtyLRqLFLv5g==
+"@astrojs/image@^0.11.0":
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/@astrojs/image/-/image-0.11.0.tgz#dd518a107bcac335550700a29f195e267456b9d1"
+  integrity sha512-cWmqig0t4ndb+4v4YwuKJObpU9zWOVsNdEmvoEPPJUgtrrJzaxJYSRBe+pbvjP0xe+cQIk6fOKAq5lchK8VBzQ==
   dependencies:
     "@altano/tiny-async-pool" "^1.0.2"
     http-cache-semantics "^4.1.0"
@@ -108,10 +108,10 @@
   dependencies:
     prismjs "^1.28.0"
 
-"@astrojs/react@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@astrojs/react/-/react-1.2.1.tgz#da2d60a28bc647c630189f9e5318e5e7ab84a379"
-  integrity sha512-EoW7coV/35ak1fPoVNrL1OyYGOnJSnRJsgIc8WtkLv5aDrMpviS6+9vmqOHEiJwab8wNh+zSphx8a9nC2Q3zAg==
+"@astrojs/react@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@astrojs/react/-/react-1.2.2.tgz#83fa61fc729c31914b8baaefed4095bd6340d701"
+  integrity sha512-ab9fYvzkC74J7N+M3DWQuZgwu7sYjW0aLO3sEAdCX/jZZz+0BhrqS8m9QjtGJyQK/niF4tgJjpPfadopxKc56g==
   dependencies:
     "@babel/core" ">=7.0.0-0 <8.0.0"
     "@babel/plugin-transform-react-jsx" "^7.17.12"
@@ -138,10 +138,10 @@
     node-fetch "^3.2.5"
     which-pm-runs "^1.1.0"
 
-"@astrojs/vercel@^2.3.1":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@astrojs/vercel/-/vercel-2.3.1.tgz#b5a38cea22b1decb0cb0a4774679c2fe7816119c"
-  integrity sha512-CrGH/5FKR8XL6LP1Y5nJkHEJbbrM3o1ViEF6REvuRNRuXdw150FGgi+mu66LdOlCKDv9tcPXsF9e9C2A8Kl5Rg==
+"@astrojs/vercel@^2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@astrojs/vercel/-/vercel-2.3.2.tgz#0512e663e0ccd6d445be9a9eccdf435368bf9d82"
+  integrity sha512-VEaoaobGKqkjKM9993hZUvObDa1WpldYHUxcODWMQ2930eC2m4aN70UcXsK3w7ENA/X8Xx9dg+yy4gmSKr9OPA==
   dependencies:
     "@astrojs/webapi" "^1.1.0"
     "@vercel/nft" "^0.22.1"
@@ -3752,10 +3752,10 @@ strip-json-comments@~2.0.1:
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
   integrity sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ==
 
-stripe@^10.14.0:
-  version "10.14.0"
-  resolved "https://registry.yarnpkg.com/stripe/-/stripe-10.14.0.tgz#3db35b434321bb1f1231267c6c960bfa442573ac"
-  integrity sha512-cXqUdZvrU20KElhLjzw/kW5t2SLLUENqeEftaiQXLogkUdNHyz/L12S4WHmQ8h0KHHFhxO39I7Q9GkJO1MMzzw==
+stripe@^10.15.0:
+  version "10.15.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-10.15.0.tgz#1f4cde7f90959673964edb07e5a49c918b124ca5"
+  integrity sha512-KXw7dozfIEQCxsshjKUwsNwlD55CkhcvVgwwxFtQNikVlRpNUPy6Ljz2mN9OXjinbbmLIcn26MAiPxfNp8Adtg==
   dependencies:
     "@types/node" ">=8.1.0"
     qs "^6.11.0"
