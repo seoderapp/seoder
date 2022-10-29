@@ -978,6 +978,7 @@ export function get({ request }) {
       },
     });
   } catch (e) {
+    console.error(e);
     return new Response("Empty", {
       headers: {
         "content-type": "image/png",
