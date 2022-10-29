@@ -4,7 +4,7 @@ export const config = {
   runtime: "experimental-edge",
 };
 
-export const get = ({ request }) => {
+export async function get({ request }) {
   try {
     const { searchParams } = new URL(request.url);
 
@@ -71,4 +71,4 @@ export const get = ({ request }) => {
       status: 500,
     });
   }
-};
+}
