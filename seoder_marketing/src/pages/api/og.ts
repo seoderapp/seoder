@@ -969,9 +969,9 @@ export function get({ request }) {
       130,
     ]);
 
-    const blob = new Blob([data], { type: "image/png" });
+    // const blob = new Blob([data], { type: "image/png" });
 
-    return new Response(blob, {
+    return new Response(data, {
       headers: {
         "content-type": "image/png",
         "Cache-Control": "public, immutable, no-transform, max-age=31536000",
