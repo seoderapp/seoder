@@ -23,11 +23,14 @@ const canonicalURL = new URL("/api/og", Astro.site);
     <meta name="twitter:creator" content={"seoderio"} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
-    {description ? <meta name="og:description" content={description} /> : null}
-    <meta property="og:site_name" content={"Seoder"} />
     <meta property="og:image" content={`${canonicalURL}?title=${title}`} />
     <meta property="og:image:width" content="940" />
     <meta property="og:image:height" content="700" />
+    <meta property="og:site_name" content={"Seoder"} />
+    <meta
+      property="keywords"
+      content="Seo Tool, Target Email Campaign Tool, Marketing Campaigns, Marketing, Target Links, Links"
+    />
   </head>
   <body>
     <slot />
@@ -36,12 +39,11 @@ const canonicalURL = new URL("/api/og", Astro.site);
     <style is:global>
       :root {
         --max-width: 142.884ch;
-        --accent: 124, 58, 237;
+        --accent: #463a9c;
         --accent-gradient: linear-gradient(
-          45deg,
-          rgb(var(--accent)),
-          #da62c4 30%,
-          white 60%
+          92.87deg,
+          var(--accent) -3.43%,
+          #be63c7 87.13%
         );
       }
       body {
