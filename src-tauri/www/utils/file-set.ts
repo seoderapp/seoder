@@ -9,10 +9,19 @@ export const baseConfig = {
 let setConf = false;
 
 // mutate selected option element mutate list.
-export const selectedFileOptionMutate = ({ path, fileSelect }) => {
+export const selectedFileOptionMutate = ({
+  path,
+  fileSelect: f,
+}: {
+  path: string;
+  fileSelect?: HTMLInputElement;
+}) => {
   if (!fileMap.has(path)) {
     fileMap.set(path, {});
     // file select
+
+    const fileSelect =
+      f ?? (document.getElementById("target-select") as HTMLInputElement);
 
     for (const [key] of fileMap) {
       const kid = "fskeys_" + key;
