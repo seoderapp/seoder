@@ -148,13 +148,12 @@ export const CampaignCell = ({
     event.preventDefault();
     event.stopPropagation();
 
-    if (
-      await window.confirm("Are you sure you want to delete this campaign?")
-    ) {
+    const confirm = await window.confirm(
+      "Are you sure you want to delete this campaign?"
+    );
+
+    if (confirm) {
       onDeleteEvent(path);
-      if ($selected === path) {
-        selectAction(path);
-      }
     }
   };
 
@@ -203,46 +202,50 @@ export const CampaignCell = ({
       onClick={selectItem}
     >
       <div className={`cell-btn ${baseClass}${bgClass}`}>
-        <div className={"row full-w"}>
-          <div className={"flex"}>
-            <div className={"engine-title"}>{path}</div>
-            <div id={"engine_stats_" + path} className={"engine-stats"}>
-              {item.valid} / {item.total}
+        <div className={"full-w"}>
+          <div className={"flex row"}>
+            <div className={"flex"}>
+              <div className={"engine-title"}>{path}</div>
+              <div id={"engine_stats_" + path} className={"engine-stats"}>
+                {item.valid} / {item.total}
+              </div>
+              <div className="gutter-t">
+                <div className={"row engine-paths"}>Paths: {item?.paths}</div>
+                <div className={"row engine-paths"}>
+                  Patterns: {item?.patterns}
+                </div>
+              </div>
             </div>
-            <div className={"row engine-paths"}>{item?.paths}</div>
-            <div className={"row gutter-t expand-width"}>
-              <button className={"btn-base"} onClick={cellRunProps.onPress}>
-                <img src={cellRunProps.icon} alt={""} />
-                <div>{cellRunProps.title}</div>
-              </button>
-              <button className={"btn-base"} onClick={onExportEventPress}>
-                <img src={"/assets/export.svg"} alt={""} />
-                <div>Export</div>
-              </button>
-              <button
-                className={"btn-base active-delete"}
-                onClick={onDeletePress}
-              >
-                <img src={"/assets/trashcan.svg"} alt={""} />
-                <div>Delete</div>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              id={"engine_status_" + path}
-              className={`${engineStatusClass} gutter`}
-            >
-              {item.status}
-            </div>
-            <div className={`${showBar ? "engine-bar" : "hidden"}`}>
+            <div>
               <div
-                style={{
-                  width: `${(totalCurrentCount / item.total) * 100}%`,
-                }}
-              />
+                id={"engine_status_" + path}
+                className={`${engineStatusClass} gutter`}
+              >
+                {item.status}
+              </div>
+              <div className={`${showBar ? "engine-bar" : "hidden"}`}>
+                <div
+                  style={{
+                    width: `${(totalCurrentCount / item.total) * 100}%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
+        </div>
+        <div className={"row gutter-t expand-width"}>
+          <button className={"btn-base"} onClick={cellRunProps.onPress}>
+            <img src={cellRunProps.icon} alt={""} />
+            <div>{cellRunProps.title}</div>
+          </button>
+          <button className={"btn-base"} onClick={onExportEventPress}>
+            <img src={"/assets/export.svg"} alt={""} />
+            <div>Export</div>
+          </button>
+          <button className={"btn-base active-delete"} onClick={onDeletePress}>
+            <img src={"/assets/trashcan.svg"} alt={""} />
+            <div>Delete</div>
+          </button>
         </div>
       </div>
     </li>

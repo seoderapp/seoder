@@ -32,6 +32,18 @@ button {
   overflow: hidden;
 }
 
+.flex {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
 .gutter {
   padding-bottom: 0.25rem;
 }
@@ -227,28 +239,16 @@ button {
   flex-wrap: wrap-reverse;
 }
 
-.row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
 .spaceless {
   padding: 0;
   margin: 0;
   gap: 4px;
 }
 
-.flex {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.flex-row {
-  flex: 1;
+.row {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .center {
