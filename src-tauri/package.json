@@ -12,10 +12,10 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@astrojs/react": "^1.2.1",
+    "@astrojs/react": "^1.2.2",
     "@nanostores/react": "^0.4.0",
     "@tauri-apps/api": "^1.1.0",
-    "astro": "^1.5.2",
+    "astro": "^1.6.1",
     "nanostores": "^0.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

@@ -9,7 +9,7 @@ import image from "@astrojs/image";
 export default defineConfig({
   site: "https://seoder.io",
   output: "server",
-  adapter: vercel(),
+  adapter: vercel({}),
   integrations: [
     react(),
     robotsTxt(),
