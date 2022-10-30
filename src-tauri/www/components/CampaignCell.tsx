@@ -10,6 +10,8 @@ import {
 } from "../stores/engine";
 import { useState } from "react";
 import { socket } from "../events/sockets";
+import { KeyWords } from "./Svgs/KeyWords";
+import { Folder } from "./Svgs/Folder";
 
 declare global {
   var __TAURI__: any;
@@ -209,10 +211,13 @@ export const CampaignCell = ({
               <div id={"engine_stats_" + path} className={"engine-stats"}>
                 {item.valid} / {item.total}
               </div>
-              <div className="gutter-t">
-                <div className={"row engine-paths"}>Paths: {item?.paths}</div>
-                <div className={"row engine-paths"}>
-                  Keywords: {item?.patterns}
+              <div className="gutter-t flex gap">
+                <div className={"row campaign-paths"}>
+                  <Folder /> {item?.paths}
+                </div>
+                <div className={"row campaign-paths"}>
+                  <KeyWords />
+                  {item?.patterns}
                 </div>
               </div>
             </div>
