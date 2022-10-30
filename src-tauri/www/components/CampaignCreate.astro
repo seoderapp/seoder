@@ -10,27 +10,27 @@ import SettingsBar from "./SettingsBar.astro";
         <form id="eform">
           <div class="form-container">
             <div>
-              <label for="ename">Name</label>
+              <label for="ename">Campaign Name</label>
               <input
                 name="ename"
-                placeholder="engine name"
+                placeholder="Name"
                 type="text"
                 class="form-control"
               />
             </div>
             <div>
-              <label for="epatterns">Patterns</label>
+              <label for="epatterns">Keywords</label>
               <input
                 name="epatterns"
                 placeholder="bitcoin, motorcycles, *cats*"
                 type="text"
                 class="form-control"
               />
-            </div>
-            <div class="seperator">
-              <span></span>
+              <p>Words are case insensitive and can utilize regex</p>
             </div>
             <div class="optional">Optional</div>
+            <div class="seperator"></div>
+
             <div class="seperator-sm"></div>
             <div>
               <label for="epaths">Paths</label>
@@ -40,6 +40,7 @@ import SettingsBar from "./SettingsBar.astro";
                 type="text"
                 class="form-control"
               />
+              <p>Choose which paths you want the crawler to find keywords in</p>
             </div>
           </div>
           <div class="gutter-t">
@@ -131,10 +132,9 @@ import SettingsBar from "./SettingsBar.astro";
   }
 
   .seperator {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    display: flex;
-    justify-content: center;
+    border-bottom: 1px solid #000;
+    width: 100%;
+    opacity: 0.12;
   }
 
   .seperator-sm {
@@ -142,19 +142,15 @@ import SettingsBar from "./SettingsBar.astro";
     padding-bottom: 0.3rem;
   }
 
-  .seperator span {
-    height: 1px;
-    background-color: #2f2768;
-    width: 100%;
-  }
-
   .optional {
     font-size: 0.8rem;
+    color: #b3b3b3;
+    line-height: 1rem;
+    padding-bottom: 0.4rem;
+    text-transform: uppercase;
+  }
+  .form-container p {
+    font-size: 0.75rem;
     color: #2f2768;
-    border-radius: 0.3rem;
-    padding: 0.3rem 0.8rem;
-    border: 1px solid #2f2768;
-    text-align: center;
-    display: inline;
   }
 </style>

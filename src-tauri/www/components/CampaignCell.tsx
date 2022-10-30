@@ -212,7 +212,7 @@ export const CampaignCell = ({
               <div className="gutter-t">
                 <div className={"row engine-paths"}>Paths: {item?.paths}</div>
                 <div className={"row engine-paths"}>
-                  Patterns: {item?.patterns}
+                  Keywords: {item?.patterns}
                 </div>
               </div>
             </div>
