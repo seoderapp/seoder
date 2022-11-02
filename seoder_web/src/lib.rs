@@ -66,8 +66,8 @@ enum Action {
     ListValidCampaigns,
     RunCampaign,
     RunAllCampaigns,
-    CreateEngine,
-    RemoveEngine,
+    CreateCampaign,
+    RemoveCampaign,
     RemoveFile,
     SetList,
     SetBuffer,
@@ -100,6 +100,7 @@ struct Eng {
     name: String,
     paths: String,
     patterns: String,
+    meta_includes: bool
 }
 
 /// tick status refreshing
@@ -205,7 +206,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                     outgoing = send_message(outgoing, &v.to_string()).await;
                 }
-            } else if st == Action::RemoveEngine {
+            } else if st == Action::RemoveCampaign {
                 shutdown(&input).await;
                 outgoing = controls::fs::remove_engine(outgoing, &input).await;
             } else if st == Action::Config {
@@ -236,6 +237,53 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 utils::write_config("tor", &input).await;
             } else if st == Action::SetBuffer {
                 utils::write_config("buffer", &input).await;
+            } else if st == Action::CreateCampaign {
+                let v: Eng = serde_json::from_str(&input).unwrap_or_default();
+
+                let n = v.name;
+    
+                if n.is_empty() == false {
+                    let db_dir = string_concat!(ENTRY_PROGRAM.0, &n);
+                    let pt = v.paths;
+                    let pat = v.patterns;
+                    // let meta_includes = v.meta_includes;
+                    // let target_file = v.target;
+
+                    tokio::task::spawn(async move {
+                        let ptt = pt.split(','); // paths
+                        let ott = pat.split(','); // patterns
+    
+                        create_dir(&db_dir).await.unwrap();
+                        create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
+                        create_dir(&string_concat!(db_dir, "/errors"))
+                            .await
+                            .unwrap();
+                        create_dir(&string_concat!(db_dir, "/invalid"))
+                            .await
+                            .unwrap();
+    
+                        let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
+                            .await
+                            .unwrap();
+    
+                        for x in ptt {
+                            let base = if !x.starts_with("/") { "/" } else { "" };
+                            let x = string_concat!(base, x, "\n");
+                            file.write_all(&x.as_bytes()).await.unwrap();
+                        }
+    
+                        let mut file = File::create(string_concat!(db_dir, "/patterns.txt"))
+                            .await
+                            .unwrap();
+    
+                        for x in ott {
+                            let x = string_concat!(x, "\n");
+                            file.write_all(&x.as_bytes()).await.unwrap();
+                        }
+
+                        // todo: create config file
+                    });
+                }
             } else if st == Action::SetList {
                 if !input.is_empty() {
                     utils::write_config("target", &string_concat!(&ENTRY_PROGRAM.1, &input)).await;
@@ -343,54 +391,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 }
             });
         } else if c == "create-engine" {
-            let v: Eng = serde_json::from_str(&cc).unwrap_or_default();
-
-            let n = v.name;
-
-            if n.is_empty() == false {
-                let db_dir = string_concat!(ENTRY_PROGRAM.0, &n);
-                let pt = v.paths;
-                let pat = v.patterns;
-
-                tokio::task::spawn(async move {
-                    let ptt = pt.split(','); // paths
-                    let ott = pat.split(','); // patterns
-
-                    create_dir(&db_dir).await.unwrap();
-                    create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
-                    create_dir(&string_concat!(db_dir, "/errors"))
-                        .await
-                        .unwrap();
-                    create_dir(&string_concat!(db_dir, "/invalid"))
-                        .await
-                        .unwrap();
-
-                    let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
-                        .await
-                        .unwrap();
-
-                    for x in ptt {
-                        let base = if !x.starts_with("/") { "/" } else { "" };
-                        let x = string_concat!(base, x, "\n");
-                        file.write_all(&x.as_bytes()).await.unwrap();
-                    }
-
-                    let mut file = File::create(string_concat!(db_dir, "/patterns.txt"))
-                        .await
-                        .unwrap();
-
-                    for x in ott {
-                        let x = string_concat!(x, "\n");
-                        file.write_all(&x.as_bytes()).await.unwrap();
-                    }
-                });
-
-                if let Err(_) = sender.send((Action::CreateEngine, "".to_string())) {
-                    logd("the receiver dropped");
-                }
+            if let Err(_) = sender.send((Action::CreateCampaign, cc)) {
+                logd("the receiver dropped");
             }
         } else if c == "delete-engine" {
-            if let Err(_) = sender.send((Action::RemoveEngine, cc)) {
+            if let Err(_) = sender.send((Action::RemoveCampaign, cc)) {
                 logd("receiver dropped");
             }
         } else if c == "list-totals" {
