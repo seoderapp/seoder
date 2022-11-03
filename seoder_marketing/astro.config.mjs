@@ -7,7 +7,7 @@ import image from "@astrojs/image";
 
 const site =
   typeof process !== "undefined"
-    ? process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
     : "https://seoder.com";
 
 // https://astro.build/config
