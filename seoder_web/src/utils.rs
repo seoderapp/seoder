@@ -119,7 +119,7 @@ pub async fn validate_program(key: &str) -> bool {
                 "http://127.0.0.1:3000/api/keygen-validate"
             }
             Err(_) => {
-                "https://seoder.io/api/keygen-validate"
+                "https://seoder.com/api/keygen-validate"
             }
         };
     }
