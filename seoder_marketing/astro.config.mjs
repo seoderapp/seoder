@@ -5,9 +5,14 @@ import robotsTxt from "astro-robots-txt";
 import sitemap from "@astrojs/sitemap";
 import image from "@astrojs/image";
 
+const site =
+  typeof process !== "undefined"
+    ? process.env.VERCEL_URL
+    : "https://seoder.com";
+
 // https://astro.build/config
 export default defineConfig({
-  site: import.meta.env.VERCEL_URL ?? "https://seoder.com",
+  site,
   output: "server",
   adapter: vercel(),
   integrations: [
