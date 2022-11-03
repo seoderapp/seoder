@@ -7,7 +7,7 @@ import image from "@astrojs/image";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://seoder.io",
+  site: process.env.VERCEL_URL ?? "https://seoder.com",
   output: "server",
   adapter: vercel(),
   integrations: [
