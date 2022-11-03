@@ -1,0 +1,61 @@
+.modal {
+  min-width: 20rem;
+  text-align: left;
+}
+
+.form-container {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.button {
+  border: 0;
+  background-color: #2f2768;
+  color: #fff;
+  gap: 8px;
+  font-weight: 600;
+  padding: 0.7rem;
+  font-size: 0.8rem;
+}
+
+label {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #2f2768;
+  text-align: left;
+  display: block;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.gap {
+  gap: 1rem;
+}
+
+.form-control {
+  width: 90%;
+}
+
+.seperator {
+  border-bottom: 1px solid #000;
+  width: 100%;
+  opacity: 0.12;
+}
+
+.seperator-sm {
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
+.optional {
+  font-size: 0.8rem;
+  color: #b3b3b3;
+  line-height: 1rem;
+  padding-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+.form-container p {
+  font-size: 0.75rem;
+  color: #2f2768;
+}

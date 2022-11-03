@@ -456,8 +456,18 @@ button {
   font-size: 1rem;
 }
 
-#campaign-create-form,
-#settings-container {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+.settings-bar {
+  display: flex;
+  place-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid rgba(47, 39, 104, 0.1);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #2f2768;
+}
+
+.settings-bar button {
+  background-color: transparent;
 }

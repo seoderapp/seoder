@@ -22,6 +22,8 @@ declare global {
     selectedFileOptionMutate,
   } from "../utils/file-set";
 
+  import { modalStore, ModalType } from "../stores/app";
+
   initSockets();
 
   // license control [determine screens] quickly
@@ -104,10 +106,6 @@ declare global {
   // settings
   const settingsContainer = document.getElementById("settings-container");
   const settingsBtn = document.getElementById("settings-button");
-  // modals first button adds close event
-  const settingsBtnCls = document.querySelectorAll(".settings-bar button");
-  // new create
-  const campaignCreateForm = document.getElementById("campaign-create-form");
 
   // tor
   const torSelect = document.getElementById("tor-select") as HTMLInputElement;
@@ -127,14 +125,6 @@ declare global {
   settingsBtn?.addEventListener("click", () => {
     settingsContainer.className = "block";
   });
-
-  // set all close buttons to close menu
-  for (let i = 0; i < settingsBtnCls.length; i++) {
-    settingsBtnCls[i].addEventListener("click", function () {
-      settingsContainer.className = "hidden";
-      campaignCreateForm.className = "hidden";
-    });
-  }
 
   /*
    * List of web socket matchers * special for high performance

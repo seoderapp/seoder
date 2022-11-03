@@ -13,15 +13,15 @@ const { title, icon } = Astro.props;
 </button>
 
 <script>
+  import { modalStore, ModalType } from "../../stores/app";
+
   // new create
   const newCampaignButton = document.querySelectorAll(".campaign-button");
   const campaignCreateForm = document.getElementById("campaign-create-form");
 
   for (const item of newCampaignButton) {
     item?.addEventListener("click", () => {
-      if (campaignCreateForm) {
-        campaignCreateForm.className = "block";
-      }
+      modalStore.set(ModalType.CAMPAIGN);
     });
   }
 </script>

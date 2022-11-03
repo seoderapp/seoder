@@ -1,13 +1,13 @@
 ---
 import LicenseInput from "./LicenseInput";
-import SettingsBar from "./SettingsBar.astro";
+import { SettingsBar } from "./SettingsBar";
 import Switch from "./Switch.astro";
 ---
 
 <div id="settings-container" class="hidden">
   <div class="modal-outer">
     <div class="modal">
-      <SettingsBar title={"Settings"} />
+      <SettingsBar title={"Settings"} client:load />
 
       <div id="proxyform" class="ph frame flex-row center-align gap">
         <label for="proxy-select">Use Proxy</label>
