@@ -7,6 +7,7 @@ export interface Props {
 const { title, description } = Astro.props;
 
 const canonicalURL = new URL("/api/og", Astro.site);
+const domain = canonicalURL.hostname;
 ---
 
 <!DOCTYPE html>
@@ -34,7 +35,10 @@ const canonicalURL = new URL("/api/og", Astro.site);
   </head>
   <body>
     <slot />
-    <script src="https://metrics.seoder.io/script.js" data-site="JAYJESFT" defer
+    <script
+      src={`https://metrics.${domain}/script.js`}
+      data-site="JAYJESFT"
+      defer
     ></script>
     <style is:global>
       :root {
