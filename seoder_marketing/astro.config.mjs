@@ -6,9 +6,7 @@ import sitemap from "@astrojs/sitemap";
 import image from "@astrojs/image";
 
 const site =
-  typeof process !== "undefined"
-    ? `https://${process.env.VERCEL_URL}`
-    : "https://seoder.com";
+  typeof process !== "undefined" ? process.env.DOMAIN : "https://seoder.com";
 
 // https://astro.build/config
 export default defineConfig({
