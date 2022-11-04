@@ -29,10 +29,6 @@ label {
   padding-bottom: 0.5rem;
 }
 
-.gap {
-  gap: 1rem;
-}
-
 .form-control {
   width: 90%;
 }
@@ -58,4 +54,70 @@ label {
 .form-container p {
   font-size: 0.75rem;
   color: #2f2768;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 45px;
+  height: 2px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  background-color: #ccc;
+  border-radius: 34px;
+}
+
+.slider:after {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 0px;
+  bottom: 0px;
+  background-color: #ccc;
+  transition: transform 0.3s;
+  border-radius: 50%;
+
+  @media (--motionOK) {
+    & {
+      transition: transform var(--thumb-transition-duration) ease,
+        box-shadow 0.25s ease;
+    }
+  }
+}
+
+input:checked + .slider {
+  background-color: rgba(47, 39, 104, 0.6);
+}
+
+input:checked + .slider:after {
+  background-color: #2f2768;
+}
+
+input + .slider {
+  background-color: #fff;
+  border: 1px solid #ccc;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2f2768;
+}
+
+input:checked + .slider:after {
+  -webkit-transform: translateX(24px);
+  -ms-transform: translateX(24px);
+  transform: translateX(24px);
 }

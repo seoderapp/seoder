@@ -16,13 +16,15 @@ declare global {
   } from "../stores/engine";
   import { socket, socketRuntime, initSockets } from "../events/sockets";
   import { CellStatus } from "./CampaignCell";
-  import {
-    baseConfig,
-    fileMap,
-    selectedFileOptionMutate,
-  } from "../utils/file-set";
 
-  import { modalStore, ModalType } from "../stores/app";
+  import {
+    fileMap,
+    lowPowerSet,
+    proxySet,
+    selectedFile,
+    torSet,
+  } from "../stores/app";
+  import { selectedFileOptionMutate } from "../utils/file-set";
 
   initSockets();
 
@@ -103,29 +105,6 @@ declare global {
   const netstatsUp = document.getElementById("network-stats-up");
   const netstatsTotal = document.getElementById("network-stats-total");
 
-  // settings
-  const settingsContainer = document.getElementById("settings-container");
-  const settingsBtn = document.getElementById("settings-button");
-
-  // tor
-  const torSelect = document.getElementById("tor-select") as HTMLInputElement;
-  const proxySelect = document.getElementById(
-    "proxy-select"
-  ) as HTMLInputElement;
-  const lowpowerSelect = document.getElementById(
-    "lowpower-select"
-  ) as HTMLInputElement;
-  const fileSelect = document.getElementById(
-    "target-select"
-  ) as HTMLInputElement;
-  const targetSelect = document.getElementById(
-    "target-select"
-  ) as HTMLInputElement;
-
-  settingsBtn?.addEventListener("click", () => {
-    settingsContainer.className = "block";
-  });
-
   /*
    * List of web socket matchers * special for high performance
    */
@@ -200,7 +179,6 @@ declare global {
 
       return selectedFileOptionMutate({
         path: np.fpath,
-        fileSelect,
       });
     }
 
@@ -395,11 +373,11 @@ declare global {
       const np = JSON.parse(raw);
       const path = np && np.dfpath;
 
-      if (fileMap.has(path)) {
+      if (fileMap.get()[path]) {
         const kid = "fskeys_" + path;
         const cell = document.getElementById(kid);
         cell.remove();
-        fileMap.delete(path);
+        fileMap.setKey(path, undefined);
       }
       return;
     }
@@ -411,22 +389,10 @@ declare global {
       if (!defaultOptionSet) {
         defaultOptionSet = true;
 
-        if (proxySelect) {
-          proxySelect.checked = np.proxy;
-        }
-
-        if (lowpowerSelect) {
-          lowpowerSelect.checked = !!np.buffer;
-        }
-
-        if (torSelect) {
-          torSelect.checked = np.tor;
-        }
-
-        if (targetSelect) {
-          targetSelect.value = np.target;
-          baseConfig.initialTarget = np.target;
-        }
+        proxySet.set(np.proxy);
+        lowPowerSet.set(np.buffer);
+        torSet.set(np.tor);
+        selectedFile.set(np.target);
       }
       return;
     }
@@ -445,52 +411,4 @@ declare global {
 
   socket.addEventListener("message", eventSub);
   socketRuntime.addEventListener("message", eventSub);
-
-  const bufferform = document.getElementById("bufferform");
-  const fsDelete = document.getElementById("fs-delete");
-
-  bufferform?.addEventListener("submit", (event) => {
-    const buffer: HTMLInputElement = bufferform.querySelector(
-      'input[name="buffer"]'
-    );
-    const selected = buffer.value;
-
-    socket.send("set-buffer " + selected);
-
-    event.preventDefault();
-  });
-
-  fileSelect?.addEventListener("change", function (event) {
-    socket.send("set-list " + this.value);
-    event.preventDefault();
-  });
-
-  torSelect?.addEventListener("change", function (event) {
-    socket.send("set-tor " + this.checked);
-    event.preventDefault();
-  });
-
-  proxySelect?.addEventListener("change", function (event) {
-    socket.send("set-proxy " + this.checked);
-    event.preventDefault();
-  });
-
-  lowpowerSelect?.addEventListener("change", function (event) {
-    socket.send("set-buffer " + this.checked);
-    event.preventDefault();
-  });
-
-  fsDelete?.addEventListener("click", async () => {
-    const cf = await window.confirm(
-      "Are, you sure you want to delete this file?"
-    );
-
-    if (cf) {
-      const selected = fileSelect?.value;
-
-      if (selected) {
-        socket.send("delete-file " + selected);
-      }
-    }
-  });
 </script>

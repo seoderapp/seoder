@@ -211,7 +211,7 @@ export const CampaignCell = ({
               <div id={"engine_stats_" + path} className={"engine-stats"}>
                 {item.valid} / {item.total}
               </div>
-              <div className="gutter-t flex gap">
+              <div className="gutter-t flex gap-sm">
                 <div className={"row campaign-paths"}>
                   <Folder /> {item?.paths}
                 </div>

@@ -1,29 +1,11 @@
 import "../styles/forms.css";
 
-import Modal from "react-modal";
 import { socket } from "../events/sockets";
 import { engines } from "../stores/engine";
 import { modalStore, ModalType } from "../stores/app";
-import { useStore } from "@nanostores/react";
-import { SettingsBar } from "./SettingsBar";
-
-Modal.setAppElement("#appProgram");
-
-const customStyles = {
-  content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
-    padding: 0,
-  },
-};
 
 // todo: refactor modal outside for central components
 export const CampaignCreate = () => {
-  const modalState = useStore(modalStore);
   const onSubmitEvent = (event) => {
     event.preventDefault();
     const eform = document.getElementById("eform");
@@ -63,63 +45,47 @@ export const CampaignCreate = () => {
   };
 
   return (
-    <Modal
-      id="campaign-create-form"
-      isOpen={modalState !== ModalType.CLOSED}
-      onRequestClose={closeModal}
-      shouldCloseOnOverlayClick
-      style={customStyles}
-    >
-      <div>
-        <SettingsBar title={"New Campaign"} />
-
+    <form id="eform" onSubmit={onSubmitEvent}>
+      <div className="form-container">
         <div>
-          <form id="eform" onSubmit={onSubmitEvent}>
-            <div className="form-container">
-              <div>
-                <label htmlFor="ename">Campaign Name</label>
-                <input
-                  name="ename"
-                  placeholder="Name"
-                  type="text"
-                  className="form-control"
-                />
-              </div>
-              <div>
-                <label htmlFor="epatterns">Keywords</label>
-                <input
-                  name="epatterns"
-                  placeholder="bitcoin, motorcycles, *cats*"
-                  type="text"
-                  className="form-control"
-                />
-                <p>Words are case insensitive and can utilize regex</p>
-              </div>
-              <div className="optional">Optional</div>
-              <div className="seperator"></div>
+          <label htmlFor="ename">Campaign Name</label>
+          <input
+            name="ename"
+            placeholder="Name"
+            type="text"
+            className="form-control"
+          />
+        </div>
+        <div>
+          <label htmlFor="epatterns">Keywords</label>
+          <input
+            name="epatterns"
+            placeholder="bitcoin, motorcycles, *cats*"
+            type="text"
+            className="form-control"
+          />
+          <p>Words are case insensitive and can utilize regex</p>
+        </div>
+        <div className="optional">Optional</div>
+        <div className="seperator"></div>
 
-              <div className="seperator-sm"></div>
-              <div>
-                <label htmlFor="epaths">Paths</label>
-                <input
-                  name="epaths"
-                  placeholder="/home, /welcome, /about"
-                  type="text"
-                  className="form-control"
-                />
-                <p>
-                  Choose which paths you want the crawler to find keywords in
-                </p>
-              </div>
-            </div>
-            <div className="gutter-t">
-              <button type="submit" className="button btn-primary full-w">
-                Add Campaign
-              </button>
-            </div>
-          </form>
+        <div className="seperator-sm"></div>
+        <div>
+          <label htmlFor="epaths">Paths</label>
+          <input
+            name="epaths"
+            placeholder="/home, /welcome, /about"
+            type="text"
+            className="form-control"
+          />
+          <p>Choose which paths you want the crawler to find keywords in</p>
         </div>
       </div>
-    </Modal>
+      <div className="gutter-t">
+        <button type="submit" className="button btn-primary full-w">
+          Add Campaign
+        </button>
+      </div>
+    </form>
   );
 };

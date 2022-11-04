@@ -7,7 +7,7 @@ export interface Props {
 const { title, icon } = Astro.props;
 ---
 
-<button class="panel-btn button btn-primary full-w campaign-button center">
+<button class="panel-btn button btn-primary full-w center campaign-button">
   {icon ? <img src="/assets/new.svg" alt="" /> : null}
   <div>{title}</div>
 </button>
@@ -17,7 +17,6 @@ const { title, icon } = Astro.props;
 
   // new create
   const newCampaignButton = document.querySelectorAll(".campaign-button");
-  const campaignCreateForm = document.getElementById("campaign-create-form");
 
   for (const item of newCampaignButton) {
     item?.addEventListener("click", () => {

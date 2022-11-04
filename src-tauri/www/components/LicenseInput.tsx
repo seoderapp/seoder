@@ -1,5 +1,6 @@
-import { useState } from "react";
 import "../styles/license.css";
+
+import { useState } from "react";
 
 export default function LicenseInput() {
   const [license, setLicense] = useState<string>("");
@@ -9,13 +10,6 @@ export default function LicenseInput() {
   };
 
   const disabled = license.length < 30;
-
-  const clear = () => {
-    const ele = document.getElementById("settings-container");
-    if (ele && ele.className !== "hidden") {
-      ele.className = "hidden";
-    }
-  };
 
   return (
     <>
@@ -34,7 +28,6 @@ export default function LicenseInput() {
             style={{ opacity: disabled ? 0.6 : 1 }}
             className={"submit"}
             disabled={disabled}
-            onClick={clear}
           >
             Verify License Key
           </button>
