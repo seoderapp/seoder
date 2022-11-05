@@ -20,8 +20,32 @@ pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>,
     );
 
     // todo: allow param passing from special configs and optional if config.txt already set
-    let selected_file = tokio::spawn(async move {
+    let (source_match, selected_file) = tokio::spawn(async move {
         let mut target = "urls-input.txt".to_string();
+        let mut source_match = true;
+
+        // configuration file
+        match File::open(&cf).await {
+            Ok(file) => {
+                let reader = BufReader::new(file);
+                let mut lines = reader.lines();
+
+                while let Some(line) = lines.next_line().await.unwrap() {
+                    let hh = line.split(" ").collect::<Vec<&str>>();
+                    let h0 = hh[0];
+                    let h1 = build_query(&hh);
+
+                    if hh.len() >= 2 {
+                        if h0 == "source" {
+                            source_match = h1.parse::<bool>().unwrap_or_default();
+                        }
+                    }
+                }
+            }
+            Err(_) => {
+                log("file does not exist - ", &cf);
+            }
+        };
 
         match File::open(&ENTRY_PROGRAM.2).await {
             Ok(file) => {
@@ -49,12 +73,10 @@ pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>,
             }
         };
 
-        target
+        (source_match, target)
     })
     .await
     .unwrap();
-
-    let source_match = false;
 
     if !selected_engine.is_empty() {
         tokio::spawn(async move {

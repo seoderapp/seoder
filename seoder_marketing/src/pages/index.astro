@@ -51,24 +51,21 @@ import Hero from "../components/Svgs/Hero.astro";
         </div>
       </Section>
       <Section>
-        <div>
-          <Image
-            src="/screens/App-Landing-Screenshot.png"
-            srcset={`
+        <Image
+          src="/screens/App-Landing-Screenshot.png"
+          srcset={`
               /screens/App-Landing-Screenshot@3x.png 1818w,
               /screens/App-Landing-Screenshot@2x.png 1212w,
               /screens/App-Landing-Screenshot.png 606w
             `}
-            sizes={`((min-width: 50em) and (max-width: 60em)) 50em,
+          sizes={`((min-width: 50em) and (max-width: 60em)) 50em,
             ((min-width: 30em) and (max-width: 50em)) 30em,
             (max-width: 30em) 20em`}
-            class="bg"
-            height={800}
-            width={1200}
-            alt="Seoder app intro display"
-            quality={100}
-          />
-        </div>
+          class="bg"
+          height={800}
+          width={1000}
+          alt="Seoder app intro display"
+        />
       </Section>
       <Section>
         <Download />
