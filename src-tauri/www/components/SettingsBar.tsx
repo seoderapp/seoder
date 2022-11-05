@@ -5,14 +5,14 @@ export interface Props {
   title: string;
 }
 
-export const SettingsBar = ({ title }: Props) => {
+export const SettingsBar = ({ title = "" }: Props) => {
   const onSettingsClick = () => {
     modalStore.set(ModalType.CLOSED);
   };
 
   return (
     <div className="settings-bar">
-      <h3>{title}</h3>
+      <h3>{title.toLowerCase()}</h3>
       <button onClick={onSettingsClick}>
         <Close />
       </button>

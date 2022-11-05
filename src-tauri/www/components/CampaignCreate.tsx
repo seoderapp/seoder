@@ -12,7 +12,6 @@ export const CampaignCreate = () => {
   const onSubmitEvent = (event) => {
     event.preventDefault();
     const eform = document.getElementById("eform");
-    const campaignCreateForm = document.getElementById("campaign-create-form");
 
     const engine: HTMLInputElement = eform.querySelector('input[name="ename"]');
     const epaths: HTMLInputElement = eform.querySelector(
@@ -29,8 +28,6 @@ export const CampaignCreate = () => {
         patterns: epatterns.value,
         source,
       });
-
-      campaignCreateForm.className = "hidden";
 
       if (engines.get()[m]) {
         window.alert("Please enter a different engine name.");

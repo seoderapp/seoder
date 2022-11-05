@@ -7,6 +7,8 @@ import { useStore } from "@nanostores/react";
 import { SettingsBar } from "./SettingsBar";
 import { CampaignCreate } from "./CampaignCreate";
 import { Settings } from "./Settings";
+import { Analytics } from "./Analytics";
+import { EditFile } from "./EditFile";
 
 Modal.setAppElement("#appProgram");
 
@@ -30,21 +32,23 @@ export const AppModal = () => {
     modalStore.set(ModalType.CLOSED);
   };
 
-  const modalTitle =
-    modalState === ModalType.CAMPAIGN ? "New Campaign" : "Settings";
+  const modalTitle = ModalType[modalState];
+
+  const title = modalTitle === "CAMPAIGN" ? `New ${modalTitle}` : modalTitle;
 
   return (
     <Modal
-      id="campaign-create-form"
       isOpen={modalState !== ModalType.CLOSED}
       onRequestClose={closeModal}
       shouldCloseOnOverlayClick
       style={customStyles}
     >
-      <div>
-        <SettingsBar title={modalTitle} />
+      <div style={{ position: "relative" }}>
+        <SettingsBar title={title} />
         {modalState === ModalType.CAMPAIGN ? <CampaignCreate /> : null}
         {modalState === ModalType.SETTINGS ? <Settings /> : null}
+        {modalState === ModalType.ANALYTICS ? <Analytics /> : null}
+        {modalState === ModalType.EDIT ? <EditFile /> : null}
       </div>
     </Modal>
   );

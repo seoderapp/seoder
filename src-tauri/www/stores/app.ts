@@ -4,6 +4,8 @@ export enum ModalType {
   CLOSED,
   CAMPAIGN,
   SETTINGS,
+  ANALYTICS,
+  EDIT,
 }
 
 // determine if modal is open and type

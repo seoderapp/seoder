@@ -24,7 +24,7 @@ pub async fn file_server() {
         .with(&cors);
 
     let download_route = warp::path("download")
-        .and(warp::fs::dir(ENTRY_PROGRAM.0.to_string()))
+        .and(warp::fs::dir(ENTRY_PROGRAM.3.to_string()))
         .with(&cors);
 
     let router = upload_route

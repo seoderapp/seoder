@@ -11,6 +11,10 @@ h6 {
   margin: 0;
 }
 
+h3 {
+  text-transform: capitalize;
+}
+
 button {
   margin: 0;
   padding: 0;
@@ -474,4 +478,55 @@ button {
 
 .settings-bar button {
   background-color: transparent;
+}
+
+.delete {
+  background-color: rgb(183, 87, 106);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.edit {
+  background-color: rgb(87, 183, 125);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.editor-container {
+  width: 50vw;
+  height: 50vh;
+  overflow: auto;
+}
+
+.editor-input {
+  min-height: 150px;
+  resize: none;
+  font-size: 1rem;
+  caret-color: rgb(5, 5, 5);
+  position: relative;
+  tab-size: 1;
+  outline: 0;
+  padding: 15px 10px;
+  caret-color: #444;
+}
+
+.editor-input > p {
+  margin: 0;
+}
+
+.editor-input > p:first-child {
+  display: none;
+}
+
+.editor-placeholder {
+  color: #999;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 5rem;
+  left: 10px;
+  font-size: 1rem;
+  user-select: none;
+  display: inline-block;
+  pointer-events: none;
 }

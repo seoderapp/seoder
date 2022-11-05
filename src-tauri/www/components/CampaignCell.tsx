@@ -28,7 +28,8 @@ const onExportEvent = async (path: string) => {
     ],
   });
 
-  const url = "http://localhost:7050/download/" + path + "/valid/links.txt";
+  const url =
+    "http://localhost:7050/download/engines/" + path + "/valid/links.txt";
   const request = new XMLHttpRequest();
 
   // todo: Post endpoint to write to file instead of get

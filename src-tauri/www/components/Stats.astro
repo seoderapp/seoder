@@ -31,6 +31,9 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
       </div>
     </div>
   </div>
+  <div class="stats-bar gutter net-row" style="place-content: end;">
+    <button id="analytics-toggle" class="btn btn-primary">Analytics</button>
+  </div>
 </div>
 
 <style>
@@ -98,4 +101,27 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
     width: 100px;
     color: #2f2768;
   }
+  #analytics-toggle {
+    padding: 0.5rem 1rem;
+    border: 2px solid #2f2768;
+    background-color: #fff;
+    color: #2f2768;
+    font-size: 1rem;
+    border-radius: 2rem;
+  }
+  #analytics-toggle:hover {
+    background-color: #ebecf2;
+  }
 </style>
+
+<script>
+  import { modalStore, ModalType } from "../stores/app";
+
+  const ele = document.getElementById("analytics-toggle");
+
+  const toggleEvent = (e) => {
+    e.preventDefault();
+    modalStore.set(ModalType.ANALYTICS);
+  };
+  ele.addEventListener("click", toggleEvent);
+</script>

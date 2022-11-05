@@ -41,9 +41,14 @@ label {
   padding-bottom: 0.4rem;
   text-transform: uppercase;
 }
+
 .form-container p {
   font-size: 0.75rem;
   color: #2f2768;
+}
+
+.form-container label:not(.switch) {
+  min-width: 7rem;
 }
 
 .switch {

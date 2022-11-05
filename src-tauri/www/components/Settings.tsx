@@ -49,7 +49,9 @@ export const Settings = () => {
     };
     const fileValue = event.target["file"].value;
     if (fileValue) {
-      request.send(new FormData(event.target as HTMLFormElement));
+      const formData = new FormData(event.target as HTMLFormElement);
+
+      request.send(formData);
       const optimisticPath = fileValue.replace(/^.*[\\\/]/, "");
 
       selectedFileOptionMutate({
@@ -93,85 +95,87 @@ export const Settings = () => {
     socket.send("set-tor " + checked);
   };
 
+  const onEditFile = () => {
+    modalStore.set(ModalType.EDIT);
+  };
+
   return (
-    <div id="settings-container">
-      <div className="form-container">
-        <div>
-          <div id="proxyform" className="ph frame flex-row center-align gap">
-            <label htmlFor="proxy-select">Use Proxy</label>
-            <Switch
-              id="proxy-select"
-              onChange={onProxyChange}
-              checked={$proxy}
-            />
-          </div>
-
-          <div id="torform" className="ph frame flex-row center-align gap">
-            <label htmlFor="tor-select">Use Tor</label>
-            <Switch id="tor-select" onChange={onTorChange} checked={$tor} />
-          </div>
-
-          <div id="lowpowerform" className="ph frame flex-row center-align gap">
-            <label htmlFor="lowpower-select">Low Power</label>
-            <Switch
-              id="lowpower-select"
-              onChange={onLowPowerChange}
-              checked={$lowpower}
-            />
-          </div>
-
-          <div className="ph frame flex-row center-align">
-            <label htmlFor="target-select">Target</label>
-            <div className="ph">
-              <select
-                name="target"
-                id="target-select"
-                onChange={onChangeFile}
-                value={$selectedTarget}
-              >
-                {$flist.map((key) => {
-                  return (
-                    <option key={key} id={"fskeys_" + key} value={key}>
-                      {key}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-            <div className="flex align-end">
-              <div>
-                <button
-                  type="button"
-                  className="button"
-                  id="fs-delete"
-                  onClick={onDeleteFile}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <form
-            id="uploadform"
-            className="ph frame flex-row center-align"
-            encType="multipart/form-data"
-            method="post"
-            onSubmit={onFileUpload}
-          >
-            <label htmlFor="file">Crawl list</label>
-            <div className="ph">
-              <input type="file" accept=".txt" name="file" />
-            </div>
-            <button className="btn-primary button" type="submit">
-              Upload
-            </button>
-          </form>
-
-          <form id="ulicense" className="ph" onSubmit={onLicenseSubmit}>
-            <LicenseInput />
-          </form>
+    <div className="form-container">
+      <div>
+        <div id="proxyform" className="ph frame flex-row center-align gap">
+          <label htmlFor="proxy-select">Use Proxy</label>
+          <Switch id="proxy-select" onChange={onProxyChange} checked={$proxy} />
         </div>
+
+        <div id="torform" className="ph frame flex-row center-align gap">
+          <label htmlFor="tor-select">Use Tor</label>
+          <Switch id="tor-select" onChange={onTorChange} checked={$tor} />
+        </div>
+
+        <div id="lowpowerform" className="ph frame flex-row center-align gap">
+          <label htmlFor="lowpower-select">Low Power</label>
+          <Switch
+            id="lowpower-select"
+            onChange={onLowPowerChange}
+            checked={$lowpower}
+          />
+        </div>
+
+        <div className="ph frame flex-row center-align">
+          <label htmlFor="target-select">Target</label>
+          <div className="ph">
+            <select
+              name="target"
+              id="target-select"
+              onChange={onChangeFile}
+              value={$selectedTarget}
+            >
+              {$flist.map((key) => {
+                return (
+                  <option key={key} id={"fskeys_" + key} value={key}>
+                    {key}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <div className="flex align-end">
+            <button type="button" className="button edit" onClick={onEditFile}>
+              Edit File
+            </button>
+          </div>
+          <div className="flex align-end">
+            <div>
+              <button
+                type="button"
+                className="button delete"
+                onClick={onDeleteFile}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <form
+          id="uploadform"
+          className="ph frame flex-row center-align"
+          encType="multipart/form-data"
+          method="post"
+          onSubmit={onFileUpload}
+        >
+          <label htmlFor="file">Crawl list</label>
+          <div className="ph">
+            <input type="file" accept=".txt" name="file" />
+          </div>
+          <button className="btn-primary button" type="submit">
+            Upload
+          </button>
+        </form>
+
+        <form id="ulicense" className="ph" onSubmit={onLicenseSubmit}>
+          <LicenseInput />
+        </form>
       </div>
     </div>
   );
