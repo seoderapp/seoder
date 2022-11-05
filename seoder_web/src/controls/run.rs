@@ -25,13 +25,14 @@ pub async fn run_all() {
             let engine_name = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
 
             // includes the base path
-            let (pt, pat, target) = builder::engine_builder(&engine_name).await;
+            let (pt, pat, target, source_match) = builder::engine_builder(&engine_name).await;
 
             let mut website: Website = Website::new(&target);
 
             website.engine.campaign.name = engine_name;
             website.engine.campaign.paths = pt;
             website.engine.campaign.patterns = pat;
+            website.engine.campaign.source_match = source_match;
 
             let sender = sender.clone();
 
@@ -65,7 +66,7 @@ pub async fn run_all() {
 
 /// run single program
 pub async fn run(input: &str) {
-    let (pt, pat, target) = builder::engine_builder(&input).await;
+    let (pt, pat, target, source_match) = builder::engine_builder(&input).await;
 
     let mut website: Website = Website::new(&target);
 
@@ -74,6 +75,7 @@ pub async fn run(input: &str) {
     website.engine.campaign.name = engine_name;
     website.engine.campaign.paths = pt;
     website.engine.campaign.patterns = pat;
+    website.engine.campaign.source_match = source_match;
 
     let performance = crate::tokio::time::Instant::now();
 

@@ -10,10 +10,16 @@ use seoder_lib::ENTRY_PROGRAM;
 use tokio::fs::File;
 
 /// build a custom engine config from path and target file
-pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>, String) {
+pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>, String, bool) {
     let e = selected_engine.to_string();
 
-    // todo: allow param passing from special configs
+    let (f, ff, cf) = (
+        string_concat!(ENTRY_PROGRAM.0, &e, "/paths.txt"),
+        string_concat!(ENTRY_PROGRAM.0, &e, "/patterns.txt"),
+        string_concat!(ENTRY_PROGRAM.0, &e, "/config.txt"),
+    );
+
+    // todo: allow param passing from special configs and optional if config.txt already set
     let selected_file = tokio::spawn(async move {
         let mut target = "urls-input.txt".to_string();
 
@@ -48,17 +54,14 @@ pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>,
     .await
     .unwrap();
 
-    let (f, ff) = (
-        string_concat!(ENTRY_PROGRAM.0, &e, "/paths.txt"),
-        string_concat!(ENTRY_PROGRAM.0, &e, "/patterns.txt"),
-    );
+    let source_match = false;
 
     if !selected_engine.is_empty() {
         tokio::spawn(async move {
             let paths = crate::utils::lines_to_vec(f).await;
             let patterns = crate::utils::lines_to_vec(ff).await;
 
-            (paths, patterns, selected_file)
+            (paths, patterns, selected_file, source_match)
         })
         .await
         .unwrap()
@@ -69,6 +72,7 @@ pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>,
             engine.campaign.paths,
             engine.campaign.patterns,
             selected_file,
+            source_match
         )
     }
 }
