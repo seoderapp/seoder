@@ -100,7 +100,8 @@ struct Eng {
     name: String,
     paths: String,
     patterns: String,
-    meta_includes: bool
+    /// source code only
+    source: bool,
 }
 
 /// tick status refreshing
@@ -241,19 +242,20 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 let v: Eng = serde_json::from_str(&input).unwrap_or_default();
 
                 let n = v.name;
-    
+
                 if n.is_empty() == false {
                     let db_dir = string_concat!(ENTRY_PROGRAM.0, &n);
                     let pt = v.paths;
                     let pat = v.patterns;
-                    // let meta_includes = v.meta_includes;
+                    let source = v.source;
                     // let target_file = v.target;
 
                     tokio::task::spawn(async move {
                         let ptt = pt.split(','); // paths
                         let ott = pat.split(','); // patterns
-    
+
                         create_dir(&db_dir).await.unwrap();
+
                         create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
                         create_dir(&string_concat!(db_dir, "/errors"))
                             .await
@@ -261,27 +263,33 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         create_dir(&string_concat!(db_dir, "/invalid"))
                             .await
                             .unwrap();
-    
+
                         let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
                             .await
                             .unwrap();
-    
+
                         for x in ptt {
                             let base = if !x.starts_with("/") { "/" } else { "" };
                             let x = string_concat!(base, x, "\n");
                             file.write_all(&x.as_bytes()).await.unwrap();
                         }
-    
+
                         let mut file = File::create(string_concat!(db_dir, "/patterns.txt"))
                             .await
                             .unwrap();
-    
+
                         for x in ott {
                             let x = string_concat!(x, "\n");
                             file.write_all(&x.as_bytes()).await.unwrap();
                         }
 
-                        // todo: create config file
+                        // configuration file
+                        let mut file = File::create(string_concat!(db_dir, "/config.txt"))
+                            .await
+                            .unwrap();
+
+                        let x = string_concat!(source.to_string(), "\n");
+                        file.write_all(&x.as_bytes()).await.unwrap();
                     });
                 }
             } else if st == Action::SetList {

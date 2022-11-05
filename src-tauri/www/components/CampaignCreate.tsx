@@ -3,9 +3,12 @@ import "../styles/forms.css";
 import { socket } from "../events/sockets";
 import { engines } from "../stores/engine";
 import { modalStore, ModalType } from "../stores/app";
+import { useState } from "react";
 
 // todo: refactor modal outside for central components
 export const CampaignCreate = () => {
+  const [source, setSourceOnly] = useState<boolean>(true);
+
   const onSubmitEvent = (event) => {
     event.preventDefault();
     const eform = document.getElementById("eform");
@@ -24,6 +27,7 @@ export const CampaignCreate = () => {
         name: engine.value,
         paths: epaths.value.length ? epaths.value : "/",
         patterns: epatterns.value,
+        source,
       });
 
       campaignCreateForm.className = "hidden";
@@ -42,6 +46,14 @@ export const CampaignCreate = () => {
 
   const closeModal = () => {
     modalStore.set(ModalType.CLOSED);
+  };
+
+  const onSetSource = () => {
+    setSourceOnly(true);
+  };
+
+  const onRemoveSource = () => {
+    setSourceOnly(false);
   };
 
   return (
@@ -66,6 +78,26 @@ export const CampaignCreate = () => {
           />
           <p>Words are case insensitive and can utilize regex</p>
         </div>
+
+        <div className="row gutter-xl">
+          <button
+            className={`button ${source ? "btn-primary" : ""}`}
+            onClick={onSetSource}
+            style={{ borderRadius: "8px 0px 0px 8px" }}
+            type={"button"}
+          >
+            Source Code
+          </button>
+          <button
+            className={`button ${source ? "" : "btn-primary"}`}
+            onClick={onRemoveSource}
+            style={{ borderRadius: "0px 8px 8px 0px" }}
+            type={"button"}
+          >
+            Rendered Text
+          </button>
+        </div>
+
         <div className="optional">Optional</div>
         <div className="seperator"></div>
 

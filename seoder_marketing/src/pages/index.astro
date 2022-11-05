@@ -9,6 +9,7 @@ import Download from "../components/Download.astro";
 import Title from "../components/Typo/Title.astro";
 import Section from "../components/Section.astro";
 import FeatureList from "../components/FeatureList.astro";
+import Hero from "../components/Svgs/Hero.astro";
 ---
 
 <Layout
@@ -30,26 +31,10 @@ import FeatureList from "../components/FeatureList.astro";
               <div>
                 <AnchorButton href="/payments" title={"BUY NOW"} />
               </div>
-              <p class="trial">Try free 7 day trial</p>
             </div>
           </div>
           <div>
-            <Image
-              src="/screens/App-Landing-Screenshot.png"
-              srcset={`
-                /screens/App-Landing-Screenshot@3x.png 1818w,
-                /screens/App-Landing-Screenshot@2x.png 1212w,
-                /screens/App-Landing-Screenshot.png 606w
-              `}
-              sizes={`((min-width: 50em) and (max-width: 60em)) 50em,
-              ((min-width: 30em) and (max-width: 50em)) 30em,
-              (max-width: 30em) 20em`}
-              class="bg"
-              height={460}
-              width={630}
-              alt="Seoder app intro display"
-              quality={100}
-            />
+            <Hero />
           </div>
         </div>
       </Section>
@@ -63,6 +48,26 @@ import FeatureList from "../components/FeatureList.astro";
             <Search />
           </div>
           <FeatureList />
+        </div>
+      </Section>
+      <Section>
+        <div>
+          <Image
+            src="/screens/App-Landing-Screenshot.png"
+            srcset={`
+              /screens/App-Landing-Screenshot@3x.png 1818w,
+              /screens/App-Landing-Screenshot@2x.png 1212w,
+              /screens/App-Landing-Screenshot.png 606w
+            `}
+            sizes={`((min-width: 50em) and (max-width: 60em)) 50em,
+            ((min-width: 30em) and (max-width: 50em)) 30em,
+            (max-width: 30em) 20em`}
+            class="bg"
+            height={800}
+            width={1200}
+            alt="Seoder app intro display"
+            quality={100}
+          />
         </div>
       </Section>
       <Section>

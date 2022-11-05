@@ -5,8 +5,7 @@ import robotsTxt from "astro-robots-txt";
 import sitemap from "@astrojs/sitemap";
 import image from "@astrojs/image";
 
-const site =
-  typeof process !== "undefined" ? process.env.DOMAIN : "https://seoder.com";
+const site = process.env.DOMAIN || "https://seoder.com";
 
 // https://astro.build/config
 export default defineConfig({
