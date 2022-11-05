@@ -29,7 +29,7 @@ To adjust the client static resources for connecting to the WSS server use the e
 
 Make sure to have `tauri` installed - (ex: cargo install tauri-cli);
 
-If you want to run the native app run `SEODER_PROGRAM=app RUST_LOG=info cargo tauri dev `.
+If you want to run the native app run `SEODER_PROGRAM=app RUST_LOG=info cargo tauri dev` or `./dev.sh`.
 
 ## Installation
 
@@ -69,18 +69,6 @@ the application may fail.
 ```sh
 # [required] increase u limits for crawl mode
 ulimit -n 999999
-```
-
-## Program Files
-
-The following auto-generated files are set inside the `.gitignore`.
-
-```
-output.jsonl
-all-others.txt
-connection_error.txt
-ok-not_valid_json.txt
-ok-valid_json.txt
 ```
 
 ## Config
