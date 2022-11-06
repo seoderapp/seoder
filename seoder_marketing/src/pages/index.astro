@@ -54,17 +54,17 @@ import Hero from "../components/Svgs/Hero.astro";
         <Image
           src="/screens/App-Landing-Screenshot.png"
           srcset={`
-              /screens/App-Landing-Screenshot@3x.png 1818w,
-              /screens/App-Landing-Screenshot@2x.png 1212w,
-              /screens/App-Landing-Screenshot.png 606w
-            `}
+                /screens/App-Landing-Screenshot@3x.png 1818w,
+                /screens/App-Landing-Screenshot@2x.png 1212w,
+                /screens/App-Landing-Screenshot.png 606w
+              `}
           sizes={`((min-width: 50em) and (max-width: 60em)) 50em,
-            ((min-width: 30em) and (max-width: 50em)) 30em,
-            (max-width: 30em) 20em`}
-          class="bg"
+              ((min-width: 30em) and (max-width: 50em)) 30em,
+              (max-width: 30em) 20em`}
           height={920}
           width={1212}
           alt="Seoder app intro display"
+          class="bg"
         />
       </Section>
       <Section>
@@ -120,6 +120,7 @@ import Hero from "../components/Svgs/Hero.astro";
   }
   .bg {
     width: 100%;
+    height: auto;
   }
   .flex-wrap {
     display: flex;
