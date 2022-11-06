@@ -59,16 +59,18 @@ export const CampaignCreate = () => {
         <div>
           <label htmlFor="ename">Campaign Name</label>
           <input
+            id="ename"
             name="ename"
             placeholder="Name"
             type="text"
             className="form-control"
           />
         </div>
-        <div>
+        <div className="gutter">
           <label htmlFor="epatterns">Keywords</label>
           <input
             name="epatterns"
+            id="epatterns"
             placeholder="bitcoin, motorcycles, *cats*"
             type="text"
             className="form-control"
@@ -76,7 +78,7 @@ export const CampaignCreate = () => {
           <p>Words are case insensitive and can utilize regex</p>
         </div>
 
-        <div className="row gutter-xl">
+        <div className="row">
           <button
             className={`button ${source ? "btn-primary" : ""}`}
             onClick={onSetSource}
@@ -95,6 +97,8 @@ export const CampaignCreate = () => {
           </button>
         </div>
 
+        <p>Choose where to crawl the keywords against</p>
+
         <div className="optional">Optional</div>
         <div className="seperator"></div>
 
@@ -103,6 +107,7 @@ export const CampaignCreate = () => {
           <label htmlFor="epaths">Paths</label>
           <input
             name="epaths"
+            id="epaths"
             placeholder="/home, /welcome, /about"
             type="text"
             className="form-control"
