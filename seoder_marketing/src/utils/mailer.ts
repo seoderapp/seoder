@@ -9,7 +9,7 @@ export const transport = nodemailer.createTransport({
   secure: true,
   auth: {
     type: "OAuth2",
-    user: "support@seoder.io",
+    user: "support@seoder.com",
     serviceClient: cid,
     privateKey: ckey.replace(/\\n/gm, "\n"),
   },

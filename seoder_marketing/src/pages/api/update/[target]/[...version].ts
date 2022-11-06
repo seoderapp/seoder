@@ -10,7 +10,7 @@ const MAC_M1 = "_aarch64.dmg";
 
 const BASE = import.meta.env.DEV
   ? "http://localhost:3000"
-  : "https://seoder.io";
+  : "https://seoder.com";
 
 const notes = import.meta.env.RELEASE_NOTES || "";
 const pub_date = import.meta.env.PUBLISHED || new Date().toISOString();

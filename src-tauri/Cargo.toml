@@ -2,7 +2,7 @@
 name = "seoder_app"
 version = "0.0.1"
 description = "Seoder desktop application"
-authors = ["support@seoder.io"]
+authors = ["support@seoder.com"]
 license = ""
 repository = ""
 edition = "2021"

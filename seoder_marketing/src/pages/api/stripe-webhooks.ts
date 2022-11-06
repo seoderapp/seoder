@@ -100,7 +100,7 @@ export async function post({ request }) {
       // Let Stripe know the event was received successfully.
       if (data && data.attributes.status === "ACTIVE") {
         await transport.sendMail({
-          from: "support@seoder.io",
+          from: "support@seoder.com",
           to: stripeCustomer.email,
           subject: "Seoder One Year License✔",
           text: "License key for the application.",
