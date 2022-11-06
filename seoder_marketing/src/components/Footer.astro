@@ -1,5 +1,6 @@
 ---
 import FooterBg from "./Svgs/FooterBg.astro";
+import Github from "./Svgs/Github.astro";
 import Twitter from "./Svgs/Twitter.astro";
 
 const currentYear = new Date().getFullYear();
@@ -39,6 +40,11 @@ const currentYear = new Date().getFullYear();
             ><Twitter />
           </a>
         </li>
+        <li>
+          <a href="https://github.com/SeoderApp" rel="noopener" target="_blank"
+            ><Github />
+          </a>
+        </li>
       </ul>
     </div>
     <p class={"cc"}>
@@ -62,6 +68,7 @@ const currentYear = new Date().getFullYear();
     margin: 0;
     gap: 1.4rem;
     display: flex;
+    text-align: left;
   }
 
   footer li {
