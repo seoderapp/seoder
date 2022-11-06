@@ -69,19 +69,6 @@
     ele.stroke();
   }
 
-  const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-  function slowBytes(x) {
-    let l = 0;
-    let n = parseInt(x, 10) || 0;
-
-    while (n >= 1024 && ++l) {
-      n = n / 1024;
-    }
-
-    return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
-  }
-
   socket.addEventListener("open", () => {
     socket.send("config");
     socket.send("list-files");
@@ -177,32 +164,31 @@
       const data = JSON.parse(raw);
       const {
         cpu_usage,
-        // load_avg_min,
         network_received,
         network_transmited,
         network_total_transmitted,
         memory_free,
-        // memory_used,
         memory_total,
       } = data.stats;
 
       if (ctx) {
         setProgress(ctx, cpu_usage);
       }
+
       if (ctx2) {
         setProgress(ctx2, (memory_free / memory_total) * 100);
       }
 
       if (netstats) {
-        netstats.innerHTML = `${slowBytes(network_received)} / s`;
+        netstats.innerHTML = network_received;
       }
 
       if (netstatsUp) {
-        netstatsUp.innerHTML = `${slowBytes(network_transmited)} / s`;
+        netstatsUp.innerHTML = network_transmited;
       }
 
       if (netstatsTotal) {
-        netstatsTotal.innerHTML = slowBytes(network_total_transmitted);
+        netstatsTotal.innerHTML = network_total_transmitted;
       }
 
       return;

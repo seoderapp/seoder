@@ -1,17 +1,17 @@
 const socketRuntime = new WebSocket("ws://127.0.0.1:8089");
 
-// const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
-// function slowBytes(x) {
-//   let l = 0;
-//   let n = parseInt(x, 10) || 0;
+function slowBytes(x) {
+  let l = 0;
+  let n = parseInt(x, 10) || 0;
 
-//   while (n >= 1024 && ++l) {
-//     n = n / 1024;
-//   }
+  while (n >= 1024 && ++l) {
+    n = n / 1024;
+  }
 
-//   return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
-// }
+  return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+}
 
 socketRuntime.addEventListener("open", () => {
   socketRuntime.send("loop");
@@ -20,7 +20,7 @@ socketRuntime.addEventListener("open", () => {
 // /*
 //  * List of web socket matchers * special for high performance
 //  */
-// const estats = "{" + '"' + "stats"; // os stats
+const estats = "{" + '"' + "stats"; // os stats
 // const bftc = "{" + '"' + "buffer" + '"'; // buffer
 // const ptp = "{" + '"' + "pengine" + '"' + ":" + '"'; // engine
 // const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"'; // selected file
@@ -41,7 +41,36 @@ socketRuntime.addEventListener("open", () => {
 
 function eventSub(event) {
   const data = event.data;
-  postMessage(data);
+
+  if (data && data?.startsWith(estats)) {
+    const { stats } = JSON.parse(data);
+    const {
+      cpu_usage,
+      // load_avg_min,
+      network_received,
+      network_transmited,
+      network_total_transmitted,
+      memory_free,
+      // memory_used,
+      memory_total,
+    } = stats;
+
+    const networkReceived = `${slowBytes(network_received)} / s`;
+    const networkTransmited = `${slowBytes(network_transmited)} / s`;
+    const networkTotal = `${slowBytes(network_total_transmitted)}`;
+
+    postMessage(
+      JSON.stringify({
+        stats: Object.assign({}, stats, {
+          network_received: networkReceived,
+          network_transmited: networkTransmited,
+          network_total_transmitted: networkTotal,
+        }),
+      })
+    );
+  } else {
+    postMessage(data);
+  }
 
   // // license handling
   // if (raw.startsWith(vlicense)) {
@@ -62,45 +91,6 @@ function eventSub(event) {
   //   if (!firstCheck) {
   //     firstCheck = true;
   //   }
-  // }
-
-  // if (raw.startsWith(selectFile)) {
-  //   const np = JSON.parse(raw);
-  // }
-
-  // if (raw.startsWith(estats)) {
-  //   const data = JSON.parse(raw);
-  //   const {
-  //     cpu_usage,
-  //     // load_avg_min,
-  //     network_received,
-  //     network_transmited,
-  //     network_total_transmitted,
-  //     memory_free,
-  //     // memory_used,
-  //     memory_total,
-  //   } = data.stats;
-
-  //   // if (ctx) {
-  //   //   setProgress(ctx, cpu_usage);
-  //   // }
-  //   // if (ctx2) {
-  //   //   setProgress(ctx2, (memory_free / memory_total) * 100);
-  //   // }
-
-  //   // if (netstats) {
-  //   //   netstats.innerHTML = `${slowBytes(network_received)} / s`;
-  //   // }
-
-  //   // if (netstatsUp) {
-  //   //   netstatsUp.innerHTML = `${slowBytes(network_transmited)} / s`;
-  //   // }
-
-  //   // if (netstatsTotal) {
-  //   //   netstatsTotal.innerHTML = slowBytes(network_total_transmitted);
-  //   // }
-
-  //   return;
   // }
 
   // if (raw.startsWith(cfin)) {
