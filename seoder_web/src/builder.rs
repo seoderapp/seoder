@@ -94,7 +94,7 @@ pub async fn engine_builder(selected_engine: &str) -> (Vec<String>, Vec<String>,
             engine.campaign.paths,
             engine.campaign.patterns,
             selected_file,
-            source_match
+            source_match,
         )
     }
 }

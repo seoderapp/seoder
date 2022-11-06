@@ -324,6 +324,7 @@ declare global {
           patterns: np?.patterns,
           paths: np?.paths,
           status: CellStatus.READY,
+          sourceCode: np?.source_match ?? true,
         };
 
         engines.setKey(path, engineSource);

@@ -2,7 +2,7 @@ use crate::json;
 use crate::string_concat::string_concat;
 use crate::string_concat::string_concat_impl;
 use crate::tokio;
-use crate::utils::get_file_value;
+use crate::utils::{build_query, get_file_value};
 use crate::BufReader;
 use crate::OpenOptions;
 use crate::OutGoing;
@@ -153,8 +153,6 @@ pub async fn list_engines(mut outgoing: OutGoing) -> OutGoing {
         if child.metadata().await.unwrap().is_dir() {
             let dpt = child.path().to_str().unwrap().to_owned();
 
-            // engine paths
-            // engine patterns
             let file = OpenOptions::new()
                 .read(true)
                 .open(string_concat!(dpt, "/paths.txt"))
@@ -198,10 +196,38 @@ pub async fn list_engines(mut outgoing: OutGoing) -> OutGoing {
                 d.remove(0);
             }
 
+            let mut source_match = true;
+
+            let file = OpenOptions::new()
+                .read(true)
+                .open(string_concat!(dpt, "/config.txt"))
+                .await;
+
+            match file {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let mut lines = reader.lines();
+
+                    while let Some(line) = lines.next_line().await.unwrap() {
+                        let hh = line.split(" ").collect::<Vec<&str>>();
+                        let h0 = hh[0];
+                        let h1 = build_query(&hh);
+
+                        if hh.len() >= 2 {
+                            if h0 == "source" {
+                                source_match = h1.parse::<bool>().unwrap_or_default();
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            };
+
             let v = json!({
                   "epath": d,
                   "paths": paths,
-                  "patterns": patterns
+                  "patterns": patterns,
+                  "source_match": source_match
             });
 
             outgoing
