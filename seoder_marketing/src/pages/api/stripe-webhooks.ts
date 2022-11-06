@@ -108,9 +108,9 @@ export async function post({ request }) {
           <div>
             <h1>Thank you for purchasing Seoder<h1>
             <h2>License Key<h2/>
-            <b>${data.attributes.key}</b>
-            <h3>Number of Machines ${data.attributes.maxMachines}<h3/>
-            <div style="padding-bottom: 2rem;">
+            <b style="font-size: 2rem;">${data.attributes.key}</b>
+            <h3>Number of Machines ${data?.attributes?.maxMachines || 1}<h3/>
+            <div style="padding-bottom: 1.5rem;">
               <p>Please do not share the key. Only one machine is allowed per license.</p>
             </div>
             <div style="padding-bottom: 3rem;">

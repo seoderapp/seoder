@@ -9,13 +9,37 @@ const headers = {
 };
 
 export async function post({ request }) {
-  const jsonData = await request.json();
+  let jsonData = {
+    key: "",
+    fingerprint: "",
+    platform: "",
+  };
+
+  // todo: fix
+  try {
+    jsonData = await request.json();
+  } catch (e) {
+    console.error(e);
+  }
+
   const { key, fingerprint, platform } = jsonData ?? {};
 
   // todo rate limit
   if (!key) {
     return new Response(
       JSON.stringify({ valid: false, message: "Missing license key" }),
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+
+  if (!fingerprint) {
+    return new Response(
+      JSON.stringify({ valid: false, message: "Missing fingerprint body" }),
       {
         status: 400,
         headers: {
