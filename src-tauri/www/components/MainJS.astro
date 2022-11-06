@@ -1,10 +1,6 @@
----
-declare global {
-  var __TAURI__: any;
-}
----
-
 <script>
+  import MainWorker from "./Worker.js?worker";
+
   import {
     addErrorLogs,
     addInvalidLogs,
@@ -14,7 +10,7 @@ declare global {
     selectedEngine,
     setStatus,
   } from "../stores/engine";
-  import { socket, socketRuntime, initSockets } from "../events/sockets";
+  import { socket, initSockets } from "../events/sockets";
   import { CellStatus } from "./CampaignCell";
 
   import {
@@ -85,10 +81,6 @@ declare global {
 
     return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
   }
-
-  socketRuntime.addEventListener("open", () => {
-    socketRuntime.send("loop");
-  });
 
   socket.addEventListener("open", () => {
     socket.send("config");
@@ -371,7 +363,6 @@ declare global {
 
       if (!defaultOptionSet) {
         defaultOptionSet = true;
-
         proxySet.set(np.proxy);
         lowPowerSet.set(np.buffer);
         torSet.set(np.tor);
@@ -392,6 +383,8 @@ declare global {
     }
   }
 
+  const myWorker = new MainWorker();
+
   socket.addEventListener("message", eventSub);
-  socketRuntime.addEventListener("message", eventSub);
+  myWorker.onmessage = eventSub;
 </script>
