@@ -64,6 +64,13 @@ const onFileUpload = async (fileName: string, fileValue: string) => {
     form.append("file", file);
 
     request.send(form);
+
+    try {
+      const cache = await caches.open("v1");
+      await cache.delete("http://localhost:7050/download/files/" + fileName);
+    } catch (e) {
+      console.error(e);
+    }
   }
 };
 
