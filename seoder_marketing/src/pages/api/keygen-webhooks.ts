@@ -4,12 +4,10 @@ const productToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
 const accountId = import.meta.env.KEYGEN_ACCOUNT_ID;
 
 export async function post({ request }) {
+  let statusCode = 200;
   const jsonData = await request?.json();
   const { data } = jsonData ?? { data: null };
-
   const keygenEventId = data?.id;
-
-  let statusCode = 200;
 
   const keygenWebhook = await fetch(
     `https://api.keygen.sh/v1/accounts/${accountId}/webhook-events/${keygenEventId}`,

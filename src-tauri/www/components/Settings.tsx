@@ -13,7 +13,12 @@ import { Switch } from "./Switch";
 import { socket } from "../events/sockets";
 import { selectedFileOptionMutate } from "../utils/file-set";
 
-const checkedToBool = (value: string) => (value === "on" ? true : false);
+const checkedToBool = (value: string) => {
+  if (typeof value === "string") {
+    return value === "on" ? true : false;
+  }
+  return value;
+};
 
 export const Settings = () => {
   const $flist = useStore(fileList);
@@ -76,21 +81,22 @@ export const Settings = () => {
   };
 
   const onProxyChange = (event) => {
-    const checked = checkedToBool(event.target.value);
+    const checked = checkedToBool(event.target.checked);
 
     proxySet.set(checked);
     socket.send("set-proxy " + checked);
   };
 
   const onLowPowerChange = (event) => {
-    const checked = checkedToBool(event.target.value);
+    const checked = checkedToBool(event.target.checked);
 
     lowPowerSet.set(checked);
     socket.send("set-buffer " + checked);
   };
 
   const onTorChange = (event) => {
-    const checked = checkedToBool(event.target.value);
+    const checked = checkedToBool(event.target.checked);
+
     torSet.set(checked);
     socket.send("set-tor " + checked);
   };
