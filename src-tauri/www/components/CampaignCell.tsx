@@ -210,7 +210,7 @@ export const CampaignCell = ({
             <div className={"flex"}>
               <div className={"engine-title"}>{path}</div>
               <div id={"engine_stats_" + path} className={"engine-stats"}>
-                {item.valid} / {item.total}
+                {item.urls.size} / {item.total}
               </div>
               <div className="gutter-t flex gap-sm">
                 <div className={"row campaign-paths"}>

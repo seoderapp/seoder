@@ -113,7 +113,6 @@ declare global {
   const ptp = "{" + '"' + "pengine" + '"' + ":" + '"'; // engine
   const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"'; // selected file
   const ptpe = "{" + '"' + "epath" + '"' + ":" + '"'; // engine created
-  const ptc = "{" + '"' + "count" + '"'; // file count
   const dfpath = "{" + '"' + "dfpath" + '"'; // deleted file
   const deptc = "{" + '"' + "depath" + '"'; // deleted campaign
   const cfin = "{" + '"' + "finished" + '"'; // crawl finished
@@ -317,7 +316,6 @@ declare global {
       if (!engines.get()[path]) {
         const engineSource = {
           total: 0,
-          valid: 0,
           urls: new Set(),
           invalidUrls: new Set(),
           errorUrls: new Set(),
@@ -350,22 +348,6 @@ declare global {
 
       if (item) {
         setStatus(path, CellStatus.PAUSED);
-      }
-      return;
-    }
-
-    if (raw.startsWith(ptc)) {
-      const np = JSON.parse(raw);
-      const path = np && np.path;
-      const item = engines.get()[path];
-
-      if (item) {
-        item.valid = np.count ?? item.valid ?? 0;
-        engines.notify(path);
-
-        if (determineFinished(item)) {
-          setStatus(path, CellStatus.FINISHED);
-        }
       }
       return;
     }

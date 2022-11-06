@@ -1,4 +1,5 @@
 ---
+import Analytics from "./Svgs/Analytics.astro";
 import ArrowDown from "./Svgs/ArrowDown.astro";
 import ArrowUp from "./Svgs/ArrowUp.astro";
 ---
@@ -32,7 +33,10 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
     </div>
   </div>
   <div class="stats-bar gutter net-row" style="place-content: end;">
-    <button id="analytics-toggle" class="btn btn-primary">Analytics</button>
+    <button id="analytics-toggle" class="btn btn-primary row space-s center">
+      <Analytics />
+      Analytics
+    </button>
   </div>
 </div>
 

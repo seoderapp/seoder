@@ -41,13 +41,6 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                 d.remove(0);
             }
 
-            // valid lines
-            let mut lns = 0;
-            // invalid lines
-            let mut ilns = 0;
-            // errors lines
-            let mut elns = 0;
-
             match file {
                 Ok(file) => {
                     let reader = BufReader::new(file);
@@ -60,8 +53,6 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                             .send(Message::Text(v.to_string()))
                             .await
                             .unwrap_or_default();
-
-                        lns += 1;
                     }
                 }
                 _ => {}
@@ -80,7 +71,6 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                             .await
                             .unwrap_or_default();
 
-                        ilns += 1;
                     }
                 }
                 _ => {}
@@ -99,18 +89,10 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                             .await
                             .unwrap_or_default();
 
-                        elns += 1;
                     }
                 }
                 _ => {}
             };
-
-            let v = json!({ "count": lns, "ecount": ilns, "error_count": elns,  "path": d });
-
-            outgoing
-                .send(Message::Text(v.to_string()))
-                .await
-                .unwrap_or_default();
         }
     }
 
@@ -249,7 +231,6 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
 
             if !dpt.ends_with("/valid") {
                 let mut target = get_file_value(&ENTRY_PROGRAM.2, "target").await;
-
                 let mut engine = dpt;
 
                 if target.is_empty() {

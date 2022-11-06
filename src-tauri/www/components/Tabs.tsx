@@ -11,6 +11,10 @@ enum TabType {
 // active tab styles
 const tabStyles = (valid: boolean) => `tab${valid ? " tab-active" : ""}`;
 
+const tauriDragRegion = {
+  "data-tauri-drag-region": 1,
+};
+
 export const Tabs = ({ macOs }: { macOs?: boolean }) => {
   const [focused, setFocused] = useState<TabType>(TabType.valid);
 
@@ -21,12 +25,7 @@ export const Tabs = ({ macOs }: { macOs?: boolean }) => {
   const validFocused = focused === TabType.valid;
   const invalidFocused = focused === TabType.invalid;
   const errorFocused = focused === TabType.errors;
-
-  const baseProps = macOs
-    ? {
-        "data-tauri-drag-region": 1,
-      }
-    : {};
+  const baseProps = macOs ? tauriDragRegion : {};
 
   return (
     <div className={"feed"}>

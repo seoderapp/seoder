@@ -176,7 +176,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                 outgoing = send_message(outgoing, &v.to_string()).await;
             } else if st == Action::ListValidCampaigns {
-                outgoing = controls::list::list_valid(outgoing).await;
+                // outgoing = controls::list::list_valid(outgoing).await;
             } else if st == Action::ListEngines {
                 outgoing = controls::list::list_engines(outgoing).await;
             } else if st == Action::ListFileCount {

@@ -3,7 +3,6 @@ import { CellStatus } from "../components/CampaignCell";
 
 export type EngineProps = {
   total: number;
-  valid: number;
   urls: Set<string | unknown>;
   invalidUrls: Set<string | unknown>;
   errorUrls: Set<string | unknown>;
