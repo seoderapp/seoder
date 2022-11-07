@@ -1,12 +1,4 @@
-const id = import.meta.env.KEYGEN_ACCOUNT_ID;
-const productToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
-const token = import.meta.env.KEYGEN_API_TOKEN;
-
-const headers = {
-  "Content-Type": "application/vnd.api+json",
-  Accept: "application/vnd.api+json",
-  Authorization: `Bearer ${token}`,
-};
+import { headers, id, productToken } from "../../utils/config";
 
 export async function post({ request }) {
   let jsonData = {
@@ -70,6 +62,7 @@ export async function post({ request }) {
 
   const data = await response.json();
   const { meta } = data;
+
   let valid = meta?.valid;
 
   // assign finger print to machine

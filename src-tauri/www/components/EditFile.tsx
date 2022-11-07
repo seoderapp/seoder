@@ -30,7 +30,7 @@ const downloadFile = async (path) => {
   return new Promise(async (resolve) => {
     request.open("GET", url, true);
 
-    request.onload = async function () {
+    request.onload = function () {
       resolve(request.response);
     };
 

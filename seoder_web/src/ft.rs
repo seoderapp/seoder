@@ -8,10 +8,11 @@ use warp::{
     Filter, Rejection, Reply,
 };
 
-use crate::string_concat_impl;
+use crate::{string_concat_impl, utils::get_prospects};
 use seoder_lib::{
     packages::spider::utils::logd, string_concat::string_concat, tokio, ENTRY_PROGRAM,
 };
+use crate::controls;
 
 /// file server basic server init
 pub async fn file_server() {
@@ -27,14 +28,42 @@ pub async fn file_server() {
         .and(warp::fs::dir(ENTRY_PROGRAM.3.to_string()))
         .with(&cors);
 
+    let prospect_route = warp::path("prospect")
+        .and(warp::post())
+        .and(warp::multipart::form().max_length(5_000_000))
+        .and_then(prospect)
+        .with(&cors);
+
     let router = upload_route
         .or(download_route)
+        .or(prospect_route)
         .recover(handle_rejection)
         .with(&cors);
 
     println!("Server started at localhost:7050");
 
     warp::serve(router).run(([0, 0, 0, 0], 7050)).await;
+}
+
+/// prospect from api endpoint
+async fn prospect(form: FormData) -> Result<impl Reply, Rejection> {
+    let parts: Vec<Part> = form.try_collect().await.map_err(|e| {
+        eprintln!("form error: {}", e);
+        warp::reject::reject()
+    })?;
+
+    let mut title = String::from("");
+    
+    for p in parts {
+        if p.name() == "title" {
+            title = p.filename().unwrap_or_default().to_string();
+        }
+    }
+
+    let key = controls::list::license().await;
+    let prospect = get_prospects(&key, &title).await;
+    
+    Ok(prospect)
 }
 
 async fn upload(form: FormData) -> Result<impl Reply, Rejection> {
