@@ -6,6 +6,7 @@ interface EData {
   emails?: any[];
 }
 
+// get contacts from server
 const getContacts = (title: string) => {
   if (title) {
     const url = "http://localhost:7050/prospect";
@@ -39,13 +40,15 @@ export const ProspectFinder = ({ title }: { title: string }) => {
   const [results, setResults] = useState<EData>();
 
   useEffect(() => {
-    getContacts(title).then((res) => {
+    getContacts(title).then((res: any) => {
       try {
         if (res) {
           if (typeof res === "string") {
-            setResults(JSON.parse(res));
+            const j = JSON.parse(res);
+
+            setResults(j?.data);
           } else {
-            setResults(res);
+            setResults(res?.data);
           }
         } else {
           setResults({ emails: [] });
@@ -71,50 +74,84 @@ export const ProspectFinder = ({ title }: { title: string }) => {
             overflowX: "hidden",
           }}
         >
-          {results.emails?.map((contact) => {
-            return (
-              <li
-                key={contact}
-                style={{
-                  padding: "0.3rem",
-                  border: "1px solid #ccc",
-                  borderRadius: 4,
-                }}
-              >
-                <a
-                  href={contact.value}
+          {results.emails
+            ?.filter((item) => item.confidence >= 50)
+            ?.map((contact) => {
+              return (
+                <li
+                  key={contact}
                   style={{
-                    textDecoration: "none",
-                    display: "block",
-                    width: "100%",
-                    padding: "0.3rem 0.5rem",
+                    padding: "0.3rem",
+                    border: "1px solid #ccc",
+                    borderRadius: 4,
                   }}
                 >
                   <div
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.4rem",
+                      textDecoration: "none",
+                      display: "block",
+                      width: "100%",
+                      padding: "0.3rem 0.5rem",
                     }}
                   >
-                    {contact.first_name ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.4rem",
+                      }}
+                    >
+                      {contact.first_name ? (
+                        <div>
+                          {contact.first_name} {contact.last_name}
+                        </div>
+                      ) : (
+                        <div>N/A</div>
+                      )}
                       <div>
-                        {contact.first_name} {contact.last_name}
+                        Email:{" "}
+                        {contact.value ? (
+                          <a href={contact.value}>{contact.value}</a>
+                        ) : (
+                          "N/A"
+                        )}
                       </div>
-                    ) : (
-                      <div>N/A</div>
-                    )}
-                    <div>Email: {contact.value}</div>
-                    <div>Department: {contact.department ?? "N/A"}</div>
-                    <div>Position: {contact.position ?? "N/A"}</div>
-                    <div>Twitter: {contact.twitter ?? "N/A"}</div>
-                    <div>LinkedIn: {contact.linkedin ?? "N/A"}</div>
-                    <div>Phone: {contact.phone_number ?? "N/A"}</div>
+                      <div>Department: {contact.department ?? "N/A"}</div>
+                      <div>Position: {contact.position ?? "N/A"}</div>
+                      <div>
+                        Twitter:{" "}
+                        {contact.twitter ? (
+                          <a
+                            rel="noopener"
+                            target="_blank"
+                            href={contact.twitter}
+                          >
+                            {contact.twitter}
+                          </a>
+                        ) : (
+                          "N/A"
+                        )}
+                      </div>
+                      <div>
+                        LinkedIn:{" "}
+                        {contact.linkedin ? (
+                          <a
+                            rel="noopener"
+                            target="_blank"
+                            href={contact.linkedin}
+                          >
+                            {contact.linkedin}
+                          </a>
+                        ) : (
+                          "N/A"
+                        )}
+                      </div>
+                      <div>Phone: {contact.phone_number ?? "N/A"}</div>
+                    </div>
                   </div>
-                </a>
-              </li>
-            );
-          })}
+                </li>
+              );
+            })}
         </ul>
       );
     } else {
