@@ -101,6 +101,7 @@
   const vlicense = "{" + '"' + "license"; // valid license;
   const cstarted = "{" + '"' + "started"; // started campaigns from pause
   const cpaused = "{" + '"' + "paused"; // paused campaigns from pause
+  const ctact = "{" + '"' + "contacts"; // paused campaigns from pause
 
   // defaults for program entry
   let defaultOptionSet = false;
@@ -221,6 +222,27 @@
       return;
     }
 
+    // todo: move to worker
+    if (raw.startsWith(ctact)) {
+      const data = JSON.parse(raw);
+      const { contacts, domain, path } = data || {};
+      const item = engines.get()[path];
+
+      if (item) {
+        if (item.contacts.has(domain)) {
+          const contact = item.contacts.get(domain)?.contacts ?? [];
+
+          if (!contact.includes(contacts)) {
+            item.contacts.set(domain, { contacts: [...contact, contacts] });
+          }
+        } else {
+          item.contacts.set(domain, { contacts: [contacts] });
+        }
+      }
+
+      return;
+    }
+
     if (raw.startsWith(epaths)) {
       const np = JSON.parse(raw);
       const { error_path, error_url } = np || {};
@@ -297,10 +319,13 @@
           urls: new Set(),
           invalidUrls: new Set(),
           errorUrls: new Set(),
+          // email contacts
+          contacts: new Map(),
           patterns: np?.patterns,
           paths: np?.paths,
           status: CellStatus.READY,
           sourceCode: np?.source_match ?? true,
+          // todo social media contacts
         };
 
         engines.setKey(path, engineSource);

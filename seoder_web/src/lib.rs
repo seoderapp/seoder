@@ -223,8 +223,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 utils::write_config("proxy", &input).await;
             } else if st == Action::SetStopped {
                 pause(&input).await;
-                // Todo: persist stop across app shutdown
-
                 let v = json!({ "stopped": input });
 
                 outgoing = send_message(outgoing, &v.to_string()).await;

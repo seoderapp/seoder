@@ -65,7 +65,7 @@ export const Tabs = ({ macOs }: { macOs?: boolean }) => {
         </button>
       </div>
 
-      <LogValid focused={validFocused} />
+      <LogValid focused={validFocused} id={"valid-logs"} />
       <LogInvalid focused={invalidFocused} />
       <LogErrors focused={errorFocused} />
     </div>

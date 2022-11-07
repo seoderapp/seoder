@@ -9,6 +9,7 @@ import { CampaignCreate } from "./CampaignCreate";
 import { Settings } from "./Settings";
 import { Analytics } from "./Analytics";
 import { EditFile } from "./EditFile";
+import { Contacts } from "./Contacts";
 
 Modal.setAppElement("#appProgram");
 
@@ -49,6 +50,7 @@ export const AppModal = () => {
         {modalState === ModalType.SETTINGS ? <Settings /> : null}
         {modalState === ModalType.ANALYTICS ? <Analytics /> : null}
         {modalState === ModalType.EDIT ? <EditFile /> : null}
+        {modalState === ModalType.CONTACTS ? <Contacts /> : null}
       </div>
     </Modal>
   );

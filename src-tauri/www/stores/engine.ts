@@ -9,6 +9,7 @@ export type EngineProps = {
   paths?: string[];
   patterns?: string[];
   status: CellStatus;
+  contacts?: Map<string, { contacts: string[] }>;
 };
 
 export interface Engine {
@@ -70,6 +71,13 @@ export const selectedErrors = computed(
   [engines, selectedEngine],
   (eng, selected) => {
     return eng[selected]?.errorUrls;
+  }
+);
+
+export const selectedContacts = computed(
+  [engines, selectedEngine],
+  (eng, selected) => {
+    return eng[selected] && eng[selected]?.contacts;
   }
 );
 

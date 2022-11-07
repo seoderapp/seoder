@@ -6,6 +6,7 @@ export enum ModalType {
   SETTINGS,
   ANALYTICS,
   EDIT,
+  CONTACTS,
 }
 
 // determine if modal is open and type
@@ -16,6 +17,9 @@ export const fileMap = map<{ [k: string]: any }>({});
 
 // selected file target
 export const selectedFile = atom<string>();
+
+// selected contacts for modal
+export const contactsModalData = atom<{ domain: string; contacts: string[] }>();
 
 // get invalid logs
 export const fileList = computed(fileMap, (files) => {

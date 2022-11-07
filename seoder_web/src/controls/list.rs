@@ -35,6 +35,11 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                 .open(string_concat!(dpt, "/errors/links.txt"))
                 .await;
 
+            let contacts_file = OpenOptions::new()
+                .read(true)
+                .open(string_concat!(dpt, "/contacts.txt"))
+                .await;
+
             let mut d = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
 
             if d.starts_with("/") {
@@ -70,7 +75,6 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                             .send(Message::Text(v.to_string()))
                             .await
                             .unwrap_or_default();
-
                     }
                 }
                 _ => {}
@@ -88,7 +92,31 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                             .send(Message::Text(v.to_string()))
                             .await
                             .unwrap_or_default();
+                    }
+                }
+                _ => {}
+            };
 
+            match contacts_file {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let mut lines = reader.lines();
+
+                    while let Some(line) = lines.next_line().await.unwrap() {
+                        let hh = line.split(" ").collect::<Vec<&str>>();
+
+                        let (h1, h2) = if hh.len() >= 2 {
+                            (hh[0], hh[1])
+                        } else {
+                            (hh[0], "")
+                        };
+
+                        let v = json!({ "contacts": h2, "domain": h1, "path": d });
+
+                        outgoing
+                            .send(Message::Text(v.to_string()))
+                            .await
+                            .unwrap_or_default();
                     }
                 }
                 _ => {}

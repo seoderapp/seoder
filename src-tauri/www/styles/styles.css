@@ -21,6 +21,10 @@ button {
   border: 0;
 }
 
+.flex-1 {
+  flex: 1;
+}
+
 .container {
   margin: 0;
   padding: 0;
@@ -67,6 +71,10 @@ button {
   gap: 0.4rem;
   flex-direction: column;
   display: flex;
+}
+
+.cell {
+  height: 1rem;
 }
 
 .cell-btn {
