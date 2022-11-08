@@ -58,6 +58,7 @@ export const ProspectFinder = ({ title }: { title: string }) => {
         } catch (e) {
           window.alert("Hunter.io API issue.");
           console.error(e);
+          setResults({ emails: [] });
         }
       });
     } else {
@@ -65,7 +66,6 @@ export const ProspectFinder = ({ title }: { title: string }) => {
         if (res) {
           try {
             const j = JSON.parse(res);
-
             if (j & j.errors?.some((item) => item?.code === 400)) {
               window.alert("Hunter.IO API quota reached");
               return;
@@ -74,7 +74,7 @@ export const ProspectFinder = ({ title }: { title: string }) => {
             setResults(j?.data);
           } catch (e) {
             console.error(e);
-            window.alert("Hunter.io API issue.");
+            setResults({ emails: [] });
           }
         } else {
           setResults({ emails: [] });

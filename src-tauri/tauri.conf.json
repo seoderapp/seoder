@@ -74,8 +74,8 @@
         "height": 600,
         "resizable": true,
         "title": "Seoder",
-        "width": 920,
-        "minWidth": 920,
+        "width": 945,
+        "minWidth": 800,
         "minHeight": 600
       }
     ]

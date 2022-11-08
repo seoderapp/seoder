@@ -233,7 +233,6 @@ button {
 
 .stats-box {
   padding: 0.5rem;
-  width: 100%;
   font-size: 0.87rem;
   place-content: center;
   display: flex;

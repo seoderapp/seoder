@@ -35,7 +35,6 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
   <div class="stats-bar gutter net-row" style="place-content: end;">
     <button id="analytics-toggle" class="btn btn-primary row space-s center">
       <Analytics />
-      Analytics
     </button>
   </div>
 </div>
@@ -102,19 +101,24 @@ import ArrowUp from "./Svgs/ArrowUp.astro";
     justify-content: center;
     display: flex;
     padding: 0.5rem;
-    width: 100px;
     color: #2f2768;
   }
   #analytics-toggle {
-    padding: 0.5rem 1rem;
+    padding: 1rem;
     border: 2px solid #2f2768;
     background-color: #fff;
     color: #2f2768;
     font-size: 1rem;
-    border-radius: 2rem;
+    border-radius: 3rem;
   }
   #analytics-toggle:hover {
     background-color: #ebecf2;
+  }
+  @media only screen and (max-width: 800px) {
+    .space,
+    .stats {
+      gap: 0.3rem;
+    }
   }
 </style>
 
