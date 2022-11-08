@@ -1,6 +1,6 @@
 import { useStore } from "@nanostores/react";
 import { useEffect, useState } from "react";
-import { contactsModalData } from "../stores/app";
+import { contactsModalData, hunterioKey } from "../stores/app";
 
 interface EData {
   emails?: any[];
@@ -17,7 +17,9 @@ const getContacts = (title: string) => {
       request.onload = function () {
         resolve(request.response);
       };
-      request.onerror = function () {};
+      request.onerror = function () {
+        resolve(null);
+      };
 
       const form = new FormData();
 
@@ -38,26 +40,48 @@ const getContacts = (title: string) => {
 
 export const ProspectFinder = ({ title }: { title: string }) => {
   const [results, setResults] = useState<EData>();
+  const $hunterio = useStore(hunterioKey);
 
   useEffect(() => {
-    getContacts(title).then((res: any) => {
-      try {
+    if ($hunterio) {
+      fetch(
+        `https://api.hunter.io/v2/domain-search?domain=${title}&api_key=${$hunterio}`
+      ).then(async (data) => {
+        try {
+          const j = await data.json();
+
+          if (j & j.errors?.some((item) => item?.code === 400)) {
+            window.alert("API quota reached");
+            return;
+          }
+          setResults(j?.data);
+        } catch (e) {
+          window.alert("Hunter.io API issue.");
+          console.error(e);
+        }
+      });
+    } else {
+      getContacts(title).then((res: any) => {
         if (res) {
-          if (typeof res === "string") {
+          try {
             const j = JSON.parse(res);
 
+            if (j & j.errors?.some((item) => item?.code === 400)) {
+              window.alert("Hunter.IO API quota reached");
+              return;
+            }
+
             setResults(j?.data);
-          } else {
-            setResults(res?.data);
+          } catch (e) {
+            console.error(e);
+            window.alert("Hunter.io API issue.");
           }
         } else {
           setResults({ emails: [] });
         }
-      } catch (e) {
-        console.error(e);
-      }
-    });
-  }, []);
+      });
+    }
+  }, [$hunterio, title]);
 
   if (results) {
     if (results.emails?.length) {
@@ -82,8 +106,7 @@ export const ProspectFinder = ({ title }: { title: string }) => {
                   key={contact}
                   style={{
                     padding: "0.3rem",
-                    border: "1px solid #ccc",
-                    borderRadius: 4,
+                    borderBottom: "1px solid #ccc",
                   }}
                 >
                   <div
@@ -155,6 +178,14 @@ export const ProspectFinder = ({ title }: { title: string }) => {
         </ul>
       );
     } else {
+      if (!$hunterio) {
+        return (
+          <div>
+            <div>No leads found.</div>
+            <p>Add your hunter.io for more API request limits.</p>
+          </div>
+        );
+      }
       return <div>No leads found</div>;
     }
   }
@@ -168,13 +199,9 @@ export const Contacts = () => {
   const contacts = $selected?.contacts ?? [];
   const title = $selected?.domain ?? "Contact Modal";
 
-  const onClickCompany = () => {
-    setPersonal(false);
-  };
+  const onClickCompany = () => setPersonal(false);
 
-  const onClickPersonal = () => {
-    setPersonal(true);
-  };
+  const onClickPersonal = () => setPersonal(true);
 
   return (
     <div>
@@ -215,8 +242,7 @@ export const Contacts = () => {
                   key={contact}
                   style={{
                     padding: "0.3rem",
-                    border: "1px solid #ccc",
-                    borderRadius: 4,
+                    borderBottom: "1px solid #ccc",
                   }}
                 >
                   <a

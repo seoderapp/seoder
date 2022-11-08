@@ -1,4 +1,5 @@
 import { atom, map, computed } from "nanostores";
+import { persistentAtom } from "@nanostores/persistent";
 
 export enum ModalType {
   CLOSED,
@@ -30,3 +31,6 @@ export const fileList = computed(fileMap, (files) => {
 export const proxySet = atom<boolean>(false);
 export const lowPowerSet = atom<boolean>(false);
 export const torSet = atom<boolean>(false);
+
+// hunterio state
+export const hunterioKey = persistentAtom<string>("");

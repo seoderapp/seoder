@@ -1,6 +1,7 @@
 import { useStore } from "@nanostores/react";
 import {
   fileList,
+  hunterioKey,
   lowPowerSet,
   modalStore,
   ModalType,
@@ -26,6 +27,7 @@ export const Settings = () => {
   const $tor = useStore(torSet);
   const $proxy = useStore(proxySet);
   const $lowpower = useStore(lowPowerSet);
+  const $hunterio = useStore(hunterioKey);
 
   const onLicenseSubmit = (event) => {
     event.preventDefault();
@@ -105,6 +107,14 @@ export const Settings = () => {
     modalStore.set(ModalType.EDIT);
   };
 
+  // set local hunter IO key
+  const onHunterSubmit = (event) => {
+    event.preventDefault();
+    const v = event.target.hunter.value;
+
+    hunterioKey.set(v);
+  };
+
   return (
     <div className="form-container">
       <div>
@@ -146,7 +156,11 @@ export const Settings = () => {
             </select>
           </div>
           <div className="flex align-end">
-            <button type="button" className="button edit" onClick={onEditFile}>
+            <button
+              type="button"
+              className="button edit button-sm"
+              onClick={onEditFile}
+            >
               Edit File
             </button>
           </div>
@@ -154,7 +168,7 @@ export const Settings = () => {
             <div>
               <button
                 type="button"
-                className="button delete"
+                className="button delete button-sm"
                 onClick={onDeleteFile}
               >
                 Delete
@@ -170,17 +184,46 @@ export const Settings = () => {
           method="post"
           onSubmit={onFileUpload}
         >
-          <label htmlFor="file">Crawl list</label>
+          <label htmlFor="uploadfile">Crawl list</label>
           <div className="ph">
-            <input type="file" accept=".txt" name="file" />
+            <input type="file" accept=".txt" name="file" id="uploadfile" />
           </div>
-          <button className="btn-primary button" type="submit">
+          <button className="btn-primary button button-sm" type="submit">
             Upload
           </button>
         </form>
 
+        <form
+          onSubmit={onHunterSubmit}
+          className="ph frame flex-row center-align"
+        >
+          <label htmlFor="hunter">Hunter IO Key</label>
+          <div className="ph">
+            <input
+              type="text"
+              placeholder="xxx-xxx-xxx-xxx-xxx"
+              name="hunter"
+              className="button-sm"
+              id="hunterio"
+              value={$hunterio}
+            />
+          </div>
+          <button className="btn-primary button button-sm" type="submit">
+            Set Key
+          </button>
+        </form>
+        <div
+          style={{
+            padding: "0.1rem 0.5rem",
+            fontSize: "0.85rem",
+            color: "#A1A7AD",
+          }}
+        >
+          Get your <a href={"https://hunter.io/api-keys"}>Hunter.io API</a> key
+          for prospects.
+        </div>
         <form id="ulicense" className="ph" onSubmit={onLicenseSubmit}>
-          <LicenseInput />
+          <LicenseInput className="pless" />
         </form>
       </div>
     </div>

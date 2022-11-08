@@ -2,7 +2,7 @@ import "../styles/license.css";
 
 import { useState } from "react";
 
-export default function LicenseInput() {
+export default function LicenseInput({ className }: { className?: string }) {
   const [license, setLicense] = useState<string>("");
 
   const onChangeTextEvent = (e) => {
@@ -13,13 +13,13 @@ export default function LicenseInput() {
 
   return (
     <>
-      <div className="license-form">
+      <div className={`license-form${className ? ` ${className}` : ""}`}>
         <label htmlFor="license">License Key</label>
         <input
           name="license"
           placeholder="XXXX-XXXX-XXXXX-XXXXX-XXXXXX"
           type="text"
-          className="license-input"
+          className={`license-input`}
           onChange={onChangeTextEvent}
         />
         <div className="gutter-t">

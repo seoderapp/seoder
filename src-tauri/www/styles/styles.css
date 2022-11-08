@@ -538,3 +538,7 @@ button {
   display: inline-block;
   pointer-events: none;
 }
+
+.button-sm {
+  padding: 0.2rem 0.7rem;
+}

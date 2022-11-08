@@ -116,3 +116,7 @@ input:checked + .slider:after {
   -ms-transform: translateX(24px);
   transform: translateX(24px);
 }
+
+.pless {
+  padding: 1rem 0;
+}
