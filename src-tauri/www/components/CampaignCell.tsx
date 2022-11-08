@@ -12,6 +12,12 @@ import { useState } from "react";
 import { socket } from "../events/sockets";
 import { KeyWords } from "./Svgs/KeyWords";
 import { Folder } from "./Svgs/Folder";
+import {
+  etemplates,
+  modalStore,
+  ModalType,
+  selectedTemplateCreate,
+} from "../stores/app";
 
 declare global {
   var __TAURI__: any;
@@ -157,7 +163,19 @@ export const CampaignCell = ({
 
     if (confirm) {
       onDeleteEvent(path);
+
+      if (etemplates.get()[path]) {
+        etemplates.setKey(path, undefined);
+      }
     }
+  };
+
+  const onClickEmailTemplate = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    selectedTemplateCreate.set(path);
+    modalStore.set(ModalType.EMAIL);
   };
 
   const engineStatusClass = cellStatusClass(item);
@@ -228,6 +246,29 @@ export const CampaignCell = ({
                 className={`${engineStatusClass} gutter`}
               >
                 {item.status}
+              </div>
+              <div
+                style={{
+                  justifyContent: "flex-end",
+                  display: "flex",
+                  padding: "0.02rem 0",
+                }}
+              >
+                <button
+                  onClick={onClickEmailTemplate}
+                  type="button"
+                  style={{ backgroundColor: "transparent" }}
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16">
+                    <title>Email Template</title>
+                    <path
+                      fill="none"
+                      stroke="#000"
+                      strokeWidth="2"
+                      d="M1 4h22v16H1V4zm0 1 11 8.5L23 5"
+                    ></path>
+                  </svg>
+                </button>
               </div>
               <div className={`${showBar ? "engine-bar" : "hidden"}`}>
                 <div

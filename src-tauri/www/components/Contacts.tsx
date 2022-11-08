@@ -1,6 +1,7 @@
 import { useStore } from "@nanostores/react";
 import { useEffect, useState } from "react";
-import { contactsModalData, hunterioKey } from "../stores/app";
+import { contactsModalData, etemplates, hunterioKey } from "../stores/app";
+import { selectedEngine } from "../stores/engine";
 
 interface EData {
   emails?: any[];
@@ -90,7 +91,15 @@ const useProspects = (title) => {
   };
 };
 
-export const ProspectFinder = ({ title }: { title: string }) => {
+export const ProspectFinder = ({
+  title,
+  subject,
+  body,
+}: {
+  title: string;
+  subject?: string;
+  body?: string;
+}) => {
   const { results, $hunterio } = useProspects(title);
 
   if (results) {
@@ -111,6 +120,12 @@ export const ProspectFinder = ({ title }: { title: string }) => {
           {results.emails
             ?.filter((item) => item.confidence >= 50)
             ?.map((contact) => {
+              const href = contact.value
+                ? `mailto:${contact.value}?subject=${subject ?? ""}&body=${
+                    body ?? ""
+                  }`
+                : contact;
+
               return (
                 <li
                   key={contact}
@@ -144,7 +159,7 @@ export const ProspectFinder = ({ title }: { title: string }) => {
                       <div>
                         Email:{" "}
                         {contact.value ? (
-                          <a href={contact.value}>{contact.value}</a>
+                          <a href={href}>{contact.value}</a>
                         ) : (
                           "N/A"
                         )}
@@ -203,15 +218,22 @@ export const ProspectFinder = ({ title }: { title: string }) => {
 };
 
 export const Contacts = () => {
-  const $selected = useStore(contactsModalData);
   const [personal, setPersonal] = useState<boolean>(false);
+  const $selected = useStore(contactsModalData);
+  const $selectedItem = useStore(selectedEngine);
+  const $etemplates = useStore(etemplates);
+
+  const onClickCompany = () => setPersonal(false);
+  const onClickPersonal = () => setPersonal(true);
+
+  const item = $etemplates[$selectedItem];
+  const searchParams = new URLSearchParams(item);
+
+  const subject = searchParams.get("subject");
+  const body = searchParams.get("body");
 
   const contacts = $selected?.contacts ?? [];
   const title = $selected?.domain ?? "Contact Modal";
-
-  const onClickCompany = () => setPersonal(false);
-
-  const onClickPersonal = () => setPersonal(true);
 
   return (
     <div>
@@ -247,6 +269,12 @@ export const Contacts = () => {
             {contacts?.map((contact) => {
               const url = new URL(contact);
 
+              const href = url.pathname
+                ? `mailto:${url.pathname}?subject=${subject ?? ""}&body=${
+                    body ?? ""
+                  }`
+                : contact;
+
               return (
                 <li
                   key={contact}
@@ -256,7 +284,7 @@ export const Contacts = () => {
                   }}
                 >
                   <a
-                    href={contact}
+                    href={href}
                     style={{
                       textDecoration: "none",
                       display: "block",
@@ -270,7 +298,7 @@ export const Contacts = () => {
             })}
           </ul>
         ) : (
-          <ProspectFinder title={title} />
+          <ProspectFinder title={title} body={body} subject={subject} />
         )}
       </div>
     </div>

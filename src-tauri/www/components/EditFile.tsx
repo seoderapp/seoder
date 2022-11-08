@@ -10,6 +10,7 @@ import rpkg from "@lexical/react/LexicalComposerContext";
 import pkg from "lexical";
 
 import { modalStore, ModalType, selectedFile } from "../stores/app";
+import { onFileUploadEvent } from "../utils/upload";
 
 const { $getRoot, $createParagraphNode, $createTextNode } = pkg;
 const { HistoryPlugin } = hpkg;
@@ -40,38 +41,6 @@ const downloadFile = async (path) => {
 
     request.send(new FormData());
   });
-};
-
-// todo: invalidate get cache
-const onFileUpload = async (fileName: string, fileValue: string) => {
-  const url = "http://localhost:7050/upload";
-  const request = new XMLHttpRequest();
-  request.open("POST", url, true);
-  request.onload = function () {};
-  request.onerror = function () {};
-
-  if (fileValue) {
-    const form = new FormData();
-
-    const blob = new Blob([fileValue.trim()], {
-      type: "text/plain",
-    });
-
-    const file = new File([blob], fileName, {
-      type: "text/plain",
-    });
-
-    form.append("file", file);
-
-    request.send(form);
-
-    try {
-      const cache = await caches.open("v1");
-      await cache.delete("http://localhost:7050/download/files/" + fileName);
-    } catch (e) {
-      console.error(e);
-    }
-  }
 };
 
 function CustomEditPlugin() {
@@ -113,7 +82,7 @@ function CustomSubmitPlugin() {
 
       const text = root.__cachedText;
 
-      await onFileUpload($selectedFile, text);
+      await onFileUploadEvent($selectedFile, text);
 
       modalStore.set(ModalType.CLOSED);
     });

@@ -1,5 +1,5 @@
 import { atom, map, computed } from "nanostores";
-import { persistentAtom } from "@nanostores/persistent";
+import { persistentAtom, persistentMap } from "@nanostores/persistent";
 
 export enum ModalType {
   CLOSED,
@@ -9,6 +9,7 @@ export enum ModalType {
   EDIT,
   CONTACTS,
   INTEGRATIONS,
+  EMAIL,
 }
 
 // determine if modal is open and type
@@ -19,6 +20,9 @@ export const fileMap = map<{ [k: string]: any }>({});
 
 // selected file target
 export const selectedFile = atom<string>();
+
+// selected template create
+export const selectedTemplateCreate = atom<string>();
 
 // selected contacts for modal
 export const contactsModalData = atom<{ domain: string; contacts: string[] }>();
@@ -35,3 +39,10 @@ export const torSet = atom<boolean>(false);
 
 // hunterio state
 export const hunterioKey = persistentAtom<string>("");
+
+export type EmailsValue = {
+  // todo: multi list of emails
+  [x: string]: string;
+};
+
+export const etemplates = persistentMap<EmailsValue>("etemplates:", {});

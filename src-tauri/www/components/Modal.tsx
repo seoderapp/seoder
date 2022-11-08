@@ -11,6 +11,7 @@ import { Analytics } from "./Analytics";
 import { EditFile } from "./EditFile";
 import { Contacts } from "./Contacts";
 import { IntegrationsView } from "./Integrations/IntegrationsView";
+import { EmailCreate } from "./EmailCreate";
 
 Modal.setAppElement("#appProgram");
 
@@ -53,6 +54,7 @@ export const AppModal = () => {
         {modalState === ModalType.EDIT ? <EditFile /> : null}
         {modalState === ModalType.CONTACTS ? <Contacts /> : null}
         {modalState === ModalType.INTEGRATIONS ? <IntegrationsView /> : null}
+        {modalState === ModalType.EMAIL ? <EmailCreate /> : null}
       </div>
     </Modal>
   );

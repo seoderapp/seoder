@@ -521,10 +521,6 @@ button {
   margin: 0;
 }
 
-.editor-input > p:first-child {
-  display: none;
-}
-
 .editor-placeholder {
   color: #999;
   overflow: hidden;
