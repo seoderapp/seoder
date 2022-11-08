@@ -120,11 +120,11 @@ export const ProspectFinder = ({
           {results.emails
             ?.filter((item) => item.confidence >= 50)
             ?.map((contact) => {
-              const href = contact.value
-                ? `mailto:${contact.value}?subject=${subject ?? ""}&body=${
-                    body ?? ""
-                  }`
-                : contact;
+              const q = `?subject=${
+                subject ? encodeURIComponent(subject) : ""
+              }&body=${body ? encodeURIComponent(body) : ""}`;
+
+              const href = contact.value ? `mailto:${contact.value}${q}` : "";
 
               return (
                 <li
@@ -158,11 +158,7 @@ export const ProspectFinder = ({
                       )}
                       <div>
                         Email:{" "}
-                        {contact.value ? (
-                          <a href={href}>{contact.value}</a>
-                        ) : (
-                          "N/A"
-                        )}
+                        {href ? <a href={href}>{contact.value}</a> : "N/A"}
                       </div>
                       <div>Department: {contact.department ?? "N/A"}</div>
                       <div>Position: {contact.position ?? "N/A"}</div>
@@ -269,10 +265,12 @@ export const Contacts = () => {
             {contacts?.map((contact) => {
               const url = new URL(contact);
 
+              const q = `?subject=${
+                subject ? encodeURIComponent(subject) : ""
+              }&body=${body ? encodeURIComponent(body) : ""}`;
+
               const href = url.pathname
-                ? `mailto:${url.pathname}?subject=${subject ?? ""}&body=${
-                    body ?? ""
-                  }`
+                ? `mailto:${url.pathname}${q}`
                 : contact;
 
               return (
