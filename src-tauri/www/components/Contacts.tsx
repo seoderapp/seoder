@@ -38,7 +38,8 @@ const getContacts = (title: string) => {
   }
 };
 
-export const ProspectFinder = ({ title }: { title: string }) => {
+// use prospects hook
+const useProspects = (title) => {
   const [results, setResults] = useState<EData>();
   const $hunterio = useStore(hunterioKey);
 
@@ -52,8 +53,8 @@ export const ProspectFinder = ({ title }: { title: string }) => {
 
           if (j & j.errors?.some((item) => item?.code === 400)) {
             window.alert("API quota reached");
-            return;
           }
+
           setResults(j?.data);
         } catch (e) {
           window.alert("Hunter.io API issue.");
@@ -68,7 +69,6 @@ export const ProspectFinder = ({ title }: { title: string }) => {
             const j = JSON.parse(res);
             if (j & j.errors?.some((item) => item?.code === 400)) {
               window.alert("Hunter.IO API quota reached");
-              return;
             }
 
             setResults(j?.data);
@@ -82,6 +82,16 @@ export const ProspectFinder = ({ title }: { title: string }) => {
       });
     }
   }, [$hunterio, title]);
+
+  return {
+    results,
+    setResults,
+    $hunterio,
+  };
+};
+
+export const ProspectFinder = ({ title }: { title: string }) => {
+  const { results, $hunterio } = useProspects(title);
 
   if (results) {
     if (results.emails?.length) {
@@ -182,7 +192,7 @@ export const ProspectFinder = ({ title }: { title: string }) => {
         return (
           <div>
             <div>No leads found.</div>
-            <p>Add your hunter.io for more API request limits.</p>
+            <p>Add your Hunter.io key for more API request limits.</p>
           </div>
         );
       }
