@@ -107,12 +107,9 @@ export const Settings = () => {
     modalStore.set(ModalType.EDIT);
   };
 
-  // set local hunter IO key
-  const onHunterSubmit = (event) => {
+  const onIntegrationClick = (event) => {
     event.preventDefault();
-    const v = event.target.hunter.value;
-
-    hunterioKey.set(v);
+    modalStore.set(ModalType.INTEGRATIONS);
   };
 
   return (
@@ -193,35 +190,16 @@ export const Settings = () => {
           </button>
         </form>
 
-        <form
-          onSubmit={onHunterSubmit}
-          className="ph frame flex-row center-align"
-        >
-          <label htmlFor="hunter">Hunter IO Key</label>
-          <div className="ph">
-            <input
-              type="text"
-              placeholder="xxx-xxx-xxx-xxx-xxx"
-              name="hunter"
-              className="button-sm"
-              id="hunterio"
-              value={$hunterio}
-            />
-          </div>
-          <button className="btn-primary button button-sm" type="submit">
-            Set Key
+        <div className="ph">
+          <button
+            type={"button"}
+            onClick={onIntegrationClick}
+            className="btn-primary button button-sm"
+          >
+            Integrations
           </button>
-        </form>
-        <div
-          style={{
-            padding: "0.1rem 0.5rem",
-            fontSize: "0.85rem",
-            color: "#A1A7AD",
-          }}
-        >
-          Get your <a href={"https://hunter.io/api-keys"}>Hunter.io API</a> key
-          for prospects.
         </div>
+
         <form id="ulicense" className="ph" onSubmit={onLicenseSubmit}>
           <LicenseInput className="pless" />
         </form>

@@ -8,6 +8,7 @@ export enum ModalType {
   ANALYTICS,
   EDIT,
   CONTACTS,
+  INTEGRATIONS,
 }
 
 // determine if modal is open and type

@@ -10,6 +10,7 @@ import { Settings } from "./Settings";
 import { Analytics } from "./Analytics";
 import { EditFile } from "./EditFile";
 import { Contacts } from "./Contacts";
+import { IntegrationsView } from "./Integrations/IntegrationsView";
 
 Modal.setAppElement("#appProgram");
 
@@ -51,6 +52,7 @@ export const AppModal = () => {
         {modalState === ModalType.ANALYTICS ? <Analytics /> : null}
         {modalState === ModalType.EDIT ? <EditFile /> : null}
         {modalState === ModalType.CONTACTS ? <Contacts /> : null}
+        {modalState === ModalType.INTEGRATIONS ? <IntegrationsView /> : null}
       </div>
     </Modal>
   );
