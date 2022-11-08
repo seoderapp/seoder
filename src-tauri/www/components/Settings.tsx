@@ -158,7 +158,7 @@ export const Settings = () => {
               className="button edit button-sm"
               onClick={onEditFile}
             >
-              Edit File
+              Edit
             </button>
           </div>
           <div className="flex align-end">
@@ -190,7 +190,7 @@ export const Settings = () => {
           </button>
         </form>
 
-        <div className="ph">
+        <div className="ph frame">
           <button
             type={"button"}
             onClick={onIntegrationClick}
