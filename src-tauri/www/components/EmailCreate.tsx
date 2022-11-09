@@ -147,7 +147,7 @@ const EmailSubject = () => {
           borderRadius: "0.5rem",
           padding: "0.3rem 0.5rem",
         }}
-        value={subject}
+        defaultValue={subject}
       ></input>
     </div>
   );
