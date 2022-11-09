@@ -19,7 +19,14 @@ const options = {
       return value;
     },
   },
+  plugins: [],
 };
+
+const legend = [
+  { name: "Valids", color: "rgb(16 185 129)" },
+  { name: "Invalids", color: "rgb(234 179 8)" },
+  { name: "Errors", color: "rgb(220 38 38)" },
+];
 
 export const Analytics = () => {
   const $campaignList = useStore(enginesList);
@@ -43,9 +50,9 @@ export const Analytics = () => {
     const data = {
       labels: $campaignList,
       series: [
-        valids, // valids
-        invalids, // invalids
-        errors, // errors
+        { name: "Valids", data: valids },
+        { name: "Invalids", data: invalids },
+        { name: "Errors", data: errors },
       ],
     };
 
@@ -55,6 +62,18 @@ export const Analytics = () => {
   return (
     <div style={{ minWidth: "10rem" }}>
       <div style={{ height: "0.5rem" }}></div>
+      <div className="flex row gap ph gutter-xl center">
+        {legend.map(({ name, color }) => {
+          return (
+            <div className="flex row gap center">
+              <div style={{ fontSize: "0.75rem", color: "rgb(30, 30, 30)" }}>
+                {name}
+              </div>
+              <span style={{ backgroundColor: color, height: 8, width: 8 }} />
+            </div>
+          );
+        })}
+      </div>
       <div id={"chart"}></div>
     </div>
   );
