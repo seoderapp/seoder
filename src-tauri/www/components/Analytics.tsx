@@ -2,7 +2,7 @@ import "chartist/dist/index.css";
 import "../styles/chart.css";
 
 import { BarChart } from "chartist";
-import { useEffect } from "react";
+import { useEffect, Fragment } from "react";
 import { useStore } from "@nanostores/react";
 import { engines, enginesList } from "../stores/engine";
 
@@ -65,12 +65,14 @@ export const Analytics = () => {
       <div className="flex row gap ph gutter-xl center">
         {legend.map(({ name, color }) => {
           return (
-            <div className="flex row gap center">
-              <div style={{ fontSize: "0.75rem", color: "rgb(30, 30, 30)" }}>
-                {name}
+            <Fragment key={name}>
+              <div className="flex row gap center">
+                <div style={{ fontSize: "0.75rem", color: "rgb(30, 30, 30)" }}>
+                  {name}
+                </div>
+                <span style={{ backgroundColor: color, height: 8, width: 8 }} />
               </div>
-              <span style={{ backgroundColor: color, height: 8, width: 8 }} />
-            </div>
+            </Fragment>
           );
         })}
       </div>
