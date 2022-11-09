@@ -5,6 +5,7 @@ import { engines } from "../stores/engine";
 import { fileList, modalStore, ModalType } from "../stores/app";
 import { useState } from "react";
 import { useStore } from "@nanostores/react";
+import { FileUpload } from "./FileUpload";
 
 // todo: refactor modal outside for central components
 export const CampaignCreate = () => {
@@ -104,27 +105,20 @@ export const CampaignCreate = () => {
 
         <div className="gutter" style={{ paddingBottom: "1.2rem" }}>
           <label htmlFor="dname">Choose domain list</label>
-          <div className="ph flex-row center-align">
-            <div>
-              <select name="target" id="dname">
-                {$flist.map((key) => {
-                  return (
-                    <option key={key} id={"fsskeys_" + key} value={key}>
-                      {key}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-            {/* <div className="flex">
-              <button
-                type="button"
-                className="button edit button-sm"
-                onClick={onFileAdd}
-              >
-                Add
-              </button>
-            </div> */}
+          <div
+            className="ph flex-row center-align gap-xl"
+            style={{ gap: "2rem" }}
+          >
+            <select name="target" id="dname">
+              {$flist.map((key) => {
+                return (
+                  <option key={key} id={"fsskeys_" + key} value={key}>
+                    {key}
+                  </option>
+                );
+              })}
+            </select>
+            <FileUpload label={"Add"} labelClassName={""} formless />
           </div>
         </div>
 

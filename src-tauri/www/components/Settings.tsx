@@ -1,7 +1,6 @@
 import { useStore } from "@nanostores/react";
 import {
   fileList,
-  hunterioKey,
   lowPowerSet,
   modalStore,
   ModalType,
@@ -12,7 +11,7 @@ import {
 import LicenseInput from "./LicenseInput";
 import { Switch } from "./Switch";
 import { socket } from "../events/sockets";
-import { selectedFileOptionMutate } from "../utils/file-set";
+import { FileUpload } from "./FileUpload";
 
 const checkedToBool = (value: string) => {
   if (typeof value === "string") {
@@ -27,7 +26,6 @@ export const Settings = () => {
   const $tor = useStore(torSet);
   const $proxy = useStore(proxySet);
   const $lowpower = useStore(lowPowerSet);
-  const $hunterio = useStore(hunterioKey);
 
   const onLicenseSubmit = (event) => {
     event.preventDefault();
@@ -42,28 +40,6 @@ export const Settings = () => {
       modalStore.set(ModalType.CLOSED);
     } else {
       window.alert("Please enter a license.");
-    }
-  };
-
-  const onFileUpload = async (event) => {
-    event.preventDefault();
-    const url = "http://localhost:7050/upload";
-    const request = new XMLHttpRequest();
-    request.open("POST", url, true);
-    request.onload = function () {};
-    request.onerror = function () {
-      // request failed
-    };
-    const fileValue = event.target["file"].value;
-    if (fileValue) {
-      const formData = new FormData(event.target as HTMLFormElement);
-
-      request.send(formData);
-      const optimisticPath = fileValue.replace(/^.*[\\\/]/, "");
-
-      selectedFileOptionMutate({
-        path: optimisticPath,
-      });
     }
   };
 
@@ -174,21 +150,7 @@ export const Settings = () => {
           </div>
         </div>
 
-        <form
-          id="uploadform"
-          className="ph frame flex-row center-align"
-          encType="multipart/form-data"
-          method="post"
-          onSubmit={onFileUpload}
-        >
-          <label htmlFor="uploadfile">Crawl list</label>
-          <div className="ph">
-            <input type="file" accept=".txt" name="file" id="uploadfile" />
-          </div>
-          <button className="btn-primary button button-sm" type="submit">
-            Upload
-          </button>
-        </form>
+        <FileUpload label={"Add File"} />
 
         <div className="ph frame">
           <button

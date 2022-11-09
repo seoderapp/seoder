@@ -221,6 +221,10 @@ button {
   color: #fff;
 }
 
+.preview {
+  width: 7rem;
+}
+
 .form-control {
   -webkit-appearance: none;
   -moz-appearance: none;
