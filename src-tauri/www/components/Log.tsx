@@ -5,6 +5,7 @@ import {
   memo,
   FC,
   PropsWithChildren,
+  useMemo,
 } from "react";
 import { useStore } from "@nanostores/react";
 import {
@@ -159,9 +160,7 @@ export function Log({ id, emptyId, focused, atom }: Props) {
 export function LogS({ id, emptyId, focused, atom }: Props) {
   const $list = useStore(atom);
   const $contacts = useStore(selectedContacts);
-
   const divRef = useRef(null);
-  const empty = !$list.length;
 
   const { scrollEnabled, onToggleScrolling } = useScrolling({
     divRef,
@@ -169,6 +168,23 @@ export function LogS({ id, emptyId, focused, atom }: Props) {
     focused,
     atom,
   });
+
+  const empty = !$list.length;
+
+  const list = useMemo(() => {
+    return (
+      <>
+        {$list.map((item: string) => (
+          <LogItem
+            key={item}
+            contacts={$contacts?.has(item) ? $contacts.get(item).contacts : []}
+          >
+            {item}
+          </LogItem>
+        ))}
+      </>
+    );
+  }, [$list, $contacts]);
 
   return (
     <div
@@ -179,16 +195,7 @@ export function LogS({ id, emptyId, focused, atom }: Props) {
       <div className="log">
         <ul id={id} role={"list"}>
           <EmptyCell empty={empty} emptyId={emptyId} />
-          {$list.map((item: string) => (
-            <LogItem
-              key={item}
-              contacts={
-                $contacts?.has(item) ? $contacts.get(item).contacts : []
-              }
-            >
-              {item}
-            </LogItem>
-          ))}
+          {list}
           <ScrollButton
             empty={empty}
             scrollEnabled={scrollEnabled}

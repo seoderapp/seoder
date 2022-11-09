@@ -8,7 +8,7 @@ import {
   selectedEngine,
   validLogs,
 } from "../stores/engine";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { socket } from "../events/sockets";
 import { KeyWords } from "./Svgs/KeyWords";
 import { Folder } from "./Svgs/Folder";
@@ -98,6 +98,7 @@ export const CampaignCell = ({
   path: string;
   item: EngineProps;
 }) => {
+  // todo: move to parent to prevent re-rendering
   const $selected = useStore(selectedEngine);
   const [pressed, setPressed] = useState<boolean>();
 
@@ -180,35 +181,41 @@ export const CampaignCell = ({
 
   const engineStatusClass = cellStatusClass(item);
 
+  const itemStatus = item.status;
+
   const bgClass =
-    item.status === CellStatus.RUNNING ? " engine-background-running" : "";
+    itemStatus === CellStatus.RUNNING ? " engine-background-running" : "";
 
   const baseClass = path === $selected ? "cell-btn-active" : "";
 
-  let cellRunProps = {
-    title: "Run",
-    icon: "/assets/unpause.svg",
-    onPress: onRunPress,
-  };
-
-  if (item.status === CellStatus.RUNNING) {
-    cellRunProps = {
-      title: "Pause",
-      icon: "/assets/pause.svg",
-      onPress: onPausePress,
-    };
-  }
-
-  if (item.status === CellStatus.PAUSED) {
-    cellRunProps = {
-      title: "Start",
+  const cellRunProps = useMemo(() => {
+    let cellRunProps = {
+      title: "Run",
       icon: "/assets/unpause.svg",
-      onPress: onPausePress, // handle same method to unpause
+      onPress: onRunPress,
     };
-  }
+
+    if (itemStatus === CellStatus.RUNNING) {
+      cellRunProps = {
+        title: "Pause",
+        icon: "/assets/pause.svg",
+        onPress: onPausePress,
+      };
+    }
+
+    if (itemStatus === CellStatus.PAUSED) {
+      cellRunProps = {
+        title: "Start",
+        icon: "/assets/unpause.svg",
+        onPress: onPausePress, // handle same method to unpause
+      };
+    }
+
+    return cellRunProps;
+  }, [itemStatus]);
 
   const showBar =
-    item.status === CellStatus.RUNNING || item.status === CellStatus.PAUSED;
+    itemStatus === CellStatus.RUNNING || itemStatus === CellStatus.PAUSED;
 
   const totalCurrentCount =
     item.invalidUrls.size + item.errorUrls.size + item.urls.size;
