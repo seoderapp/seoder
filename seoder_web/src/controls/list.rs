@@ -256,10 +256,11 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
     while let Some(child) = dir.next_entry().await.unwrap_or_default() {
         if child.metadata().await.unwrap().is_dir() {
             let dpt = child.path().to_str().unwrap().to_owned();
+            let c_config = String::from(string_concat!(dpt, "/config.txt"));
 
             if !dpt.ends_with("/valid") {
                 let mut target = get_file_value(&ENTRY_PROGRAM.2, "target").await;
-                let mut engine = dpt;
+                let mut engine = dpt.clone();
 
                 if target.is_empty() {
                     target = String::from(string_concat!(ENTRY_PROGRAM.1, "urls-input.txt"));
@@ -268,6 +269,34 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
                 if engine.is_empty() {
                     engine = String::from("default");
                 }
+
+                // target file length
+                match OpenOptions::new().read(true).open(c_config).await {
+                    Ok(file) => {
+                        let reader = BufReader::new(file);
+                        let mut lines = reader.lines();
+
+                        while let Some(line) = lines.next_line().await.unwrap() {
+                            let hh = line.split(" ").collect::<Vec<&str>>();
+
+                            if hh.len() >= 2 {
+                                let h0 = hh[0];
+                                let h1 = hh[1].to_string();
+
+                                if h0 == "target" {
+                                    let path = std::path::Path::new(&h1);
+                                    let filename = path.file_name().unwrap();
+                                    let f = filename.to_str().unwrap_or_default().to_string();
+    
+                                    if !f.is_empty() {
+                                        target = String::from(string_concat!(ENTRY_PROGRAM.1, f));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                };
 
                 let mut nml = 0;
 

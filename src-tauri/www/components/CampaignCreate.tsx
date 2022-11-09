@@ -2,12 +2,14 @@ import "../styles/forms.css";
 
 import { socket } from "../events/sockets";
 import { engines } from "../stores/engine";
-import { modalStore, ModalType } from "../stores/app";
+import { fileList, modalStore, ModalType } from "../stores/app";
 import { useState } from "react";
+import { useStore } from "@nanostores/react";
 
 // todo: refactor modal outside for central components
 export const CampaignCreate = () => {
   const [source, setSourceOnly] = useState<boolean>(true);
+  const $flist = useStore(fileList);
 
   const onSubmitEvent = (event) => {
     event.preventDefault();
@@ -21,12 +23,17 @@ export const CampaignCreate = () => {
       'input[name="epatterns"]'
     );
 
+    const etarget: HTMLInputElement = eform.querySelector(
+      'select[name="target"]'
+    );
+
     if (engine && engine.value) {
       const m = JSON.stringify({
         name: engine.value,
         paths: epaths.value.length ? epaths.value : "/",
         patterns: epatterns.value,
         source,
+        target: etarget.value,
       });
 
       if (engines.get()[m]) {
@@ -41,17 +48,13 @@ export const CampaignCreate = () => {
     }
   };
 
-  const closeModal = () => {
-    modalStore.set(ModalType.CLOSED);
-  };
+  const closeModal = () => modalStore.set(ModalType.CLOSED);
 
-  const onSetSource = () => {
-    setSourceOnly(true);
-  };
+  const onSetSource = () => setSourceOnly(true);
 
-  const onRemoveSource = () => {
-    setSourceOnly(false);
-  };
+  const onRemoveSource = () => setSourceOnly(false);
+
+  // const onFileAdd = () => {};
 
   return (
     <form id="eform" onSubmit={onSubmitEvent}>
@@ -98,6 +101,32 @@ export const CampaignCreate = () => {
         </div>
 
         <p>Choose where to crawl the keywords against</p>
+
+        <div className="gutter" style={{ paddingBottom: "1.2rem" }}>
+          <label htmlFor="dname">Choose domain list</label>
+          <div className="ph flex-row center-align">
+            <div>
+              <select name="target" id="dname">
+                {$flist.map((key) => {
+                  return (
+                    <option key={key} id={"fsskeys_" + key} value={key}>
+                      {key}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            {/* <div className="flex">
+              <button
+                type="button"
+                className="button edit button-sm"
+                onClick={onFileAdd}
+              >
+                Add
+              </button>
+            </div> */}
+          </div>
+        </div>
 
         <div className="optional">Optional</div>
         <div className="seperator"></div>

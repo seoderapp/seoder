@@ -46,7 +46,7 @@ export const AppModal = () => {
       shouldCloseOnOverlayClick
       style={customStyles}
     >
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "relative", overflow: "hidden" }}>
         <SettingsBar title={title} />
         {modalState === ModalType.CAMPAIGN ? <CampaignCreate /> : null}
         {modalState === ModalType.SETTINGS ? <Settings /> : null}

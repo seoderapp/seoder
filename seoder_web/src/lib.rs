@@ -98,10 +98,14 @@ lazy_static! {
 #[derive(Serialize, Deserialize, Debug, Default)]
 struct Eng {
     name: String,
+    /// folder targets
     paths: String,
+    /// pattern matching
     patterns: String,
     /// source code only
     source: bool,
+    /// target file
+    target: String
 }
 
 /// tick status refreshing
@@ -246,7 +250,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     let pt = v.paths;
                     let pat = v.patterns;
                     let source = v.source;
-                    // let target_file = v.target;
+                    let target = v.target;
 
                     tokio::task::spawn(async move {
                         let ptt = pt.split(','); // paths
@@ -288,6 +292,10 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                         let x = string_concat!("source ", source.to_string(), "\n");
                         file.write_all(&x.as_bytes()).await.unwrap();
+                        if !target.is_empty() {
+                            let x = string_concat!("target ", target.to_string(), "\n");
+                            file.write_all(&x.as_bytes()).await.unwrap();
+                        }
                     });
                 }
             } else if st == Action::SetList {
