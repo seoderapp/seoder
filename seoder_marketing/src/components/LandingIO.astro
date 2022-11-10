@@ -20,8 +20,10 @@ import Section from "./Section.astro";
           </div>
         </div>
       </div>
-      <div class={"text-center flex-center"}>
-        <AnchorButton href="https://seoder.com/payments" title={"BUY NOW"} />
+      <div class="flex-center bg pad">
+        <div class={"hero-bg flex-center"}>
+          <AnchorButton href="https://seoder.com/payments" title={"BUY NOW"} />
+        </div>
       </div>
     </div>
   </Section>
@@ -80,11 +82,27 @@ import Section from "./Section.astro";
     gap: 5.9rem;
     text-align: left;
   }
+
   .flex-center {
     display: flex;
     justify-content: center;
     align-items: center;
   }
+
+  .hero-bg {
+    border: 3px solid #2f2768;
+    padding: 5rem;
+    height: 13rem;
+    width: auto;
+    border-radius: 30rem;
+    background-color: #2f2768;
+  }
+
+  .pad {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
   @media only screen and (max-width: 1080px) {
     .flex-wrap {
       gap: 3rem;
