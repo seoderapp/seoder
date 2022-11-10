@@ -5,6 +5,7 @@ import Linux from "./Logos/Linux.astro";
 import Windows from "./Logos/Windows.astro";
 // @ts-ignore
 import pkg from "../../package.json";
+import Highlight from "./Highlight.astro";
 
 export type Props = {
   sub?: boolean;
@@ -17,7 +18,7 @@ const version = pkg.version ?? "0.0.2";
 ---
 
 <section>
-  <p class="highlight center">Downloads</p>
+  <Highlight className="center">Downloads</Highlight>
   {
     sub ? (
       <h3 class="text-primary center heading">{platText}</h3>

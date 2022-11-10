@@ -8,6 +8,7 @@ import Title from "./Typo/Title.astro";
 import Section from "./Section.astro";
 import FeatureList from "./FeatureList.astro";
 import Hero from "./Svgs/Hero.astro";
+import Highlight from "./Highlight.astro";
 ---
 
 <div class="prog">
@@ -32,7 +33,7 @@ import Hero from "./Svgs/Hero.astro";
   <Section>
     <div class="row features">
       <div class="features">
-        <p class="highlight">Features</p>
+        <Highlight>Features</Highlight>
         <h2 class="text-primary sub-heading">Beyond fast keyword searcher</h2>
         <Search />
       </div>
@@ -114,6 +115,7 @@ import Hero from "./Svgs/Hero.astro";
     gap: 5.9rem;
     text-align: left;
   }
+
   @media only screen and (max-width: 1080px) {
     .flex-wrap {
       gap: 3rem;
