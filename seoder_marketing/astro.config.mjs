@@ -4,6 +4,7 @@ import vercel from "@astrojs/vercel/serverless";
 import robotsTxt from "astro-robots-txt";
 import sitemap from "@astrojs/sitemap";
 import image from "@astrojs/image";
+
 const site = process.env.DOMAIN || "https://seoder.com";
 
 // https://astro.build/config
@@ -15,14 +16,14 @@ export default defineConfig({
     react(),
     sitemap({
       customPages: [
-        "/",
-        "/about",
-        "/payments",
-        "/faq",
-        "/privacy-policy",
-        "/terms-of-service",
-        "/seos-can-be-dangerous",
-        "/compare/seoder-vs-zendesk-sell",
+        `${site}/`,
+        `${site}/about`,
+        `${site}/payments`,
+        `${site}/faq`,
+        `${site}/privacy-policy`,
+        `${site}/terms-of-service`,
+        `${site}/seos-can-be-dangerous`,
+        `${site}/compare/seoder-vs-zendesk-sell`,
       ],
     }),
     robotsTxt({
