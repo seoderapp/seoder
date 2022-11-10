@@ -222,7 +222,11 @@ button {
 }
 
 .preview {
-  width: 7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 3;
+  color: #2f2768;
+  /* white-space: nowrap; */
 }
 
 .form-control {
@@ -342,10 +346,16 @@ button {
   flex-direction: column;
 }
 
-#uploadform button {
+#uploadform .button:not(.disabled) {
   background-color: transparent;
   border: 1px solid #0e1116;
   color: #0e1116;
+}
+
+.disabled {
+  background-color: #dfe6ec;
+  color: rgba(17, 17, 17, 0.32);
+  border-color: #dfe6ec;
 }
 
 .wrap {

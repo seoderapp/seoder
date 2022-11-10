@@ -43,6 +43,11 @@ const labelButtonStyle: React.CSSProperties = {
   paddingBottom: "0.5rem",
 };
 
+const labelStyle: React.CSSProperties = {
+  ...labelButtonStyle,
+  cursor: "pointer",
+};
+
 export const FileUpload = ({
   label,
   submitTitle,
@@ -61,6 +66,8 @@ export const FileUpload = ({
     }
   };
 
+  const disabled = !inputState;
+
   if (formless) {
     return (
       <div
@@ -71,7 +78,7 @@ export const FileUpload = ({
         <label
           htmlFor="uploadfile"
           className={labelClassName}
-          style={labelButtonStyle}
+          style={labelStyle}
         >
           {label ?? "Crawl list"}
         </label>
@@ -81,18 +88,17 @@ export const FileUpload = ({
           name="file"
           onChange={onInputChange}
           id="uploadfile"
-          style={{ opacity: 0, width: 10 }}
+          style={{ opacity: 0, width: 5 }}
         />
         <div className="preview">
-          <p id="preview">
-            {inputState || "No files currently selected for upload"}
-          </p>
+          <p id="preview">{inputState || "No files selected"}</p>
         </div>
         <button
-          className="btn-primary button"
+          className={`button${disabled ? " disabled" : ""}`}
           type="button"
           style={labelButtonStyle}
           onClick={onFileUpload}
+          disabled={disabled}
         >
           {submitTitle ?? "Upload"}
         </button>
@@ -109,11 +115,7 @@ export const FileUpload = ({
       method="post"
       onSubmit={onFileUpload}
     >
-      <label
-        htmlFor="uploadfile"
-        className={labelClassName}
-        style={labelButtonStyle}
-      >
+      <label htmlFor="uploadfile" className={labelClassName} style={labelStyle}>
         {label ?? "Crawl list"}
       </label>
       <input
@@ -122,17 +124,16 @@ export const FileUpload = ({
         name="file"
         id="uploadfile"
         onChange={onInputChange}
-        style={{ opacity: 0, width: 10 }}
+        style={{ opacity: 0, width: 5 }}
       />
       <div className="preview">
-        <p id="preview">
-          {inputState || "No files currently selected for upload"}
-        </p>
+        <p id="preview">{inputState || "No files selected"}</p>
       </div>
       <button
-        className="btn-primary button"
+        className={`button${disabled ? " disabled" : ""}`}
         type="submit"
         style={labelButtonStyle}
+        disabled={disabled}
       >
         {submitTitle ?? "Upload"}
       </button>

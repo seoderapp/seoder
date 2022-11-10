@@ -103,20 +103,15 @@ export const CampaignCreate = () => {
 
         <p>Choose where to crawl the keywords against</p>
 
-        <div className="gutter" style={{ paddingBottom: "1.2rem" }}>
+        <div className="gutter">
           <label htmlFor="dname">Choose domain list</label>
-          <div
-            className="ph flex-row center-align gap-xl"
-            style={{ gap: "2rem" }}
-          >
+          <div className="flex-row center-align gap-xl" style={{ gap: "1rem" }}>
             <select name="target" id="dname">
-              {$flist.map((key) => {
-                return (
-                  <option key={key} id={"fsskeys_" + key} value={key}>
-                    {key}
-                  </option>
-                );
-              })}
+              {$flist.map((key) => (
+                <option key={key} id={"fsskeys_" + key} value={key}>
+                  {key}
+                </option>
+              ))}
             </select>
             <FileUpload label={"Add"} labelClassName={""} formless />
           </div>
