@@ -16,9 +16,12 @@ import Section from "./Section.astro";
         </p>
         <div class={"text-center"}>
           <div>
-            <AnchorButton href="https://seoder.com" title={"BUY NOW"} />
+            <AnchorButton href="https://seoder.com" title={"Learn More"} />
           </div>
         </div>
+      </div>
+      <div class={"text-center flex-center"}>
+        <AnchorButton href="https://seoder.com/payments" title={"BUY NOW"} />
       </div>
     </div>
   </Section>
@@ -76,6 +79,11 @@ import Section from "./Section.astro";
     flex-direction: row;
     gap: 5.9rem;
     text-align: left;
+  }
+  .flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   @media only screen and (max-width: 1080px) {
     .flex-wrap {
