@@ -14,7 +14,7 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [
     react(),
-    robotsTxt(),
+    robotsTxt({ sitemap: true }),
     sitemap({
       customPages: [
         "/",
