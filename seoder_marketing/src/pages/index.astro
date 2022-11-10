@@ -3,20 +3,15 @@ import Layout from "../layouts/Layout.astro";
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
 import Landing from "../components/Landing.astro";
-import LandingIO from "../components/LandingIO.astro";
-
-const canonicalURL = new URL(Astro.site);
-const domain = canonicalURL.hostname;
-const ioCom = domain.endsWith(".io");
 ---
 
 <Layout
-  title="Seoder - The marketing outbound lead generation tool"
+  title="Seoder - The outbound lead generation tool"
   description={"Outbound lead generation fast with little downtime. Insightful marketing campaigns for high conversion ratios and templating tools."}
 >
   <main>
-    <Navbar hiddenBuy={ioCom} />
-    {ioCom ? <LandingIO /> : <Landing />}
+    <Navbar />
+    <Landing />
   </main>
   <Footer />
 </Layout>
