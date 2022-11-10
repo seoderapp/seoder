@@ -1,0 +1,123 @@
+---
+import { Image } from "@astrojs/image/components";
+
+import AnchorButton from "./AnchorButton.astro";
+import Search from "./Svgs/Search.astro";
+import Download from "./Download.astro";
+import Title from "./Typo/Title.astro";
+import Section from "./Section.astro";
+import FeatureList from "./FeatureList.astro";
+import Hero from "./Svgs/Hero.astro";
+---
+
+<div class="prog">
+  <Section>
+    <div class="flex-wrap">
+      <div>
+        <Title>Find outbound leads swiftly and efficiently</Title>
+        <p class="instructions text-primary">
+          Import thousands of domains and identify keywords {`you’re`} looking for
+        </p>
+        <div class={"text-center"}>
+          <div>
+            <AnchorButton href="/payments" title={"BUY NOW"} />
+          </div>
+        </div>
+      </div>
+      <div>
+        <Hero />
+      </div>
+    </div>
+  </Section>
+  <Section>
+    <div class="row features">
+      <div class="features">
+        <p class="highlight">Features</p>
+        <h2 class="text-primary sub-heading">Beyond fast keyword searcher</h2>
+        <Search />
+      </div>
+      <FeatureList />
+    </div>
+  </Section>
+  <Section>
+    <Image
+      src="/screens/App-Landing-Screenshot.png"
+      srcset={`
+              /screens/App-Landing-Screenshot@3x.png 1818w,
+              /screens/App-Landing-Screenshot@2x.png 1212w,
+              /screens/App-Landing-Screenshot.png 606w
+            `}
+      sizes={`((min-width: 50em) and (max-width: 60em)) 50em,
+            ((min-width: 30em) and (max-width: 50em)) 30em,
+            (max-width: 30em) 20em`}
+      height={920}
+      width={1212}
+      alt="Seoder app intro display"
+      class="bg"
+    />
+  </Section>
+  <Section>
+    <Download />
+  </Section>
+</div>
+
+<style>
+  .heading {
+    font-size: 1.4rem;
+  }
+  .sub-heading {
+    font-size: 2.25rem;
+    max-width: 14rem;
+    font-weight: 600;
+  }
+  .trial {
+    font-size: 0.8rem;
+    color: #2f2768;
+    padding: 0.6rem 0;
+    margin: 0;
+    opacity: 0.8;
+  }
+  .text-center {
+    max-width: 14rem;
+    text-align: center;
+  }
+  .center {
+    text-align: center;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 3rem;
+  }
+  .features {
+    justify-content: center;
+    flex: 0.4;
+  }
+  .text-primary {
+    color: #2f2768;
+  }
+  .instructions {
+    font-size: 2rem;
+    max-width: 36rem;
+    color: #2f2768;
+    margin: 0;
+    padding-bottom: 3.6rem;
+  }
+  .bg {
+    width: 100%;
+    height: auto;
+  }
+  .flex-wrap {
+    display: flex;
+    flex-direction: row;
+    gap: 5.9rem;
+    text-align: left;
+  }
+  @media only screen and (max-width: 1080px) {
+    .flex-wrap {
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+  }
+</style>
