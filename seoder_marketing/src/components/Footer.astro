@@ -4,12 +4,28 @@ import Github from "./Svgs/Github.astro";
 import Twitter from "./Svgs/Twitter.astro";
 
 const currentYear = new Date().getFullYear();
+const canonicalURL = new URL(Astro.site);
 ---
 
 <footer>
   <div class="footer-container">
     <div class="container">
       <ul>
+        <li>
+          <a href="https://seoder.com/payments">Buy Now</a>
+        </li>
+        <li>
+          <a href={`${canonicalURL}/faq`}>FAQ</a>
+        </li>
+        <li>
+          <a href={`${canonicalURL}/about`}>About</a>
+        </li>
+        <li>
+          <a href={`${canonicalURL}/privacy-policy`}>Privacy Policy</a>
+        </li>
+        <li>
+          <a href={`${canonicalURL}/terms-of-service`}>Terms of Service</a>
+        </li>
         <li>
           <a
             href="https://usefathom.com/ref/IRZNZG"
@@ -19,21 +35,6 @@ const currentYear = new Date().getFullYear();
         </li>
         <li>
           <a href="mailto:support@seoder.com">Support</a>
-        </li>
-        <li>
-          <a href="/payments">Buy Now</a>
-        </li>
-        <li>
-          <a href="/faq">FAQ</a>
-        </li>
-        <li>
-          <a href="/about">About</a>
-        </li>
-        <li>
-          <a href="/privacy-policy">Privacy Policy</a>
-        </li>
-        <li>
-          <a href="/terms-of-service">Terms of Service</a>
         </li>
         <li>
           <a href="https://twitter.com/seoderio" rel="noopener" target="_blank"
