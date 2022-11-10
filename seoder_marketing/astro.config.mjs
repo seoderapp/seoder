@@ -13,18 +13,7 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [
     react(),
-    sitemap({
-      customPages: [
-        "/",
-        "/about",
-        "/payments",
-        "/faq",
-        "/privacy-policy",
-        "/terms-of-service",
-        "/seos-can-be-dangerous",
-        "/compare/seoder-vs-zendesk-sell",
-      ],
-    }),
+    sitemap(),
     robotsTxt({
       sitemap: true,
     }),
