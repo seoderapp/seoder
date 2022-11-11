@@ -10,55 +10,84 @@ const canonicalURL = new URL(Astro.site);
 <footer>
   <div class="footer-container">
     <div class="container">
-      <ul>
-        <li>
-          <a href="https://seoder.com/payments">Buy Now</a>
-        </li>
-        <li>
-          <a href={`${canonicalURL}faq`}>FAQ</a>
-        </li>
-        <li>
-          <a href={`${canonicalURL}about`}>About</a>
-        </li>
-        <li>
-          <a href={`${canonicalURL}compare/seoder-vs-zendesk-sell`}
-            >Seoder VS. Zendesk Sell</a
-          >
-        </li>
-        <li>
-          <a href={`${canonicalURL}privacy-policy`}>Privacy Policy</a>
-        </li>
-        <li>
-          <a href={`${canonicalURL}terms-of-service`}>Terms of Service</a>
-        </li>
-        <li>
-          <a
-            href="https://usefathom.com/ref/IRZNZG"
-            rel="noopener"
-            target="_blank">Analytics</a
-          >
-        </li>
-        <li>
-          <a href="mailto:support@seoder.com">Support</a>
-        </li>
-        <li>
-          <a
-            href="https://seoder1.statuspage.io/"
-            rel="noopener"
-            target="_blank">Server Status</a
-          >
-        </li>
-        <li>
-          <a href="https://twitter.com/seoderio" rel="noopener" target="_blank"
-            ><Twitter />
-          </a>
-        </li>
-        <li>
-          <a href="https://github.com/SeoderApp" rel="noopener" target="_blank"
-            ><Github />
-          </a>
-        </li>
-      </ul>
+      <div class="sub">
+        <h5>Product</h5>
+        <ul>
+          <li>
+            <a href="https://seoder.com/payments">Pricing</a>
+          </li>
+        </ul>
+      </div>
+      <div class="sub">
+        <h5>Updates</h5>
+        <ul>
+          <li>
+            <a href={`${canonicalURL}faq`}>FAQ</a>
+          </li>
+          <li>
+            <a href={`${canonicalURL}about`}>About</a>
+          </li>
+          <li>
+            <a href="mailto:support@seoder.com">Support</a>
+          </li>
+          <li>
+            <a
+              href="https://seoder1.statuspage.io/"
+              rel="noopener"
+              target="_blank">Server Status</a
+            >
+          </li>
+        </ul>
+      </div>
+      <div class="sub">
+        <h5>Compared to</h5>
+        <ul>
+          <li>
+            <a href={`${canonicalURL}compare/seoder-vs-zendesk-sell`}
+              >Seoder VS. Zendesk Sell</a
+            >
+          </li>
+        </ul>
+      </div>
+      <div class="sub">
+        <h5>Legal</h5>
+        <ul>
+          <li>
+            <a href={`${canonicalURL}privacy-policy`}>Privacy Policy</a>
+          </li>
+          <li>
+            <a href={`${canonicalURL}terms-of-service`}>Terms of Service</a>
+          </li>
+          <li>
+            <a
+              href="https://usefathom.com/ref/IRZNZG"
+              rel="noopener"
+              target="_blank">Analytics</a
+            >
+          </li>
+        </ul>
+      </div>
+      <div class="sub">
+        <h5>Social</h5>
+        <ul class="flex">
+          <li>
+            <a
+              href="https://twitter.com/seoderio"
+              rel="noopener"
+              target="_blank"
+              ><Twitter />
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://github.com/SeoderApp"
+              rel="noopener"
+              target="_blank"
+              ><Github />
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
     <p class={"cc"}>
       Seoder &copy; {currentYear}
@@ -73,23 +102,40 @@ const canonicalURL = new URL(Astro.site);
   footer {
     position: relative;
     overflow: hidden;
+    padding-top: 2rem;
   }
 
   footer ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
-    gap: 1.4rem;
-    display: flex;
     text-align: left;
+    flex-direction: column;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .flex {
+    flex-direction: row;
+  }
+  h5 {
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 1rem;
+    font-size: 1rem;
+  }
+
+  .sub {
+    flex: 1;
+    padding-top: 1rem;
   }
 
   footer li {
-    display: inline;
+    /* display: inline; */
   }
 
   footer a {
-    color: #2f2768;
+    color: var(--accent);
     font-size: 1rem;
     text-decoration: none;
     font-weight: 600;
@@ -109,13 +155,14 @@ const canonicalURL = new URL(Astro.site);
     bottom: 0px;
     pointer-events: none;
     z-index: -1;
+    height: 50vh;
   }
 
   .container {
     gap: 1.5rem;
     display: flex;
     flex-direction: row;
-    padding: 2rem 0;
+    padding: 0;
     flex-wrap: nowrap;
   }
 
@@ -125,6 +172,9 @@ const canonicalURL = new URL(Astro.site);
   }
 
   @media only screen and (max-width: 800px) {
+    .container {
+      flex-direction: column;
+    }
     footer {
       background: rgba(232, 192, 26, 0.17);
     }
