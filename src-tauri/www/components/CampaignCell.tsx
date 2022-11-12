@@ -29,29 +29,39 @@ const onExportEvent = async (path: string) => {
     filters: [
       {
         name: path,
-        extensions: ["txt"],
+        extensions: ["txt", "csv"],
       },
     ],
   });
 
-  const url =
-    "http://localhost:7050/download/engines/" + path + "/valid/links.txt";
-  const request = new XMLHttpRequest();
+  if (filePath) {
+    const request = new XMLHttpRequest();
 
-  // todo: Post endpoint to write to file instead of get
-  request.open("GET", url, true);
+    // TODO: Post endpoint to write to file instead of get
+    request.open(
+      "GET",
+      "http://localhost:7050/download/engines/" + path + "/valid/links.txt",
+      true
+    );
 
-  request.onload = async function () {
-    if (filePath && request.response) {
-      await window.__TAURI__.fs.writeTextFile(filePath, request.response);
-    }
-  };
+    request.onload = async function () {
+      if (request.response) {
+        const data = filePath.endsWith(".csv")
+          ? `domain\n${request.response
+              .split("\n")
+              .map((line) => line.split(/\s+/).join(","))
+              .join("\n")}`
+          : request.response;
+        await window.__TAURI__.fs.writeTextFile(filePath, data);
+      }
+    };
 
-  request.onerror = function () {
-    alert("Issue downloading the file.");
-  };
+    request.onerror = function () {
+      alert("Issue exporting the file.");
+    };
 
-  request.send(new FormData());
+    request.send(new FormData());
+  }
 };
 
 const onDeleteEvent = (path: string) => {
