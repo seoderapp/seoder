@@ -6,7 +6,7 @@ export interface Props {
 
 const { title, description } = Astro.props;
 
-const ogImage = new URL("/product.png", Astro.site);
+const ogImage = new URL("/og/OG_Image.png", Astro.site);
 const domain = ogImage.hostname;
 
 const domainCom = domain.replace(".io", ".com");
@@ -32,7 +32,7 @@ const domainCom = domain.replace(".io", ".com");
     <meta property="og:site_name" content={"Seoder"} />
     <meta
       property="keywords"
-      content="Seo Tool, Target Email Campaign Tool, Marketing Campaigns, Marketing, Target Links, Links"
+      content="Outbound Leads, Seo Tool, Target Email Campaign Tool, Marketing Campaigns, Marketing, Target Links, Links"
     />
   </head>
   <body>
