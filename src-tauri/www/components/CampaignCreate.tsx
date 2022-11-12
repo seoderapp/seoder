@@ -1,7 +1,7 @@
 import "../styles/forms.css";
 
 import { socket } from "../events/sockets";
-import { engines } from "../stores/engine";
+import { createEngine, engines } from "../stores/engine";
 import {
   fileList,
   fileMap,
@@ -34,21 +34,23 @@ export const CampaignCreate = () => {
     );
 
     if (engine && engine.value) {
-      const fileTarget = $newfile || selectedFile;
+      const fileTarget = $newfile || $selectedf;
 
-      const m = JSON.stringify({
+      const p = {
         name: engine.value,
         paths: epaths.value.length ? epaths.value : "/",
         patterns: epatterns.value,
         target: fileTarget,
         source,
-      });
+      };
+
+      const m = JSON.stringify(p);
 
       if (engines.get()[m]) {
         window.alert("Please enter a different engine name.");
       } else {
         socket.send("create-engine " + m);
-        socket.send("list-engines"); // todo: send new engine created on submit or add optimistic update
+        createEngine(engine.value, p);
         closeModal();
       }
     } else {

@@ -230,6 +230,15 @@ export const CampaignCell = ({
   const totalCurrentCount =
     item.invalidUrls.size + item.errorUrls.size + item.urls.size;
 
+  const paths =
+    item?.paths && Array.isArray(item?.paths)
+      ? item?.paths?.join(",")
+      : item?.paths;
+  const pats =
+    item?.patterns && Array.isArray(item?.patterns)
+      ? item?.patterns?.join(",")
+      : item?.patterns;
+
   return (
     <li
       className={`engine-item`}
@@ -249,11 +258,10 @@ export const CampaignCell = ({
               </div>
               <div className="gutter-t flex gap-sm">
                 <div className={"row campaign-paths"}>
-                  <Folder /> {item?.paths}
+                  <Folder /> {paths}
                 </div>
                 <div className={"row campaign-paths"}>
-                  <KeyWords />
-                  {item?.patterns}
+                  <KeyWords /> {pats}
                 </div>
               </div>
             </div>

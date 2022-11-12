@@ -5,6 +5,7 @@
     addErrorLogs,
     addInvalidLogs,
     addValidLogs,
+    createEngine,
     EngineProps,
     engines,
     selectedEngine,
@@ -71,13 +72,11 @@
 
   socket.addEventListener("open", () => {
     socket.send("config");
+    socket.send("feed");
     socket.send("list-files");
     socket.send("list-engines");
+    socket.send("list-campaign-stats");
     socket.send("list-totals");
-
-    setTimeout(() => {
-      socket.send("list-campaign-stats");
-    });
   });
 
   const netstats = document.getElementById("network-stats");
@@ -217,8 +216,9 @@
         if (determineFinished(eitem)) {
           setStatus(pengine, CellStatus.FINISHED);
         }
+      } else {
+        createEngine(pengine, np);
       }
-
       return;
     }
 
@@ -312,23 +312,8 @@
       const np = JSON.parse(raw);
       const path = np && (np.epath as string);
 
-      if (!engines.get()[path]) {
-        const engineSource = {
-          total: 0,
-          urls: new Set(),
-          invalidUrls: new Set(),
-          errorUrls: new Set(),
-          // email contacts
-          contacts: new Map(),
-          patterns: np?.patterns,
-          paths: np?.paths,
-          status: CellStatus.READY,
-          sourceCode: np?.source_match ?? true,
-          // todo social media contacts
-        };
+      createEngine(path, np);
 
-        engines.setKey(path, engineSource);
-      }
       return;
     }
 

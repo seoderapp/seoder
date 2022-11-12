@@ -180,7 +180,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                 outgoing = send_message(outgoing, &v.to_string()).await;
             } else if st == Action::ListValidCampaigns {
-                // outgoing = controls::list::list_valid(outgoing).await;
+                outgoing = controls::list::list_valid(outgoing).await;
             } else if st == Action::ListEngines {
                 outgoing = controls::list::list_engines(outgoing).await;
             } else if st == Action::ListFileCount {
@@ -252,7 +252,8 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                     let source = v.source;
                     let target = v.target;
 
-                    tokio::task::spawn(async move {
+                    // todo: remove handle
+                    let join = tokio::task::spawn(async move {
                         let ptt = pt.split(','); // paths
                         let ott = pat.split(','); // patterns
 
@@ -297,6 +298,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                             file.write_all(&x.as_bytes()).await.unwrap();
                         }
                     });
+
+                    
+                    join.await.unwrap();
+
+                    outgoing = controls::list::list_file_count(outgoing).await;
                 }
             } else if st == Action::SetList {
                 if !input.is_empty() {
@@ -468,7 +474,9 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
     tokio::spawn(scheduler.start());
 
     let handle = tokio::spawn(async move {
-        let mut interval = tokio::time::interval(Duration::from_millis(1000));
+        let mut interval = tokio::time::interval(Duration::from_millis(500));
+
+        // todo: add fs watcher and update data while loop exist in spawn
 
         while let Some(_) = receiver.recv().await {
             let mut list_ticket = 0;
@@ -476,15 +484,17 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
 
             // todo: handle fs tick count skip between
             loop {
+                // send stats per iteration
                 outgoing = ticker(outgoing).await;
 
+                // todo: remove list config loop for file watcher
                 if list_config == 0 {
                     outgoing = controls::list::config(outgoing).await;
 
                     list_config = list_config + 1;
                 } else {
                     list_config = list_config + 1;
-                    if list_ticket == 25 {
+                    if list_config == 25 {
                         list_config = 0;
                     }
                 }
@@ -492,9 +502,9 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
                 // list on this tick
                 if list_ticket == 0 {
                     outgoing = controls::list::list_valid(outgoing).await;
-                    outgoing = controls::list::list_engines(outgoing).await;
-                    outgoing = controls::list::list_file_count(outgoing).await;
-                    outgoing = controls::list::list_files(outgoing).await;
+                    // outgoing = controls::list::list_engines(outgoing).await;
+                    // outgoing = controls::list::list_file_count(outgoing).await;
+                    // outgoing = controls::list::list_files(outgoing).await;
                     list_ticket = list_ticket + 1;
                 } else {
                     list_ticket = list_ticket + 1;

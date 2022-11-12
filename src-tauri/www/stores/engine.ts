@@ -116,3 +116,54 @@ export const setStatus = action(
     }
   }
 );
+
+// standard methods until moved to action
+export const createEngine = action(
+  engines,
+  "create",
+  (store, path: string, np: any = {}) => {
+    const item = store.get()[path];
+
+    if (item) {
+      // merge all keys
+      Object.keys(np).forEach((key) => {
+        const ikey = item[key];
+
+        if (
+          !ikey ||
+          (Array.isArray(ikey) && !ikey.length && Array.isArray(np[key]))
+        ) {
+          const it = np[key];
+
+          if (
+            typeof it === "string" &&
+            (key === "patterns" || key === "paths")
+          ) {
+            // convert to array
+            item[key] = it.split(",");
+          } else {
+            item[key] = it;
+          }
+        }
+      });
+
+      store.notify(path);
+    } else {
+      const engineSource = {
+        total: np?.ploc ?? 0,
+        urls: new Set(),
+        invalidUrls: new Set(),
+        errorUrls: new Set(),
+        // email contacts
+        contacts: new Map(),
+        patterns: np?.patterns,
+        paths: np?.paths,
+        status: CellStatus.READY,
+        sourceCode: np?.source_match ?? true,
+        // todo social media contacts
+      };
+
+      store.setKey(path, engineSource);
+    }
+  }
+);
