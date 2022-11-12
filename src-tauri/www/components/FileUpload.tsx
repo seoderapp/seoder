@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { selectedFileOptionMutate } from "../utils/file-set";
 
-const onFileUpload = (event) => {
-  event.preventDefault();
-  const fileValue = event.target["file"].value;
+export const onFileUpload = async (event) => {
+  event?.preventDefault();
 
-  if (fileValue) {
+  const newValue = document?.getElementById("uploadform");
+  const input = newValue?.querySelector("input") as HTMLInputElement;
+
+  // validate input files
+  if (input && input?.files?.length) {
     const url = "http://localhost:7050/upload";
     const request = new XMLHttpRequest();
     request.open("POST", url, true);
@@ -13,11 +16,23 @@ const onFileUpload = (event) => {
     request.onerror = function () {
       // request failed
     };
-    const formData = new FormData(event.target as HTMLFormElement);
+    const formData = new FormData();
+
+    const newPath = input.value;
+
+    const optimisticPath = newPath.replace(/^.*[\\\/]/, "");
+
+    const blob = new Blob([await input.files[0].arrayBuffer()], {
+      type: "text/plain",
+    });
+
+    const file = new File([blob], optimisticPath, {
+      type: "text/plain",
+    });
+
+    formData.append("file", file);
 
     request.send(formData);
-
-    const optimisticPath = fileValue.replace(/^.*[\\\/]/, "");
 
     selectedFileOptionMutate({
       path: optimisticPath,
@@ -32,6 +47,7 @@ type UploadProps = {
   submitTitle?: string;
   labelClassName?: string;
   formless?: boolean;
+  onChange?(x?: any): any;
 };
 
 const labelButtonStyle: React.CSSProperties = {
@@ -53,16 +69,22 @@ export const FileUpload = ({
   submitTitle,
   labelClassName = "",
   formless,
+  onChange,
 }: UploadProps) => {
   const [inputState, setInput] = useState<string>("");
 
-  const onInputChange = (event) => {
+  const onInputChange = async (event) => {
     event.preventDefault();
     const fileValue = event.target.value;
     if (fileValue) {
       const optimisticPath = fileValue.replace(/^.*[\\\/]/, "");
 
       setInput(optimisticPath);
+
+      if (onChange) {
+        onChange(optimisticPath);
+        await onFileUpload(event);
+      }
     }
   };
 
@@ -93,15 +115,6 @@ export const FileUpload = ({
         <div className="preview">
           <p id="preview">{inputState || "No files selected"}</p>
         </div>
-        <button
-          className={`button${disabled ? " disabled" : ""}`}
-          type="button"
-          style={labelButtonStyle}
-          onClick={onFileUpload}
-          disabled={disabled}
-        >
-          {submitTitle ?? "Upload"}
-        </button>
       </div>
     );
   }

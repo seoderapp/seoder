@@ -51,6 +51,14 @@ export const Settings = () => {
     if (cf && $selectedTarget) {
       socket.send("delete-file " + $selectedTarget);
     }
+
+    if ($flist.length) {
+      const nextTarget = $flist[0];
+
+      selectedFile.set(nextTarget);
+
+      socket.send("set-list " + nextTarget);
+    }
   };
 
   const onChangeFile = (event) => {

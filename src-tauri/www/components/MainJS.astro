@@ -359,9 +359,6 @@
       const path = np && np.dfpath;
 
       if (fileMap.get()[path]) {
-        const kid = "fskeys_" + path;
-        const cell = document.getElementById(kid);
-        cell.remove();
         fileMap.setKey(path, undefined);
       }
       return;

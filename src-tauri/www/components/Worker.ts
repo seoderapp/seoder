@@ -239,20 +239,6 @@ function eventSub(event) {
   //   return;
   // }
 
-  // // settings
-  // if (raw.startsWith(bftc)) {
-  //   const np = JSON.parse(raw);
-
-  //   // if (!defaultOptionSet) {
-  //   //   defaultOptionSet = true;
-  //   //   proxySet.set(np.proxy);
-  //   //   lowPowerSet.set(np.buffer);
-  //   //   torSet.set(np.tor);
-  //   //   selectedFile.set(np.target);
-  //   // }
-  //   return;
-  // }
-
   // // delete engine
   // if (raw.startsWith(deptc)) {
   //   const np = JSON.parse(raw);

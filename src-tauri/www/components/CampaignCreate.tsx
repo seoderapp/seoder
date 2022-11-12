@@ -2,14 +2,23 @@ import "../styles/forms.css";
 
 import { socket } from "../events/sockets";
 import { engines } from "../stores/engine";
-import { fileList, modalStore, ModalType } from "../stores/app";
+import {
+  fileList,
+  fileMap,
+  modalStore,
+  ModalType,
+  selectedFile,
+} from "../stores/app";
 import { useState } from "react";
 import { useStore } from "@nanostores/react";
 import { FileUpload } from "./FileUpload";
 
 // todo: refactor modal outside for central components
 export const CampaignCreate = () => {
+  const $selectedf = useStore(selectedFile);
+
   const [source, setSourceOnly] = useState<boolean>(true);
+  const [$newfile, setInput] = useState<string>("");
   const $flist = useStore(fileList);
 
   const onSubmitEvent = (event) => {
@@ -24,17 +33,15 @@ export const CampaignCreate = () => {
       'input[name="epatterns"]'
     );
 
-    const etarget: HTMLInputElement = eform.querySelector(
-      'select[name="target"]'
-    );
-
     if (engine && engine.value) {
+      const fileTarget = $newfile || selectedFile;
+
       const m = JSON.stringify({
         name: engine.value,
         paths: epaths.value.length ? epaths.value : "/",
         patterns: epatterns.value,
+        target: fileTarget,
         source,
-        target: etarget.value,
       });
 
       if (engines.get()[m]) {
@@ -54,6 +61,18 @@ export const CampaignCreate = () => {
   const onSetSource = () => setSourceOnly(true);
 
   const onRemoveSource = () => setSourceOnly(false);
+
+  const onInputChange = (fileValue: string) => {
+    if (fileValue) {
+      const optimisticPath = fileValue.replace(/^.*[\\\/]/, "");
+
+      setInput(optimisticPath);
+    }
+  };
+
+  const onFileChange = (event) => {
+    setInput(event.target.value);
+  };
 
   // const onFileAdd = () => {};
 
@@ -106,14 +125,24 @@ export const CampaignCreate = () => {
         <div className="gutter">
           <label htmlFor="dname">Choose domain list</label>
           <div className="flex-row center-align gap-xl" style={{ gap: "1rem" }}>
-            <select name="target" id="dname">
+            <select
+              name="target"
+              id="dname"
+              value={$newfile || $selectedf}
+              onChange={onFileChange}
+            >
               {$flist.map((key) => (
                 <option key={key} id={"fsskeys_" + key} value={key}>
                   {key}
                 </option>
               ))}
             </select>
-            <FileUpload label={"Add"} labelClassName={""} formless />
+            <FileUpload
+              label={"Add"}
+              labelClassName={""}
+              formless
+              onChange={onInputChange}
+            />
           </div>
         </div>
 
