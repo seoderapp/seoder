@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { fileMap } from "../stores/app";
 import { selectedFileOptionMutate } from "../utils/file-set";
 
 export const onFileUpload = async (event) => {
@@ -48,6 +49,8 @@ type UploadProps = {
   labelClassName?: string;
   formless?: boolean;
   onChange?(x?: any): any;
+  // render file upload preview
+  preview?: boolean;
 };
 
 const labelButtonStyle: React.CSSProperties = {
@@ -70,6 +73,7 @@ export const FileUpload = ({
   labelClassName = "",
   formless,
   onChange,
+  preview = true,
 }: UploadProps) => {
   const [inputState, setInput] = useState<string>("");
 
@@ -83,6 +87,9 @@ export const FileUpload = ({
 
       if (onChange) {
         onChange(optimisticPath);
+      }
+
+      if (!fileMap.get()[optimisticPath]) {
         await onFileUpload(event);
       }
     }
@@ -112,9 +119,13 @@ export const FileUpload = ({
           id="uploadfile"
           style={{ opacity: 0, width: 5 }}
         />
-        <div className="preview">
-          <p id="preview">{inputState || "No files selected"}</p>
-        </div>
+        {preview ? (
+          <div className="preview">
+            <p id="preview">
+              {inputState ? `Uploaded ${inputState}` : "No files selected"}
+            </p>
+          </div>
+        ) : null}
       </div>
     );
   }

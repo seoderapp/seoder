@@ -142,6 +142,7 @@ export const CampaignCreate = () => {
               labelClassName={""}
               formless
               onChange={onInputChange}
+              preview={false}
             />
           </div>
         </div>

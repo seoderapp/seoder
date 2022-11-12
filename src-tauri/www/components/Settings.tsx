@@ -158,7 +158,9 @@ export const Settings = () => {
           </div>
         </div>
 
-        <FileUpload label={"Add File"} />
+        <div className="ph frame">
+          <FileUpload label={"Upload File"} formless preview={false} />
+        </div>
 
         <div className="ph frame">
           <button
