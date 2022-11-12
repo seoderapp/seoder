@@ -6,8 +6,8 @@ export interface Props {
 
 const { title, description } = Astro.props;
 
-const canonicalURL = new URL("/api/og", Astro.site);
-const domain = canonicalURL.hostname;
+const ogImage = new URL("/product.png", Astro.site);
+const domain = ogImage.hostname;
 
 const domainCom = domain.replace(".io", ".com");
 ---
@@ -26,7 +26,7 @@ const domainCom = domain.replace(".io", ".com");
     <meta name="twitter:creator" content={"seoderio"} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
-    <meta property="og:image" content={`${canonicalURL}?title=${title}`} />
+    <meta property="og:image" content={`${ogImage}?title=${title}`} />
     <meta property="og:image:width" content="940" />
     <meta property="og:image:height" content="700" />
     <meta property="og:site_name" content={"Seoder"} />
