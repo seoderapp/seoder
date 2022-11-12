@@ -16,20 +16,24 @@ const canonicalURL = new URL(Astro.site);
           <li>
             <a href="https://seoder.com/payments">Pricing</a>
           </li>
+          <li>
+            <a href="mailto:support@seoder.com">Support</a>
+          </li>
         </ul>
       </div>
       <div class="sub">
         <h5>Updates</h5>
         <ul>
           <li>
+            <a href={`${canonicalURL}changelog`}>Changelog</a>
+          </li>
+          <li>
             <a href={`${canonicalURL}faq`}>FAQ</a>
           </li>
           <li>
             <a href={`${canonicalURL}about`}>About</a>
           </li>
-          <li>
-            <a href="mailto:support@seoder.com">Support</a>
-          </li>
+
           <li>
             <a
               href="https://seoder1.statuspage.io/"
