@@ -14,13 +14,84 @@ export async function post({ request }) {
   let statusCode = 200;
 
   switch (stripeEvent.type) {
-    // todo: re-send subscription new licenses
-    // case "invoice.payment_succeeded"
+    case "invoice.payment_succeeded": {
+      const { object: stripeCustomer } = stripeEvent.data;
+      // Make sure our Stripe customer has a Keygen user ID, or else we can't work with it.
+      if (!stripeCustomer.metadata.keygenUserId) {
+        throw new Error(
+          `Customer ${stripeCustomer.id} does not have a Keygen user ID attached to their customer account!`
+        );
+      }
+
+      // get the keygen license for the stripe subscription
+      const keygenLicense = await fetch(
+        `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${keygenProductToken}`,
+            "Content-Type": "application/vnd.api+json",
+            Accept: "application/vnd.api+json",
+          },
+          body: JSON.stringify({
+            data: {
+              type: "licenses",
+              attributes: {
+                metadata: {
+                  stripeSubscriptionId:
+                    stripeCustomer?.subscription?.id ?? stripePlanId,
+                },
+              },
+              relationships: {
+                policy: {
+                  data: {
+                    type: "policies",
+                    id: keygenPolicyId,
+                  },
+                },
+                user: {
+                  data: {
+                    type: "users",
+                    id: stripeCustomer.metadata.keygenUserId,
+                  },
+                },
+              },
+            },
+          }),
+        }
+      );
+
+      const { data, errors } = await keygenLicense.json();
+
+      const key = data?.attributes?.key;
+
+      if (key) {
+        // renew a valid jkey
+        const keygenRenewResponse = await fetch(
+          `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses/${key}/actions/renew`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${keygenProductToken}`,
+              Accept: "application/vnd.api+json",
+            },
+          }
+        );
+
+        const renewable = await keygenRenewResponse.json();
+
+        if (renewable?.errors) {
+          console.error(renewable.errors);
+        }
+      } else {
+        console.error(errors);
+      }
+    }
 
     // 4. Respond to customer creation events within your Stripe account. Here, we'll
     //    create a new Stripe subscription for the customer as well as a Keygen license
     //    for the Keygen user that belongs to the Stripe customer.
-    case "customer.created":
+    case "customer.created": {
       const { object: stripeCustomer } = stripeEvent.data;
 
       // Make sure our Stripe customer has a Keygen user ID, or else we can't work with it.
@@ -122,6 +193,7 @@ export async function post({ request }) {
 
       statusCode = 200;
       break;
+    }
     default:
       // todo: re-send new key
       // For events we don't care about, let Stripe know all is good.
