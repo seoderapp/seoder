@@ -23,20 +23,6 @@
 
   initSockets();
 
-  const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-  function slowBytes(x) {
-    let l = 0;
-    let n = parseInt(x, 10) || 0;
-
-    // each iteration capture the bytes
-    while (n >= 1024 && ++l) {
-      n = n / 1024;
-    }
-
-    return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
-  }
-
   socketRuntime.addEventListener("open", () => {
     socketRuntime.send("loop");
   });
@@ -189,10 +175,6 @@
         memory_total,
       } = stats;
 
-      const networkReceived = `${slowBytes(network_received)} / s`;
-      const networkTransmited = `${slowBytes(network_transmited)} / s`;
-      const networkTotal = `${slowBytes(network_total_transmitted)}`;
-
       if (ctx) {
         setProgress(ctx, cpu_usage);
       }
@@ -202,15 +184,15 @@
       }
 
       if (netstats) {
-        netstats.innerHTML = networkReceived;
+        netstats.innerHTML = network_received;
       }
 
       if (netstatsUp) {
-        netstatsUp.innerHTML = networkTransmited;
+        netstatsUp.innerHTML = network_transmited;
       }
 
       if (netstatsTotal) {
-        netstatsTotal.innerHTML = networkTotal;
+        netstatsTotal.innerHTML = network_total_transmitted;
       }
 
       return;

@@ -287,7 +287,7 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
                                     let path = std::path::Path::new(&h1);
                                     let filename = path.file_name().unwrap();
                                     let f = filename.to_str().unwrap_or_default().to_string();
-    
+
                                     if !f.is_empty() {
                                         target = String::from(string_concat!(ENTRY_PROGRAM.1, f));
                                     }

@@ -8,11 +8,11 @@ use warp::{
     Filter, Rejection, Reply,
 };
 
+use crate::controls;
 use crate::{string_concat_impl, utils::get_prospects};
 use seoder_lib::{
     packages::spider::utils::logd, string_concat::string_concat, tokio, ENTRY_PROGRAM,
 };
-use crate::controls;
 
 /// file server basic server init
 pub async fn file_server() {
@@ -53,7 +53,7 @@ async fn prospect(form: FormData) -> Result<impl Reply, Rejection> {
     })?;
 
     let mut title = String::from("");
-    
+
     for p in parts {
         if p.name() == "title" {
             title = p.filename().unwrap_or_default().to_string();
@@ -62,7 +62,7 @@ async fn prospect(form: FormData) -> Result<impl Reply, Rejection> {
 
     let key = controls::list::license().await;
     let prospect = get_prospects(&key, &title).await;
-    
+
     Ok(prospect)
 }
 

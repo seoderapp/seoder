@@ -1,4 +1,5 @@
 use crate::serde_json::{json, Value};
+use crate::utils::convert_to_bytes;
 use crate::SYSTEM;
 use sysinfo::CpuExt;
 use sysinfo::NetworkExt;
@@ -22,9 +23,9 @@ pub fn stats() -> Value {
     let v = json!({
         "stats": {
             // network
-            "network_received": net_total_received,
-            "network_transmited": net_total_transmited,
-            "network_total_transmitted": net_total_received + net_total_transmited,
+            "network_received": convert_to_bytes(net_total_received),
+            "network_transmited": convert_to_bytes(net_total_transmited),
+            "network_total_transmitted": convert_to_bytes(net_total_received + net_total_transmited),
             // cpu
             "load_avg_min": s.load_average().one,
             "cpu_usage": s.global_cpu_info().cpu_usage(),

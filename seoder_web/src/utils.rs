@@ -273,3 +273,22 @@ pub async fn get_prospects(key: &str, title: &str) -> Response {
 
     resp
 }
+
+lazy_static! {
+    /// units of memory
+    static ref UNITS: Vec<&'static str> = vec!["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+}
+
+/// convert to bytes
+pub fn convert_to_bytes(bytes: u64) -> String {
+    let mut l = 0;
+    let mut n = bytes;
+
+    // // each iteration capture the bytes
+    while n >= 1024 {
+        n = n / 1024;
+        l += 1;
+    }
+
+    string_concat!(n.to_string(), " ", UNITS[l])
+}

@@ -156,7 +156,7 @@ pub async fn store_fs_io_matching(
                             o.write(&link.as_bytes()).await.unwrap();
                             let h = store_fs_io_contacts(&response).await;
                             for l in h {
-                                let l =  string_concat!(&original_link, " ", &l, "\n");
+                                let l = string_concat!(&original_link, " ", &l, "\n");
                                 oc.write(&l.as_bytes()).await.unwrap();
                             }
                         } else {
@@ -189,7 +189,7 @@ pub async fn store_fs_io_matching(
                                     o.write(&link.as_bytes()).await.unwrap();
                                     let h = store_fs_io_contacts(&response).await;
                                     for l in h {
-                                        let l =  string_concat!(&original_link, " ", &l, "\n");
+                                        let l = string_concat!(&original_link, " ", &l, "\n");
                                         oc.write(&l.as_bytes()).await.unwrap();
                                     }
                                 } else {
@@ -225,7 +225,7 @@ pub async fn store_fs_io_matching(
             let error = response.starts_with("- error ");
 
             let link = string_concat!(&original_link, "\n");
-            
+
             task::yield_now().await;
 
             if response == "" || error {
@@ -239,7 +239,7 @@ pub async fn store_fs_io_matching(
                     o.write(&link.as_bytes()).await.unwrap();
                     let h = store_fs_io_contacts(&response).await;
                     for l in h {
-                        let l =  string_concat!(&original_link, " ", &l, "\n");
+                        let l = string_concat!(&original_link, " ", &l, "\n");
                         oc.write(&l.as_bytes()).await.unwrap();
                     }
                 } else {

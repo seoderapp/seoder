@@ -105,7 +105,7 @@ struct Eng {
     /// source code only
     source: bool,
     /// target file
-    target: String
+    target: String,
 }
 
 /// tick status refreshing
@@ -299,7 +299,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                         }
                     });
 
-                    
                     join.await.unwrap();
 
                     outgoing = controls::list::list_file_count(outgoing).await;
@@ -484,8 +483,10 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
 
             // todo: handle fs tick count skip between
             loop {
-                // send stats per iteration
-                outgoing = ticker(outgoing).await;
+                if list_config % 2 == 0 {
+                    // send stats per iteration
+                    outgoing = ticker(outgoing).await;
+                }
 
                 // todo: remove list config loop for file watcher
                 if list_config == 0 {
