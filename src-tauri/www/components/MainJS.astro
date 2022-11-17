@@ -1,6 +1,4 @@
 <script>
-  import MainWorker from "./Worker.js?worker";
-
   import {
     addErrorLogs,
     addInvalidLogs,
@@ -11,7 +9,7 @@
     selectedEngine,
     setStatus,
   } from "../stores/engine";
-  import { socket, initSockets } from "../events/sockets";
+  import { socket, socketRuntime, initSockets } from "../events/sockets";
   import { CellStatus } from "./CampaignCell";
 
   import {
@@ -24,6 +22,24 @@
   import { selectedFileOptionMutate } from "../utils/file-set";
 
   initSockets();
+
+  const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+  function slowBytes(x) {
+    let l = 0;
+    let n = parseInt(x, 10) || 0;
+
+    // each iteration capture the bytes
+    while (n >= 1024 && ++l) {
+      n = n / 1024;
+    }
+
+    return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+  }
+
+  socketRuntime.addEventListener("open", () => {
+    socketRuntime.send("loop");
+  });
 
   // license control [determine screens] quickly
   const program = document.getElementById("appProgram");
@@ -161,15 +177,21 @@
     }
 
     if (raw.startsWith(estats)) {
-      const data = JSON.parse(raw);
+      const { stats } = JSON.parse(raw);
       const {
         cpu_usage,
+        // load_avg_min,
         network_received,
         network_transmited,
         network_total_transmitted,
         memory_free,
+        // memory_used,
         memory_total,
-      } = data.stats;
+      } = stats;
+
+      const networkReceived = `${slowBytes(network_received)} / s`;
+      const networkTransmited = `${slowBytes(network_transmited)} / s`;
+      const networkTotal = `${slowBytes(network_total_transmitted)}`;
 
       if (ctx) {
         setProgress(ctx, cpu_usage);
@@ -180,15 +202,15 @@
       }
 
       if (netstats) {
-        netstats.innerHTML = network_received;
+        netstats.innerHTML = networkReceived;
       }
 
       if (netstatsUp) {
-        netstatsUp.innerHTML = network_transmited;
+        netstatsUp.innerHTML = networkTransmited;
       }
 
       if (netstatsTotal) {
-        netstatsTotal.innerHTML = network_total_transmitted;
+        netstatsTotal.innerHTML = networkTotal;
       }
 
       return;
@@ -375,8 +397,6 @@
     }
   }
 
-  const myWorker = new MainWorker();
-
   socket.addEventListener("message", eventSub);
-  myWorker.onmessage = eventSub;
+  socketRuntime.addEventListener("message", eventSub);
 </script>
