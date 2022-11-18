@@ -20,16 +20,17 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
     <div class="prog">
       <Section center>
         <Title>Fare pricing for all</Title>
+        <strong class="xl">$4/month</strong>
         <p>
           Our pricing plan is really simple and only costs 4$ a month per
           machine. You can cancel at any time during the first 15 days for a
           full refund.
         </p>
         <p class="gray">
-          During the during of the plan you will receive updates as we release
+          During the duration of the plan you will receive updates as we release
           new features without having to upgrade.
         </p>
-        <SubTitle>Organic lead generation ready to go</SubTitle>
+        <SubTitle>Organic lead generation ready</SubTitle>
         <form id="register">
           <div>
             <label for="first-name">First name</label>
@@ -139,6 +140,11 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
 </script>
 
 <style>
+  .xl {
+    font-size: 3.4rem;
+    font-weight: 900;
+    padding: 1rem 0;
+  }
   form {
     padding: 0.6rem 0;
     text-align: left;
@@ -179,7 +185,6 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
   p {
     font-size: 1rem;
     font-weight: 400;
-    line-height: 1.6;
   }
   .gray {
     color: rgb(23, 23, 23);
