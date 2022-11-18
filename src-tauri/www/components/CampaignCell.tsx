@@ -1,3 +1,4 @@
+import { useMemo, useState, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import {
   EngineProps,
@@ -8,7 +9,6 @@ import {
   selectedEngine,
   validLogs,
 } from "../stores/engine";
-import { useMemo, useState } from "react";
 import { socket } from "../events/sockets";
 import { KeyWords } from "./Svgs/KeyWords";
 import { Folder } from "./Svgs/Folder";
@@ -70,10 +70,6 @@ const onDeleteEvent = (path: string) => {
   socket.send("delete-engine " + path);
 };
 
-const onRunEvent = (path: string) => {
-  socket.send("run-campaign " + path);
-};
-
 const onPauseEvent = (path: string) => {
   socket.send("set-stopped " + path);
 };
@@ -104,99 +100,115 @@ export const CampaignCell = ({
   item,
   path,
 }: {
-  key: string;
   path: string;
   item: EngineProps;
 }) => {
-  // todo: move to parent to prevent re-rendering
+  // todo: move to parent to prevent re-rendering using react subscriber to update counts + memo
   const $selected = useStore(selectedEngine);
   const [pressed, setPressed] = useState<boolean>();
 
-  const selectItem = (event) => {
-    event.preventDefault();
-    setPressed(true);
-    selectAction(path);
-    setPressed(false);
-  };
+  const selectItem = useCallback(
+    (event) => {
+      event.preventDefault();
+      setPressed(true);
+      selectAction(path);
+      setPressed(false);
+    },
+    [setPressed]
+  );
 
-  const onExportEventPress = async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    await onExportEvent(path);
-  };
+  const onExportEventPress = useCallback(
+    async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      await onExportEvent(path);
+    },
+    [path]
+  );
 
-  const onRunPress = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const onRunPress = useCallback(
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    if (item.status === CellStatus.RUNNING) {
-      return alert("Campaign already in progress");
-    }
-
-    item.invalidUrls.clear();
-    item.errorUrls.clear();
-    item.urls.clear();
-    item.status = CellStatus.RUNNING;
-
-    engines.notify(path);
-
-    if ($selected === path) {
-      errorLogs.set([]);
-      validLogs.set([]);
-      invalidLogs.set([]);
-    }
-
-    onRunEvent(path);
-  };
-
-  const onPausePress = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (item.status === CellStatus.PAUSED) {
-      item.status = CellStatus.RUNNING;
-      onStartedEvent(path);
-    } else {
-      item.status = CellStatus.PAUSED;
-      onPauseEvent(path);
-    }
-
-    engines.notify(path);
-  };
-
-  const onDeletePress = async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const confirm = await window.confirm(
-      "Are you sure you want to delete this campaign?"
-    );
-
-    if (confirm) {
-      onDeleteEvent(path);
-
-      if (etemplates.get()[path]) {
-        etemplates.setKey(path, undefined);
+      if (item.status === CellStatus.RUNNING) {
+        return alert("Campaign already in progress");
       }
-    }
-  };
 
-  const onClickEmailTemplate = async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+      if (item.status !== CellStatus.PAUSED) {
+        if (selectedEngine.get() === path) {
+          errorLogs.set([]);
+          validLogs.set([]);
+          invalidLogs.set([]);
+        }
+        item.invalidUrls.clear();
+        item.errorUrls.clear();
+        item.urls.clear();
+      }
 
-    selectedTemplateCreate.set(path);
-    modalStore.set(ModalType.EMAIL);
-  };
+      item.status = CellStatus.RUNNING;
+
+      engines.notify(path);
+      socket.send("run-campaign " + path);
+    },
+    [item.status, path]
+  );
+
+  const onPausePress = useCallback(
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (item.status === CellStatus.PAUSED) {
+        item.status = CellStatus.RUNNING;
+        onStartedEvent(path);
+      } else {
+        item.status = CellStatus.PAUSED;
+        onPauseEvent(path);
+      }
+
+      engines.notify(path);
+    },
+    [item.status, path]
+  );
+
+  const onDeletePress = useCallback(
+    async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const confirm = await window.confirm(
+        "Are you sure you want to delete this campaign?"
+      );
+
+      if (confirm) {
+        onDeleteEvent(path);
+
+        if (etemplates.get()[path]) {
+          etemplates.setKey(path, undefined);
+        }
+      }
+    },
+    [path]
+  );
+
+  const onClickEmailTemplate = useCallback(
+    async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      selectedTemplateCreate.set(path);
+      modalStore.set(ModalType.EMAIL);
+    },
+    [path]
+  );
 
   const engineStatusClass = cellStatusClass(item);
 
+  const baseClass = path === $selected ? "cell-btn-active" : "";
   const itemStatus = item.status;
-
   const bgClass =
     itemStatus === CellStatus.RUNNING ? " engine-background-running" : "";
-
-  const baseClass = path === $selected ? "cell-btn-active" : "";
 
   const cellRunProps = useMemo(() => {
     let cellRunProps = {
@@ -227,17 +239,26 @@ export const CampaignCell = ({
   const showBar =
     itemStatus === CellStatus.RUNNING || itemStatus === CellStatus.PAUSED;
 
-  const totalCurrentCount =
-    item.invalidUrls.size + item.errorUrls.size + item.urls.size;
+  const totalCurrentCount = useMemo(() => {
+    return item.invalidUrls.size + item.errorUrls.size + item.urls.size;
+  }, [item.invalidUrls, item.errorUrls, item.urls]);
 
-  const paths =
-    item?.paths && Array.isArray(item?.paths)
-      ? item?.paths?.join(",")
-      : item?.paths;
-  const pats =
-    item?.patterns && Array.isArray(item?.patterns)
-      ? item?.patterns?.join(",")
-      : item?.patterns;
+  const pagePaths = item.paths;
+  const pagePatterns = item.patterns;
+
+  const paths = useMemo(() => {
+    if (pagePaths && Array.isArray(item.paths)) {
+      return pagePaths.join(",");
+    }
+    return pagePaths;
+  }, [pagePaths]);
+
+  const pats = useMemo(() => {
+    if (pagePatterns && Array.isArray(item.patterns)) {
+      return pagePatterns.join(",");
+    }
+    return pagePatterns;
+  }, [pagePatterns]);
 
   return (
     <li

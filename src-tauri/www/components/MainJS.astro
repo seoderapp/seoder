@@ -23,9 +23,12 @@
 
   initSockets();
 
-  socketRuntime.addEventListener("open", () => {
+  const loopEvent = () => {
     socketRuntime.send("loop");
-  });
+    socketRuntime.removeEventListener("open", loopEvent);
+  };
+
+  socketRuntime.addEventListener("open", loopEvent, true);
 
   // license control [determine screens] quickly
   const program = document.getElementById("appProgram");
@@ -226,7 +229,6 @@
       return;
     }
 
-    // todo: move to worker
     if (raw.startsWith(ctact)) {
       const data = JSON.parse(raw);
       const { contacts, domain, path } = data || {};

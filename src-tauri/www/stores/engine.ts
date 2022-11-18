@@ -85,7 +85,7 @@ export const selectedContacts = computed(
 export const selectAction = action(
   selectedEngine,
   "select",
-  (store, selected) => {
+  (store, selected: string) => {
     if (store.get() === selected) {
       store.set("");
     } else {
