@@ -1,6 +1,4 @@
 ---
-import { Image } from "@astrojs/image/components";
-
 import AnchorButton from "./AnchorButton.astro";
 import Search from "./Svgs/Search.astro";
 import Download from "./Download.astro";
@@ -9,6 +7,7 @@ import Section from "./Section.astro";
 import FeatureList from "./FeatureList.astro";
 import Hero from "./Svgs/Hero.astro";
 import Highlight from "./Highlight.astro";
+import App from "./Svgs/App.astro";
 ---
 
 <div class="prog">
@@ -41,21 +40,7 @@ import Highlight from "./Highlight.astro";
     </div>
   </Section>
   <Section>
-    <Image
-      src="/screens/App-Landing-Screenshot.png"
-      srcset={`
-              /screens/App-Landing-Screenshot@3x.png 1818w,
-              /screens/App-Landing-Screenshot@2x.png 1212w,
-              /screens/App-Landing-Screenshot.png 606w
-            `}
-      sizes={`((min-width: 50em) and (max-width: 60em)) 50em,
-            ((min-width: 30em) and (max-width: 50em)) 30em,
-            (max-width: 30em) 20em`}
-      height={920}
-      width={1212}
-      alt="Seoder app intro display"
-      class="bg"
-    />
+    <App />
   </Section>
   <Section>
     <Download />
