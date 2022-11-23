@@ -7,10 +7,10 @@ export interface Props {
 const { title, href } = Astro.props;
 ---
 
-<a href={href ?? "/"}>{title ?? "BUY NOW"}</a>
+<a href={href ?? "/"} class="buy-btn">{title ?? "BUY NOW"}</a>
 
 <style>
-  a {
+  .buy-btn {
     background-color: #e8c01a;
     border-radius: 4px;
     padding: 1rem 2.5rem;
