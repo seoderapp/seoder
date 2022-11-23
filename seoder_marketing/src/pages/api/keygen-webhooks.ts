@@ -1,8 +1,8 @@
 import Stripe from "stripe";
 
 const key = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
-const productToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
 const accountId = import.meta.env.KEYGEN_ACCOUNT_ID;
+const token = import.meta.env.KEYGEN_API_TOKEN;
 
 const stripe = new Stripe(key, {
   apiVersion: "2022-08-01"
@@ -11,17 +11,17 @@ const stripe = new Stripe(key, {
 export async function post({ request }) {
   let statusCode = 200;
   const jsonData = await request?.json();
-  const { data } = jsonData ?? { data: null };
+  const { data } = jsonData;
   const keygenEventId = data?.id;
 
-  console.log('params', jsonData)
+  console.log('params', data)
 
   const keygenWebhook = await fetch(
     `https://api.keygen.sh/v1/accounts/${accountId}/webhook-events/${keygenEventId}`,
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${productToken}`,
+        Authorization: `Bearer ${token}`,
         Accept: "application/vnd.api+json",
       },
     }
@@ -68,7 +68,7 @@ export async function post({ request }) {
         {
           method: "PATCH",
           headers: {
-            Authorization: `Bearer ${productToken}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/vnd.api+json",
             Accept: "application/vnd.api+json",
           },
