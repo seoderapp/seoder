@@ -31,10 +31,10 @@ export async function post({ request }) {
   switch (keygenEvent?.attributes?.event) {
     // 1. Respond to user creation events within your Keygen account. Here, we'll create
     //    a new Stripe customer account for new Keygen users.
-    case "user.created":
+    case "user.created":{ 
       const { data: keygenUser } = JSON.parse(keygenEvent.attributes.payload);
 
-      // Make sure our Keygen user has a Stripe token, or else we can't charge them later on..
+      // validate stripe token
       if (!keygenUser.attributes.metadata.stripeToken) {
         throw new Error(
           `User ${keygenUser.id} does not have a Stripe token attached to their user account!`
@@ -46,11 +46,9 @@ export async function post({ request }) {
       const stripeCustomer = await stripe.customers.create({
         description: `Customer for Keygen user ${keygenUser.attributes.email}`,
         email: keygenUser.attributes.email,
-        // Source is a Stripe token obtained with Stripe.js during user creation and
-        // temporarily stored in the user's metadata attribute.
+        // Source is a Stripe token
         source: keygenUser.attributes.metadata.stripeToken,
-        // Store the user's Keygen ID within the Stripe customer so that we can lookup
-        // a Stripe customer's Keygen account.
+        // Store the user's Keygen ID
         metadata: { keygenUserId: keygenUser.id },
       });
 
@@ -76,7 +74,7 @@ export async function post({ request }) {
         }
       );
 
-      const { data, errors } = await update.json();
+      const { errors } = await update.json();
 
       if (errors) {
         throw new Error(errors.map((e) => e.detail).toString());
@@ -85,7 +83,7 @@ export async function post({ request }) {
       // All is good! Stripe customer was successfully created for the new Keygen
       // user. Let Keygen know the event was received successfully.
       statusCode = 200;
-      break;
+      break;}
     default:
       // For events we don't care about, let Keygen know all is good.
       statusCode = 200;
