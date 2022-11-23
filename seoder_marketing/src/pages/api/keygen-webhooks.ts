@@ -22,16 +22,18 @@ export async function post({ request }) {
 
   const { data: keygenEvent, errors } = await keygenWebhook.json();
 
+  console.log(keygenEvent)
+  
   if (errors) {
     return new Response(null, {
       status: 200,
     });
   }
 
-  switch (keygenEvent?.attributes?.event) {
+  switch (keygenEvent.attributes.event) {
     // 1. Respond to user creation events within your Keygen account. Here, we'll create
     //    a new Stripe customer account for new Keygen users.
-    case "user.created":{ 
+    case "user.created": { 
       const { data: keygenUser } = JSON.parse(keygenEvent.attributes.payload);
 
       // validate stripe token
@@ -51,6 +53,8 @@ export async function post({ request }) {
         // Store the user's Keygen ID
         metadata: { keygenUserId: keygenUser.id },
       });
+
+      console.log(stripeCustomer)
 
       // 3. Add the user's Stripe customer ID to the user's metadata attribute so that
       //    we can lookup their Stripe customer account when needed.
