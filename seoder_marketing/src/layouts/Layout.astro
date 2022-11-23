@@ -65,7 +65,7 @@ const domainCom = domain.replace(".io", ".com");
     }
     {
       headScripts?.map(({ children, ...node }) => (
-        <script {...node} set:html={children} />
+        <script {...node} set:html={children} is:inline />
       ))
     }
   </head>
@@ -77,9 +77,9 @@ const domainCom = domain.replace(".io", ".com");
       defer
     ></script>
     {
-      bodyScripts?.map(({ children, ...node }) => {
-        return <script {...node} set:html={children} />;
-      })
+      bodyScripts?.map(({ children, ...node }) => (
+        <script {...node} set:html={children} is:inline />
+      ))
     }
     <style is:global>
       :root {

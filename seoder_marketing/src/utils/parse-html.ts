@@ -8,7 +8,6 @@ export const parseHtml = async (body: string) => {
   const htmlRoot = parse(body)
 
   const siteNavigationAnchor = htmlRoot.querySelector('#site-navigation a')
-  const adminBar = htmlRoot.querySelector('#wpadminbar')
   const footer = htmlRoot.querySelector('.footer-wrap')
   const navMenu = htmlRoot.querySelector('.menu-area')
   const statsScript = htmlRoot.querySelector(
@@ -74,7 +73,6 @@ export const parseHtml = async (body: string) => {
     tag.remove()
   })
 
-  adminBar?.remove()
   footer?.remove()
   siteNavigationAnchor?.remove()
   navMenu?.remove()
@@ -93,6 +91,12 @@ export const parseHtml = async (body: string) => {
             .light-background {
               background-color: #fff;
               font-family: system-ui;
+            }
+            .w-dyn-list,.grid-2-columns.hero-top {
+              opacity: 1 !important;
+            }
+            .blog-card-bg-image {
+              z-index: 1 !important;
             }
         </style>`
   )
