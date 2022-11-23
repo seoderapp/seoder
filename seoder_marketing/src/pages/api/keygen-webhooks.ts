@@ -14,6 +14,8 @@ export async function post({ request }) {
   const { data } = jsonData ?? { data: null };
   const keygenEventId = data?.id;
 
+  console.log('params', jsonData)
+
   const keygenWebhook = await fetch(
     `https://api.keygen.sh/v1/accounts/${accountId}/webhook-events/${keygenEventId}`,
     {
@@ -24,6 +26,8 @@ export async function post({ request }) {
       },
     }
   );
+
+  console.log('hook valid', keygenWebhook)
 
   const { data: keygenEvent, errors } = await keygenWebhook.json();
   
