@@ -1,7 +1,12 @@
-import { stripe } from "../../utils/stripe";
+import Stripe from "stripe";
 
+const key = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
 const productToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
 const accountId = import.meta.env.KEYGEN_ACCOUNT_ID;
+
+const stripe = new Stripe(key, {
+  apiVersion: "2022-08-01"
+});
 
 export async function post({ request }) {
   let statusCode = 200;
