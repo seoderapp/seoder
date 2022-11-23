@@ -26,8 +26,6 @@ export async function post({ request }) {
   );
 
   const { data: keygenEvent, errors } = await keygenWebhook.json();
-
-  console.log(keygenEvent)
   
   if (errors) {
     return new Response(null, {
@@ -59,8 +57,6 @@ export async function post({ request }) {
         metadata: { keygenUserId: keygenUser.id },
       });
 
-      console.log(stripeCustomer)
-
       // 3. Add the user's Stripe customer ID to the user's metadata attribute so that
       //    we can lookup their Stripe customer account when needed.
       const update = await fetch(
@@ -90,9 +86,9 @@ export async function post({ request }) {
       }
 
       // All is good! Stripe customer was successfully created for the new Keygen
-      // user. Let Keygen know the event was received successfully.
       statusCode = 200;
-      break;}
+      break;
+    }
     default:
       // For events we don't care about, let Keygen know all is good.
       statusCode = 200;
