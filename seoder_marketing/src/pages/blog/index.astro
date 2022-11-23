@@ -1,0 +1,22 @@
+---
+import Footer from "../../components/Footer.astro";
+import Navbar from "../../components/Navbar.astro";
+import Layout from "../../layouts/Layout.astro";
+import { getDynamicPage } from "../../utils/get-dynamic-page";
+
+const props = await getDynamicPage("/");
+---
+
+<Layout
+    title={props.title}
+    description={"Outbound lead generation fast with little downtime. Insightful marketing campaigns for high conversion ratios and templating tools."}
+    {...props}
+>
+    <main>
+        <Navbar />
+        <div class="light-container">
+            <Fragment set:html={props.html.replace("<!DOCTYPE html>", "")} />
+        </div>
+    </main>
+    <Footer />
+</Layout>

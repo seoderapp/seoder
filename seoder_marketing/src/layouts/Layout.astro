@@ -2,9 +2,22 @@
 export interface Props {
   title: string;
   description?: string;
+  bodyScripts?: string[];
+  headScripts?: string[];
+  links?: string[];
+  metas?: string[];
+  stylesheets?: string[];
 }
 
-const { title, description } = Astro.props;
+const {
+  bodyScripts,
+  headScripts,
+  title,
+  description,
+  links,
+  metas,
+  stylesheets,
+} = Astro.props;
 
 const ogImage = new URL("/og/OG_Image.png", Astro.site);
 const domain = ogImage.hostname;
@@ -20,20 +33,33 @@ const domainCom = domain.replace(".io", ".com");
     <link rel="icon" type="image/x-icon" href="/icon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    {description ? <meta name="description" content={description} /> : null}
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content={"seoderio"} />
-    <meta name="twitter:creator" content={"seoderio"} />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
-    <meta property="og:image" content={`${ogImage}?title=${title}`} />
-    <meta property="og:image:width" content="940" />
-    <meta property="og:image:height" content="700" />
-    <meta property="og:site_name" content={"Seoder"} />
+    {
+      !links ? (
+        <>
+          {description ? (
+            <meta name="description" content={description} />
+          ) : null}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:site" content={"seoderio"} />
+          <meta name="twitter:creator" content={"seoderio"} />
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={title} />
+          <meta property="og:image" content={`${ogImage}?title=${title}`} />
+          <meta property="og:image:width" content="940" />
+          <meta property="og:image:height" content="700" />
+          <meta property="og:site_name" content={"Seoder"} />
+        </>
+      ) : null
+    }
     <meta
       property="keywords"
       content="Outbound Leads, Seo Tool, Target Email Campaign Tool, Marketing Campaigns, Marketing, Target Links, Links"
     />
+    <link rel="alternate" hreflang="en" />
+    {links?.map((node) => <link {...node} />)}
+    {metas?.map((node) => <meta {...node} />)}
+    {stylesheets?.map((node) => <style {...node} />)}
+    {headScripts?.map((node) => <script {...node} />)}
   </head>
   <body>
     <slot />
@@ -42,6 +68,7 @@ const domainCom = domain.replace(".io", ".com");
       data-site="JAYJESFT"
       defer
     ></script>
+    {bodyScripts?.map((n) => <script {...n} defer />)}
     <style is:global>
       :root {
         --max-width: 142.884ch;
