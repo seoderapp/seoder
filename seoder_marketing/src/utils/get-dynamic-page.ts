@@ -1,7 +1,5 @@
 import { parseHtml } from './parse-html'
 
-const DOMAIN_NAME = process.env.DOMAIN || "https://seoder.com";
-
 export type PageProps = {
     name: string
     website?: any
@@ -21,6 +19,8 @@ export interface BlogPageProps extends PageProps {
     children?: any
 }
 
+
+const DOMAIN_NAME = process.env.DOMAIN || "https://seoder.com";
 const BLOG_WEBFLOW_URL =
   process.env.BLOG_WEBFLOW_URL || 'https://blog-bd2f0f.webflow.io/'
 

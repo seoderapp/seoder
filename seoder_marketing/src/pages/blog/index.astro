@@ -7,16 +7,10 @@ import { getDynamicPage } from "../../utils/get-dynamic-page";
 const props = await getDynamicPage("/");
 ---
 
-<Layout
-    title={props.title}
-    description={"Outbound lead generation fast with little downtime. Insightful marketing campaigns for high conversion ratios and templating tools."}
-    {...props}
->
+<Layout title={props.title} {...props}>
     <main>
         <Navbar />
-        <div class="light-background">
-            <Fragment set:html={props.html.replace("<!DOCTYPE html>", "")} />
-        </div>
+        <Fragment set:html={props.html} />
     </main>
     <Footer />
 </Layout>

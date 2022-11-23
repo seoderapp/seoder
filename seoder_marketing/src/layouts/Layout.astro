@@ -2,11 +2,11 @@
 export interface Props {
   title: string;
   description?: string;
-  bodyScripts?: string[];
-  headScripts?: string[];
-  links?: string[];
-  metas?: string[];
-  stylesheets?: string[];
+  bodyScripts?: any[];
+  headScripts?: any[];
+  links?: any[];
+  metas?: any[];
+  stylesheets?: any[];
 }
 
 const {
@@ -58,8 +58,16 @@ const domainCom = domain.replace(".io", ".com");
     <link rel="alternate" hreflang="en" />
     {links?.map((node) => <link {...node} />)}
     {metas?.map((node) => <meta {...node} />)}
-    {stylesheets?.map((node) => <style {...node} />)}
-    {headScripts?.map((node) => <script {...node} />)}
+    {
+      stylesheets?.map(({ children, ...node }) => (
+        <style {...node} set:html={children} />
+      ))
+    }
+    {
+      headScripts?.map(({ children, ...node }) => (
+        <script {...node} set:html={children} />
+      ))
+    }
   </head>
   <body>
     <slot />
@@ -68,7 +76,11 @@ const domainCom = domain.replace(".io", ".com");
       data-site="JAYJESFT"
       defer
     ></script>
-    {bodyScripts?.map((n) => <script {...n} defer />)}
+    {
+      bodyScripts?.map(({ children, ...node }) => {
+        return <script {...node} set:html={children} />;
+      })
+    }
     <style is:global>
       :root {
         --max-width: 142.884ch;
