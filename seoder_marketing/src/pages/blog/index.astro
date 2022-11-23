@@ -14,7 +14,7 @@ const props = await getDynamicPage("/");
 >
     <main>
         <Navbar />
-        <div class="light-container">
+        <div class="light-background">
             <Fragment set:html={props.html.replace("<!DOCTYPE html>", "")} />
         </div>
     </main>

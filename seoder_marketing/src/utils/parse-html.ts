@@ -1,7 +1,7 @@
 import { parse } from 'node-html-parser'
 
 const BLOG_URL =
-  process.env.BLOG_WEBFLOW_URL || 'https://a11ywatch-blog.webflow.io'
+  process.env.BLOG_WEBFLOW_URL || 'https://blog-bd2f0f.webflow.io'
 
 // cleanup wordpress page and parse html
 export const parseHtml = async (body: string) => {
