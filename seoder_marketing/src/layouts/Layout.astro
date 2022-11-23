@@ -10,8 +10,8 @@ export interface Props {
 }
 
 const {
-  bodyScripts,
-  headScripts,
+  bodyScripts = [],
+  headScripts = [],
   title,
   description,
   links,
@@ -65,7 +65,7 @@ const domainCom = domain.replace(".io", ".com");
     }
     {
       headScripts?.map(({ children, ...node }) => (
-        <script {...node} set:html={children} is:inline />
+        <script {...node} set:html={children} />
       ))
     }
   </head>
@@ -78,7 +78,7 @@ const domainCom = domain.replace(".io", ".com");
     ></script>
     {
       bodyScripts?.map(({ children, ...node }) => (
-        <script {...node} set:html={children} is:inline />
+        <script {...node} set:html={children} />
       ))
     }
     <style is:global>
