@@ -96,7 +96,18 @@ export const parseHtml = async (body: string) => {
               opacity: 1 !important;
             }
             .blog-card-bg-image {
+              z-index: auto !important;
+            }
+            .w-dyn-items, .title-and-categories, .rich-text,.w-richtext {
+              z-index: auto !important;
+              opacity: 1 !important;
+            }
+            .bg-overlay-gradient.blog-card-bg-overlay {
               z-index: 1 !important;
+            }
+            .blog-card-bg-container, .heading-h4-size {
+              position: relative !important;
+              z-index: 3 !important;
             }
         </style>`
   )
