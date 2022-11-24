@@ -3,7 +3,6 @@ import { validateKey } from "../../utils/validate-keygen";
 
 // todo: try to improve og images or add default images per route
 export async function post({ request }) {
-  console.log("sp");
   let jsonData = {
     key: "",
     fingerprint: "",

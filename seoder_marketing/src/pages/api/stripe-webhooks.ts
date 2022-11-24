@@ -3,9 +3,10 @@ import { transport } from "../../utils/mailer";
 
 const stripePlanId = import.meta.env.STRIPE_PLAN_ID;
 
-const keygenProductToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
+// const keygenProductToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
 const keygenAccountId = import.meta.env.KEYGEN_ACCOUNT_ID;
 const keygenPolicyId = import.meta.env.KEYGEN_POLICY_ID;
+const token = import.meta.env.KEYGEN_API_TOKEN;
 
 export async function post({ request }) {
   const jsonData = await request?.json();
@@ -29,7 +30,7 @@ export async function post({ request }) {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${keygenProductToken}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/vnd.api+json",
             Accept: "application/vnd.api+json",
           },
@@ -66,13 +67,13 @@ export async function post({ request }) {
       const key = data?.attributes?.key;
 
       if (key) {
-        // renew a valid jkey
+        // renew a valid
         const keygenRenewResponse = await fetch(
           `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses/${key}/actions/renew`,
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${keygenProductToken}`,
+              Authorization: `Bearer ${token}`,
               Accept: "application/vnd.api+json",
             },
           }
@@ -125,7 +126,7 @@ export async function post({ request }) {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${keygenProductToken}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/vnd.api+json",
             Accept: "application/vnd.api+json",
           },
