@@ -1,8 +1,6 @@
 import Stripe from "stripe";
 
-const key = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
-
-const stripe = new Stripe(key, {
+const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
     apiVersion: "2022-08-01"
 });
 
