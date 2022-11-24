@@ -1,10 +1,9 @@
 import Stripe from "stripe";
 
-const key = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
 const accountId = import.meta.env.KEYGEN_ACCOUNT_ID;
 const token = import.meta.env.KEYGEN_API_TOKEN;
 
-const stripe = new Stripe(key, {
+const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: "2022-08-01"
 });
 
@@ -13,8 +12,6 @@ export async function post({ request }) {
   const jsonData = await request?.json();
   const { data } = jsonData;
   const keygenEventId = data?.id;
-
-  console.log('params', data)
 
   const keygenWebhook = await fetch(
     `https://api.keygen.sh/v1/accounts/${accountId}/webhook-events/${keygenEventId}`,
@@ -26,8 +23,6 @@ export async function post({ request }) {
       },
     }
   );
-
-  console.log('hook valid', keygenWebhook)
 
   const { data: keygenEvent, errors } = await keygenWebhook.json();
   
