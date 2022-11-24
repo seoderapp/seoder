@@ -12,8 +12,6 @@ export async function post({ request }) {
   const stripeEvent = await request?.json();
 
   let statusCode = 200;
-
-  console.log(stripeEvent)
   
   switch (stripeEvent.type) {
     case "invoice.payment_succeeded": {
