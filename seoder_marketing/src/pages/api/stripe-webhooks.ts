@@ -9,11 +9,12 @@ const keygenPolicyId = import.meta.env.KEYGEN_POLICY_ID;
 const token = import.meta.env.KEYGEN_API_TOKEN;
 
 export async function post({ request }) {
-  const jsonData = await request?.json();
-  const { stripeEvent } = jsonData ?? { stripeEvent: null };
+  const stripeEvent = await request?.json();
 
   let statusCode = 200;
 
+  console.log(stripeEvent)
+  
   switch (stripeEvent.type) {
     case "invoice.payment_succeeded": {
       const { object: stripeCustomer } = stripeEvent.data;
