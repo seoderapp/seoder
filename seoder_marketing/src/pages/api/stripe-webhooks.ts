@@ -88,9 +88,6 @@ export async function post({ request }) {
       }
     }
 
-    // 4. Respond to customer creation events within your Stripe account. Here, we'll
-    //    create a new Stripe subscription for the customer as well as a Keygen license
-    //    for the Keygen user that belongs to the Stripe customer.
     case "customer.created": {
       const { object: stripeCustomer } = stripeEvent.data;
 
@@ -107,12 +104,10 @@ export async function post({ request }) {
       const stripeSubscription = await stripe.subscriptions.create(
         {
           customer: stripeCustomer.id,
-          items: [{ price: stripePlanId }],
+          items: [{ plan: stripePlanId }],
         },
         {
           // Use an idempotency key so that we don't charge a customer more than one
-          // time regardless of how many times this webhook is retried.
-          // See: https://stripe.com/docs/api/node#idempotent_requests
           idempotency_key: stripeCustomer.metadata.keygenUserId,
         }
       );
@@ -194,6 +189,7 @@ export async function post({ request }) {
       statusCode = 200;
       break;
     }
+
     default:
       // todo: re-send new key
       // For events we don't care about, let Stripe know all is good.
