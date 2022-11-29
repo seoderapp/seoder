@@ -1,5 +1,5 @@
-import { stripe } from "../../utils/stripe";
 import nodemailer from "nodemailer";
+import { stripe } from "../../utils/stripe";
 
 const cid = import.meta.env.EMAIL_CLIENT_ID;
 const ckey = import.meta.env.EMAIL_CLIENT_KEY;
@@ -38,68 +38,70 @@ export async function post({ request }) {
         );
       }
 
-      // get the keygen license for the stripe subscription
-      const keygenLicense = await fetch(
-        `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/vnd.api+json",
-            Accept: "application/vnd.api+json",
-          },
-          body: JSON.stringify({
-            data: {
-              type: "licenses",
-              attributes: {
-                metadata: {
-                  stripeSubscriptionId:
-                    stripeCustomer?.subscription?.id ?? stripePlanId,
-                },
-              },
-              relationships: {
-                policy: {
-                  data: {
-                    type: "policies",
-                    id: keygenPolicyId,
-                  },
-                },
-                user: {
-                  data: {
-                    type: "users",
-                    id: stripeCustomer.metadata.keygenUserId,
-                  },
-                },
-              },
-            },
-          }),
-        }
-      );
-
-      const { data, errors } = await keygenLicense.json();
-
-      const key = data?.attributes?.key;
-
-      if (key) {
-        // renew a valid
-        const keygenRenewResponse = await fetch(
-          `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses/${key}/actions/renew`,
+      // if new payment renew the key
+      if(stripeCustomer.billing_reason !== 'subscription_create') {
+        const keygenLicense = await fetch(
+          `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses`,
           {
-            method: "GET",
+            method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "application/vnd.api+json",
               Accept: "application/vnd.api+json",
             },
+            body: JSON.stringify({
+              data: {
+                type: "licenses",
+                attributes: {
+                  metadata: {
+                    stripeSubscriptionId:
+                      stripeCustomer?.subscription?.id ?? stripePlanId,
+                  },
+                },
+                relationships: {
+                  policy: {
+                    data: {
+                      type: "policies",
+                      id: keygenPolicyId,
+                    },
+                  },
+                  user: {
+                    data: {
+                      type: "users",
+                      id: stripeCustomer.metadata.keygenUserId,
+                    },
+                  },
+                },
+              },
+            }),
           }
         );
-
-        const renewable = await keygenRenewResponse.json();
-
-        if (renewable?.errors) {
-          console.error(renewable.errors);
+  
+        const { data, errors } = await keygenLicense.json();
+  
+        const key = data?.attributes?.key;
+  
+        if (key) {
+          // renew a valid
+          const keygenRenewResponse = await fetch(
+            `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses/${key}/actions/renew`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/vnd.api+json",
+              },
+            }
+          );
+  
+          const renewable = await keygenRenewResponse.json();
+  
+          if (renewable?.errors) {
+            console.error(renewable.errors);
+          }
+        } else {
+          console.error(errors);
         }
-      } else {
-        console.error(errors);
       }
     }
 
