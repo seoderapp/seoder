@@ -10,12 +10,14 @@ const token = import.meta.env.KEYGEN_API_TOKEN;
 
 export async function post({ request }) {
   const stripeEvent = await request?.json();
+  const { object: stripeCustomer } = stripeEvent?.data ?? {};
 
   let statusCode = 200;
   
+  console.log(stripeCustomer)
+
   switch (stripeEvent.type) {
     case "invoice.payment_succeeded": {
-      const { object: stripeCustomer } = stripeEvent.data;
       // Make sure our Stripe customer has a Keygen user ID, or else we can't work with it.
       if (!stripeCustomer.metadata.keygenUserId) {
         throw new Error(
@@ -89,8 +91,6 @@ export async function post({ request }) {
     }
 
     case "customer.created": {
-      const { object: stripeCustomer } = stripeEvent.data;
-
       // Make sure our Stripe customer has a Keygen user ID, or else we can't work with it.
       if (!stripeCustomer.metadata.keygenUserId) {
         throw new Error(
