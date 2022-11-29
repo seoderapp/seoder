@@ -8,6 +8,8 @@ const keygenAccountId = import.meta.env.KEYGEN_ACCOUNT_ID;
 const keygenPolicyId = import.meta.env.KEYGEN_POLICY_ID;
 const token = import.meta.env.KEYGEN_API_TOKEN;
 
+const transportor = transport();
+
 export async function post({ request }) {
   const stripeEvent = await request?.json();
   const { object: stripeCustomer } = stripeEvent?.data ?? {};
@@ -147,8 +149,6 @@ export async function post({ request }) {
       );
 
       const { data, errors } = await keygenLicense?.json();
-
-      console.log(data)
       
       if (errors) {
         statusCode = 500;
@@ -163,7 +163,8 @@ export async function post({ request }) {
       // our user's email using `stripeCustomer.email` or something similar.
       // Let Stripe know the event was received successfully.
       if (data && data.attributes.status === "ACTIVE") {
-        await transport.sendMail({
+        console.log('attempting mail send')
+        await transportor.sendMail({
           from: "support@seoder.com",
           to: stripeCustomer.email,
           subject: "Seoder One Year License✔",
