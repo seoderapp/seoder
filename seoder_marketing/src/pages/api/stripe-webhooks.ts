@@ -108,7 +108,7 @@ export async function post({ request }) {
         },
         {
           // Use an idempotency key so that we don't charge a customer more than one
-          idempotency_key: stripeCustomer.metadata.keygenUserId,
+          idempotencyKey: stripeCustomer.metadata.keygenUserId,
         }
       );
 
