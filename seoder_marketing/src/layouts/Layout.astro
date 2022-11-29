@@ -59,7 +59,9 @@ const domainCom = domain.replace(".io", ".com");
     {metas?.map((node) => <meta {...node} />)}
     {
       stylesheets?.map(({ children, ...node }) => (
-        <style {...node} set:html={children} />
+        <style {...node} set:html={children}>
+          {}
+        </style>
       ))
     }
     {
