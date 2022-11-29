@@ -47,7 +47,7 @@ export const IntegrationsView = () => {
           color: "#A1A7AD",
         }}
       >
-        Get your <a href={"https://hunter.io/api-keys"}>Hunter.io API</a> key
+        Get your <a href={"https://hunter.io/api-keys"} target={"_blank"} rel="noopener noreferrer">Hunter.io API</a> key
         for prospects.
       </div>
     </div>

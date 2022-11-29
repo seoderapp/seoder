@@ -4,7 +4,6 @@ import { socket } from "../events/sockets";
 import { createEngine, engines } from "../stores/engine";
 import {
   fileList,
-  fileMap,
   modalStore,
   ModalType,
   selectedFile,
@@ -105,7 +104,7 @@ export const CampaignCreate = () => {
 
         <div className="row">
           <button
-            className={`button ${source ? "btn-primary" : ""}`}
+            className={`button ${source ? "btn-primary" : "btn-defaults"}`}
             onClick={onSetSource}
             style={{ borderRadius: "8px 0px 0px 8px" }}
             type={"button"}
@@ -113,7 +112,7 @@ export const CampaignCreate = () => {
             Source Code
           </button>
           <button
-            className={`button ${source ? "" : "btn-primary"}`}
+            className={`button ${source ? "btn-defaults" : "btn-primary"}`}
             onClick={onRemoveSource}
             style={{ borderRadius: "0px 8px 8px 0px" }}
             type={"button"}
@@ -125,7 +124,7 @@ export const CampaignCreate = () => {
         <p>Choose where to crawl the keywords against</p>
 
         <div className="gutter">
-          <label htmlFor="dname">Choose domain list</label>
+          <label htmlFor="dname">Default domain list</label>
           <div className="flex-row center-align gap-xl" style={{ gap: "1rem" }}>
             <select
               name="target"

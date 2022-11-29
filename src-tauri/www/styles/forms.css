@@ -121,3 +121,8 @@ input:checked + .slider:after {
 .pless {
   padding: 0.5rem 0;
 }
+
+
+.btn-defaults {
+  color: #2F2768;
+}

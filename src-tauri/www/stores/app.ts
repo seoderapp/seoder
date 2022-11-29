@@ -39,6 +39,8 @@ export const torSet = atom<boolean>(false);
 
 // hunterio state
 export const hunterioKey = persistentAtom<string>("");
+// app license
+export const licenseKey = persistentAtom<string>("");
 
 export type EmailsValue = {
   // todo: multi list of emails
@@ -46,3 +48,6 @@ export type EmailsValue = {
 };
 
 export const etemplates = persistentMap<EmailsValue>("etemplates:", {});
+
+// authed
+export const authenticated = atom<boolean>(false);

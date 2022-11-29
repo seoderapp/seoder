@@ -167,7 +167,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         *LICENSED.lock().unwrap() = valid_license;
     }
 
-    let v = json!({ "license": valid_license });
+    let v = json!({ "license": valid_license, "key": stored_license });
 
     outgoing = send_message(outgoing, &v.to_string()).await;
 

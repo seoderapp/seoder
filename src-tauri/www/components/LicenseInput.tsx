@@ -2,8 +2,8 @@ import "../styles/license.css";
 
 import { useState } from "react";
 
-export default function LicenseInput({ className }: { className?: string }) {
-  const [license, setLicense] = useState<string>("");
+export default function LicenseInput({ className, value }: { className?: string, value?:string }) {
+  const [license, setLicense] = useState<string>(value ?? "");
 
   const onChangeTextEvent = (e) => {
     setLicense(e.target.value);
@@ -19,6 +19,7 @@ export default function LicenseInput({ className }: { className?: string }) {
           name="license"
           placeholder="XXXX-XXXX-XXXXX-XXXXX-XXXXXX"
           type="text"
+          value={license}
           className={`license-input`}
           onChange={onChangeTextEvent}
         />

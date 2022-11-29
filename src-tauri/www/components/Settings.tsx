@@ -1,6 +1,8 @@
 import { useStore } from "@nanostores/react";
 import {
+  authenticated,
   fileList,
+  licenseKey,
   lowPowerSet,
   modalStore,
   ModalType,
@@ -26,6 +28,8 @@ export const Settings = () => {
   const $tor = useStore(torSet);
   const $proxy = useStore(proxySet);
   const $lowpower = useStore(lowPowerSet);
+  const $authed = useStore(authenticated);
+  const $licenseKey = useStore(licenseKey);
 
   const onLicenseSubmit = (event) => {
     event.preventDefault();
@@ -36,7 +40,7 @@ export const Settings = () => {
 
     if (slicense && slicense.value) {
       socket.send("set-license " + slicense.value);
-
+      licenseKey.set(slicense.value)
       modalStore.set(ModalType.CLOSED);
     } else {
       window.alert("Please enter a license.");
@@ -171,9 +175,15 @@ export const Settings = () => {
             Integrations
           </button>
         </div>
+        
+        {$authed ? 
+        <div className="ph frame">
+          <a href={"https://billing.stripe.com/p/login/eVa5on4PD2rD9lCfYY"} target={"_blank"} rel="noopener noreferrer">Manage Account</a>
+        </div>
+        : null}
 
         <form id="ulicense" className="ph" onSubmit={onLicenseSubmit}>
-          <LicenseInput className="pless" />
+          <LicenseInput className="pless" value={$licenseKey} />
         </form>
       </div>
     </div>

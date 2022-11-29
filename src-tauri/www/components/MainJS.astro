@@ -13,7 +13,9 @@
   import { CellStatus } from "./CampaignCell";
 
   import {
+    authenticated,
     fileMap,
+    licenseKey,
     lowPowerSet,
     proxySet,
     selectedFile,
@@ -35,8 +37,10 @@
   const elicense = document.getElementById("elicense");
 
   if (program && localStorage.getItem("authed")) {
+    authenticated.set(true);
     program.className = "row block";
   } else if (elicense) {
+    authenticated.set(false);
     elicense.className = "row block";
   }
 
@@ -125,8 +129,9 @@
     // license handling
     if (raw.startsWith(vlicense)) {
       const data = JSON.parse(raw);
-      const { license } = data || {};
+      const { license, key } = data || {};
 
+      licenseKey.set(key);
       // set local storage of license enabled and display view
       if (license) {
         if (program) {
@@ -136,6 +141,7 @@
           elicense.className = "row hidden";
         }
         localStorage.setItem("authed", "true");
+        authenticated.set(true);
       } else {
         localStorage.removeItem("authed");
 
