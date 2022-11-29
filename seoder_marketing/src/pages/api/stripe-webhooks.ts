@@ -14,8 +14,6 @@ export async function post({ request }) {
 
   let statusCode = 200;
   
-  console.log(stripeCustomer)
-
   switch (stripeEvent.type) {
     case "invoice.payment_succeeded": {
       // Make sure our Stripe customer has a Keygen user ID, or else we can't work with it.
@@ -107,14 +105,13 @@ export async function post({ request }) {
           items: [{ plan: stripePlanId }],
         },
         {
-          // Use an idempotency key so that we don't charge a customer more than one
+          // Use an idempotency key so that we don't charge a customer more than once
           idempotencyKey: stripeCustomer.metadata.keygenUserId,
         }
       );
 
       // 6. Create a license for the new Stripe customer after we create a subscription
       //    for them. We're pulling the Keygen user's ID from the Stripe customer's
-      //    metadata attribute (we stored it there earler).
       const keygenLicense = await fetch(
         `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses`,
         {
@@ -149,11 +146,12 @@ export async function post({ request }) {
         }
       );
 
-      const { data, errors } = await keygenLicense.json();
+      const { data, errors } = await keygenLicense?.json();
 
+      console.log(data)
+      
       if (errors) {
         statusCode = 500;
-
         // If you receive an error here, then you may want to handle the fact the customer
         // may have been charged for a license that they didn't receive e.g. easiest way
         // would be to create it manually, or refund their subscription charge.
