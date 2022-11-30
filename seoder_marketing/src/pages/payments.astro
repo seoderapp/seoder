@@ -123,7 +123,7 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
         throw new Error(message);
       }
 
-      register.parentNode.innerHTML = `Thanks for your purchase, ${data.attributes.firstName}! 🚀`;
+      register.parentNode.innerHTML = `Thanks for your purchase, ${data.attributes.firstName}! 🚀 Download the app below and enter the license key that was emailed to you.`;
     },
   });
 
