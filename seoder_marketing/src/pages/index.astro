@@ -3,10 +3,12 @@ import Layout from "../layouts/Layout.astro";
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
 import Landing from "../components/Landing.astro";
+import { appTitle } from "../statics/title";
 ---
 
 <Layout
-  title="Seoder - The outbound lead generation tool"
+  companyTitle
+  title={appTitle}
   description={"Outbound lead generation fast with little downtime. Insightful marketing campaigns for high conversion ratios and templating tools."}
 >
   <main>

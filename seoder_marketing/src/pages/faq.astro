@@ -8,7 +8,8 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout
-  title="Seoder - Frequently Asked Questions"
+  faq
+  title="Frequently Asked Questions"
   description={"Frequently asked questions and answers to help you with using Seoder."}
 >
   <main>
@@ -18,57 +19,136 @@ import Layout from "../layouts/Layout.astro";
         <Title center>Frequently Asked Questions</Title>
         <SubTitle>Common questions and answers</SubTitle>
         <ul>
-          <li>
-            <h3>License Machine limits</h3>
-            <p>
-              Currently each license allows usage on one machine. If you need to
-              run on another machine you need to purchase another license.
-            </p>
+          <li
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <h3 itemprop="name">License Machine limits</h3>
+            <div
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <p itemprop="text">
+                Currently each license allows usage on one machine. If you need
+                to run on another machine you need to purchase another license.
+              </p>
+            </div>
           </li>
-          <li>
-            <h3>Update Frequency</h3>
-            <p>
-              We roll out changes often and try to make each update compatible
-              across all future system updates.
-            </p>
+          <li
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <h3 itemprop="name">Can I upload 1,000 urls?</h3>
+            <div
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <p itemprop="text">
+                Yes, you can upload an infinite amount of urls at once.
+              </p>
+            </div>
           </li>
-          <li>
-            <h3>Money back Guarantee</h3>
-            <p>
-              If you are not happy with the state of Seoder at anytime during
-              the first 30 days we will offer a full refund by reaching out to <a
-                href="mailto:support@seoder.com">support</a
-              >.
-            </p>
+          <li
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <h3 itemprop="name">How fast can this scan 1 million urls?</h3>
+            <div
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <p itemprop="text">
+                The process for 1 million urls varies between runs and latency.
+                The average duration should be in under 20 minutes.
+              </p>
+            </div>
+          </li>
+          <li
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <h3 itemprop="name">Update Frequency</h3>
+            <div
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <p itemprop="text">
+                We roll out changes often and try to make each update compatible
+                across all future system updates.
+              </p>
+            </div>
+          </li>
+          <li
+            itemscope
+            itemprop="mainEntity"
+            itemtype="https://schema.org/Question"
+          >
+            <h3 itemprop="name">Money back Guarantee</h3>
+            <div
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <p itemprop="text">
+                <p>
+                  If you are not happy with the state of Seoder at anytime
+                  during the first 30 days we will offer a full refund by
+                  reaching out to <a href="mailto:support@seoder.com">support</a
+                  >.
+                </p>
+              </p>
+            </div>
           </li>
         </ul>
       </Section>
     </div>
+    <div class={"space"}></div>
+    <Footer />
   </main>
-  <div class={"space"}></div>
-  <Footer />
-</Layout>
 
-<style>
-  .space {
-    height: 11rem;
-  }
-  .button-container {
-    padding-top: 0.8rem;
-    padding-bottom: 5rem;
-  }
-  .button-container button {
-    text-transform: uppercase;
-    color: #2f2768;
-    border: none;
-    padding: 0.85rem 0.8rem;
-    border-radius: 0.3rem;
-    min-width: 16.8rem;
-    margin: 0;
-    background-color: #e8c01a;
-    font-weight: 700;
-  }
-  .button-container button:hover {
-    background-color: #e9c73e;
-  }
-</style>
+  <style>
+    h3 {
+      font-weight: 500;
+      font-size: 1.2rem;
+    }
+    .space {
+      height: 11rem;
+    }
+    .button-container {
+      padding-top: 0.8rem;
+      padding-bottom: 5rem;
+    }
+    .button-container button {
+      text-transform: uppercase;
+      color: #2f2768;
+      border: none;
+      padding: 0.85rem 0.8rem;
+      border-radius: 0.3rem;
+      min-width: 16.8rem;
+      margin: 0;
+      background-color: #e8c01a;
+      font-weight: 700;
+    }
+    .button-container button:hover {
+      background-color: #e9c73e;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0 2rem;
+    }
+    ul li p {
+      font-size: 1.2rem;
+    }
+    ul li {
+      padding: 0.2rem 0;
+    }
+  </style>
+</Layout>

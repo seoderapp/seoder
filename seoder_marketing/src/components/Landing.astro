@@ -8,15 +8,18 @@ import FeatureList from "./FeatureList.astro";
 import Hero from "./Svgs/Hero.astro";
 import Highlight from "./Highlight.astro";
 import App from "./Svgs/App.astro";
+import { appTitle } from "../statics/title";
 ---
 
 <div class="prog">
   <Section>
     <div class="flex-wrap">
       <div>
-        <Title>Find outbound leads swiftly and efficiently</Title>
+        <Title>{appTitle} lists quickly</Title>
         <p class="instructions text-primary">
-          Import thousands of domains and identify keywords {`you’re`} looking for
+          Import thousands of domains and identify organic meta information {
+            `you’re`
+          } looking for.
         </p>
         <div class={"text-center"}>
           <div>
@@ -33,7 +36,7 @@ import App from "./Svgs/App.astro";
     <div class="row features">
       <div class="features">
         <Highlight>Features</Highlight>
-        <h2 class="text-primary sub-heading">Beyond fast keyword searcher</h2>
+        <h2 class="text-primary sub-heading">Beyond fast SEO engine</h2>
         <Search />
       </div>
       <FeatureList />

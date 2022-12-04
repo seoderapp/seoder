@@ -1,4 +1,6 @@
 ---
+import { appTitle, getCompanyTitle } from "../statics/title";
+
 export interface Props {
   title: string;
   description?: string;
@@ -7,6 +9,8 @@ export interface Props {
   links?: any[];
   metas?: any[];
   stylesheets?: any[];
+  companyTitle?: boolean;
+  faq?: boolean;
 }
 
 const {
@@ -17,21 +21,33 @@ const {
   links,
   metas,
   stylesheets,
+  companyTitle,
+  faq,
 } = Astro.props;
 
 const ogImage = new URL("/og/OG_Image.png", Astro.site);
 const domain = ogImage.hostname;
 
 const domainCom = domain.replace(".io", ".com");
+
+const faqProps = faq
+  ? { itemscope: true, itemtype: "https://schema.org/FAQPage" }
+  : {};
 ---
 
-<html lang="en">
+<html lang="en" {...faqProps}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/x-icon" href="/icon.ico" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
+    <title>
+      {
+        companyTitle
+          ? getCompanyTitle(title)
+          : `${getCompanyTitle(title)} | ${appTitle}`
+      }
+    </title>
     {
       !links ? (
         <>
