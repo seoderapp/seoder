@@ -3,6 +3,26 @@
   text-align: left;
 }
 
+.Overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(30, 30, 30, 0.8);
+}
+
+.truncate {
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.borderless {
+  border: 0;
+}
+
 .form-container {
   padding-left: 1.25rem;
   padding-right: 1.25rem;
@@ -46,6 +66,8 @@ label {
 .form-container p {
   font-size: 0.75rem;
   color: #2f2768;
+  margin: 0;
+  padding: 0.35rem 0;
 }
 
 .form-container label:not(.switch) {
@@ -121,7 +143,6 @@ input:checked + .slider:after {
 .pless {
   padding: 0.5rem 0;
 }
-
 
 .btn-defaults {
   color: #2F2768;

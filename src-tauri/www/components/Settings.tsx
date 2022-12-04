@@ -123,7 +123,7 @@ export const Settings = () => {
         </div>
 
         <div className="ph frame flex-row center-align">
-          <label htmlFor="target-select">Target</label>
+          <label htmlFor="target-select">Domain List</label>
           <div className="ph">
             <select
               name="target"

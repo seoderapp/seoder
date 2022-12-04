@@ -102,7 +102,7 @@ export const CampaignCreate = () => {
           <p>Words are case insensitive and can utilize regex</p>
         </div>
 
-        <div className="row">
+        <div className="row pless">
           <button
             className={`button ${source ? "btn-primary" : "btn-defaults"}`}
             onClick={onSetSource}
@@ -161,11 +161,11 @@ export const CampaignCreate = () => {
             type="text"
             className="form-control"
           />
-          <p>Choose which paths you want the crawler to find keywords in</p>
+          <p className="truncate">Choose which paths you want the crawler to find keywords in</p>
         </div>
       </div>
       <div className="gutter-t">
-        <button type="submit" className="button btn-primary full-w">
+        <button type="submit" className="button btn-primary full-w borderless">
           Add Campaign
         </button>
       </div>

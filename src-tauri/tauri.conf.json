@@ -71,12 +71,12 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 635,
         "resizable": true,
         "title": "Seoder",
         "width": 945,
         "minWidth": 800,
-        "minHeight": 600
+        "minHeight": 635
       }
     ]
   }

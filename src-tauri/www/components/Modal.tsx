@@ -17,6 +17,7 @@ Modal.setAppElement("#appProgram");
 
 const customStyles = {
   content: {
+    overflow:"hidden",
     top: "50%",
     left: "50%",
     right: "auto",
@@ -24,8 +25,9 @@ const customStyles = {
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
     padding: 0,
-  },
+  }
 };
+
 
 // todo: refactor modal outside for central components
 export const AppModal = () => {
@@ -45,8 +47,9 @@ export const AppModal = () => {
       onRequestClose={closeModal}
       shouldCloseOnOverlayClick
       style={customStyles}
+      overlayClassName="Overlay"
     >
-      <div style={{ position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "relative", overflow: "hidden", background: "#fff" }}>
         <SettingsBar title={title} />
         {modalState === ModalType.CAMPAIGN ? <CampaignCreate /> : null}
         {modalState === ModalType.SETTINGS ? <Settings /> : null}
