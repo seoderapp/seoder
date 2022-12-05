@@ -40,7 +40,7 @@ export async function post({ request }) {
       }
 
       // if new payment renew the key
-      if(stripeCustomer.billing_reason !== 'subscription_create') {
+      if(stripeCustomer.billing_reason === 'subscription_cycle') {
         const keygenLicense = await fetch(
           `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses`,
           {
@@ -206,8 +206,6 @@ export async function post({ request }) {
     }
 
     default:
-      // todo: re-send new key
-      // For events we don't care about, let Stripe know all is good.
       statusCode = 200;
   }
 
