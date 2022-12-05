@@ -63,7 +63,7 @@ export async function post({ request }) {
       }
 
       // if new payment renew the key
-      if(stripeCustomer.billing_reason === 'subscription_cycle') {
+      if (["manual", "subscription_cycle", "subscription_update"].includes(stripeCustomer.billing_reason)) {
         const keygenLicense = await fetch(
           `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses`,
           {
@@ -228,8 +228,9 @@ export async function post({ request }) {
       break;
     }
 
-    default:
-      statusCode = 200;
+    default:{
+      statusCode = 200
+    }
   }
 
   return new Response(JSON.stringify({ message: "Success" }), {
