@@ -127,6 +127,8 @@ export async function post({ request }) {
           console.error(errors);
         }
       }
+
+      break;
     }
 
     case "customer.created": {
