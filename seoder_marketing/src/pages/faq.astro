@@ -17,14 +17,14 @@ import Layout from "../layouts/Layout.astro";
     <div class="prog">
       <Section center>
         <Title center>Frequently Asked Questions</Title>
-        <SubTitle>Common questions and answers</SubTitle>
+        <p>Common questions and answers on using the product.</p>
         <ul>
           <li
             itemscope
             itemprop="mainEntity"
             itemtype="https://schema.org/Question"
           >
-            <h3 itemprop="name">License Machine limits</h3>
+            <h2 itemprop="name">License Machine limits</h2>
             <div
               itemscope
               itemprop="acceptedAnswer"
@@ -41,7 +41,7 @@ import Layout from "../layouts/Layout.astro";
             itemprop="mainEntity"
             itemtype="https://schema.org/Question"
           >
-            <h3 itemprop="name">Can I upload 1,000 urls?</h3>
+            <h2 itemprop="name">Can I upload 1,000 urls?</h2>
             <div
               itemscope
               itemprop="acceptedAnswer"
@@ -57,7 +57,7 @@ import Layout from "../layouts/Layout.astro";
             itemprop="mainEntity"
             itemtype="https://schema.org/Question"
           >
-            <h3 itemprop="name">How fast can this scan 1 million urls?</h3>
+            <h2 itemprop="name">How fast can this scan 1 million urls?</h2>
             <div
               itemscope
               itemprop="acceptedAnswer"
@@ -74,7 +74,7 @@ import Layout from "../layouts/Layout.astro";
             itemprop="mainEntity"
             itemtype="https://schema.org/Question"
           >
-            <h3 itemprop="name">Update Frequency</h3>
+            <h2 itemprop="name">Update Frequency</h2>
             <div
               itemscope
               itemprop="acceptedAnswer"
@@ -91,7 +91,7 @@ import Layout from "../layouts/Layout.astro";
             itemprop="mainEntity"
             itemtype="https://schema.org/Question"
           >
-            <h3 itemprop="name">Money back Guarantee</h3>
+            <h2 itemprop="name">Money back Guarantee</h2>
             <div
               itemscope
               itemprop="acceptedAnswer"
@@ -109,13 +109,25 @@ import Layout from "../layouts/Layout.astro";
           </li>
         </ul>
       </Section>
+      <Section>
+        <h3>Improve your workflow and save time</h3>
+        <p>
+          Deliver with accuracy target websites that match your audience. You
+          control how the system finds the patterns for campaigns.
+        </p>
+        <h4>Support followup is here</h4>
+        <p>
+          If you need help still learning about the product. Please contact us
+          at <a href={"mailto:support@seoder.com"}>support@seoder.com</a>
+        </p>
+      </Section>
     </div>
     <div class={"space"}></div>
     <Footer />
   </main>
 
   <style>
-    h3 {
+    h2 {
       font-weight: 500;
       font-size: 1.2rem;
     }
