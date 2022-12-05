@@ -41,23 +41,17 @@ export async function post({ request }) {
           `Customer ${stripeCustomer.id} does not have a Keygen user ID attached to their customer account!`
         );
       }
-      const keygenLicense = await fetch(
+      // fire fetch without content response
+      await fetch(
         `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses/${stripeCustomer.metadata.keygenUserId}`,
         {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/vnd.api+json",
             Accept: "application/vnd.api+json",
           }
         }
       );
-
-      const { errors } = await keygenLicense.json();
-
-      if (errors) {
-        console.error(errors);
-      }
     }
 
     case "invoice.payment_succeeded": {
