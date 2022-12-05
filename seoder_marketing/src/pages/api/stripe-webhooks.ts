@@ -29,6 +29,7 @@ export async function post({ request }) {
 
   let statusCode = 200;
   
+  // todo: validate subscription cancelled 
   switch (stripeEvent.type) {
     case "invoice.payment_succeeded": {
       // Make sure our Stripe customer has a Keygen user ID, or else we can't work with it.
