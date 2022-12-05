@@ -120,6 +120,7 @@ export async function post({ request }) {
         {
           customer: stripeCustomer.id,
           items: [{ plan: stripePlanId }],
+          trial_period_days: 7
         },
         {
           // Use an idempotency key so that we don't charge a customer more than once
