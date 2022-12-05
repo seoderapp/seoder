@@ -23,14 +23,43 @@ const transportor = nodemailer.createTransport({
   },
 });
 
+// stripe keygen webhook
 export async function post({ request }) {
   const stripeEvent = await request?.json();
   const { object: stripeCustomer } = stripeEvent?.data ?? {};
 
   let statusCode = 200;
   
-  // todo: validate subscription cancelled 
+  // todo: payment failed handle subscription pause.
+
   switch (stripeEvent.type) {
+
+    case "customer.subscription.deleted": {
+      // Make sure our Stripe customer has a Keygen user ID, or else we can't work with it.
+      if (!stripeCustomer.metadata.keygenUserId) {
+        throw new Error(
+          `Customer ${stripeCustomer.id} does not have a Keygen user ID attached to their customer account!`
+        );
+      }
+      const keygenLicense = await fetch(
+        `https://api.keygen.sh/v1/accounts/${keygenAccountId}/licenses/${stripeCustomer.metadata.keygenUserId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/vnd.api+json",
+            Accept: "application/vnd.api+json",
+          }
+        }
+      );
+
+      const { errors } = await keygenLicense.json();
+
+      if (errors) {
+        console.error(errors);
+      }
+    }
+
     case "invoice.payment_succeeded": {
       // Make sure our Stripe customer has a Keygen user ID, or else we can't work with it.
       if (!stripeCustomer.metadata.keygenUserId) {
