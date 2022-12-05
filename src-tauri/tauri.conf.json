@@ -13,6 +13,13 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "shell": {
+        "all": false,
+        "execute": false,
+        "open": true,
+        "scope": [],
+        "sidecar": false
+      },
       "fs": {
         "writeFile": true,
         "readFile": true
