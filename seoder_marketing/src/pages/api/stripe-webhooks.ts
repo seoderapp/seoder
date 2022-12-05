@@ -11,6 +11,8 @@ const keygenAccountId = import.meta.env.KEYGEN_ACCOUNT_ID;
 const keygenPolicyId = import.meta.env.KEYGEN_POLICY_ID;
 const token = import.meta.env.KEYGEN_API_TOKEN;
 
+const whSecret = import.meta.env.STRIPE_WH_SECRET;
+
 const transportor = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -26,7 +28,24 @@ const transportor = nodemailer.createTransport({
 // stripe keygen webhook
 export async function post({ request }) {
   const stripeEvent = await request?.json();
-  const { object: stripeCustomer } = stripeEvent?.data ?? {};
+
+  const sig = request.headers['stripe-signature'];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(stripeEvent, sig, whSecret);
+  } catch (err) {
+    return new Response(JSON.stringify({ message: `Webhook Error: ${err.message}` }), {
+      status: 400,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return;
+  }
+
+  const { object: stripeCustomer } = event?.data ?? {};
 
   let statusCode = 200;
   
