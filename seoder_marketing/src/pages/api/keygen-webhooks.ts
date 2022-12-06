@@ -1,42 +1,40 @@
 import { stripe } from "../../utils/stripe";
 
-const productToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
 const accountId = import.meta.env.KEYGEN_ACCOUNT_ID;
+const token = import.meta.env.KEYGEN_API_TOKEN;
 
 export async function post({ request }) {
-  const jsonData = await request?.json();
-  const { data } = jsonData ?? { data: null };
-
-  const keygenEventId = data?.id;
-
   let statusCode = 200;
+  const jsonData = await request?.json();
+  const { data } = jsonData;
+  const keygenEventId = data?.id;
 
   const keygenWebhook = await fetch(
     `https://api.keygen.sh/v1/accounts/${accountId}/webhook-events/${keygenEventId}`,
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${productToken}`,
+        Authorization: `Bearer ${token}`,
         Accept: "application/vnd.api+json",
       },
     }
   );
 
   const { data: keygenEvent, errors } = await keygenWebhook.json();
-
+  
   if (errors) {
     return new Response(null, {
       status: 200,
     });
   }
 
-  switch (keygenEvent?.attributes?.event) {
+  switch (keygenEvent.attributes.event) {
     // 1. Respond to user creation events within your Keygen account. Here, we'll create
     //    a new Stripe customer account for new Keygen users.
-    case "user.created":
+    case "user.created": { 
       const { data: keygenUser } = JSON.parse(keygenEvent.attributes.payload);
 
-      // Make sure our Keygen user has a Stripe token, or else we can't charge them later on..
+      // validate stripe token
       if (!keygenUser.attributes.metadata.stripeToken) {
         throw new Error(
           `User ${keygenUser.id} does not have a Stripe token attached to their user account!`
@@ -48,11 +46,9 @@ export async function post({ request }) {
       const stripeCustomer = await stripe.customers.create({
         description: `Customer for Keygen user ${keygenUser.attributes.email}`,
         email: keygenUser.attributes.email,
-        // Source is a Stripe token obtained with Stripe.js during user creation and
-        // temporarily stored in the user's metadata attribute.
+        // Source is a Stripe token
         source: keygenUser.attributes.metadata.stripeToken,
-        // Store the user's Keygen ID within the Stripe customer so that we can lookup
-        // a Stripe customer's Keygen account.
+        // Store the user's Keygen ID
         metadata: { keygenUserId: keygenUser.id },
       });
 
@@ -63,7 +59,7 @@ export async function post({ request }) {
         {
           method: "PATCH",
           headers: {
-            Authorization: `Bearer ${productToken}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/vnd.api+json",
             Accept: "application/vnd.api+json",
           },
@@ -78,16 +74,16 @@ export async function post({ request }) {
         }
       );
 
-      const { data, errors } = await update.json();
+      const { errors } = await update.json();
 
       if (errors) {
         throw new Error(errors.map((e) => e.detail).toString());
       }
 
       // All is good! Stripe customer was successfully created for the new Keygen
-      // user. Let Keygen know the event was received successfully.
       statusCode = 200;
       break;
+    }
     default:
       // For events we don't care about, let Keygen know all is good.
       statusCode = 200;

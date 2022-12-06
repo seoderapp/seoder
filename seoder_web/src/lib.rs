@@ -66,8 +66,8 @@ enum Action {
     ListValidCampaigns,
     RunCampaign,
     RunAllCampaigns,
-    CreateEngine,
-    RemoveEngine,
+    CreateCampaign,
+    RemoveCampaign,
     RemoveFile,
     SetList,
     SetBuffer,
@@ -98,8 +98,14 @@ lazy_static! {
 #[derive(Serialize, Deserialize, Debug, Default)]
 struct Eng {
     name: String,
+    /// folder targets
     paths: String,
+    /// pattern matching
     patterns: String,
+    /// source code only
+    source: bool,
+    /// target file
+    target: String,
 }
 
 /// tick status refreshing
@@ -161,7 +167,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
         *LICENSED.lock().unwrap() = valid_license;
     }
 
-    let v = json!({ "license": valid_license });
+    let v = json!({ "license": valid_license, "key": stored_license });
 
     outgoing = send_message(outgoing, &v.to_string()).await;
 
@@ -205,7 +211,7 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
 
                     outgoing = send_message(outgoing, &v.to_string()).await;
                 }
-            } else if st == Action::RemoveEngine {
+            } else if st == Action::RemoveCampaign {
                 shutdown(&input).await;
                 outgoing = controls::fs::remove_engine(outgoing, &input).await;
             } else if st == Action::Config {
@@ -221,8 +227,6 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 utils::write_config("proxy", &input).await;
             } else if st == Action::SetStopped {
                 pause(&input).await;
-                // Todo: persist stop across app shutdown
-
                 let v = json!({ "stopped": input });
 
                 outgoing = send_message(outgoing, &v.to_string()).await;
@@ -236,6 +240,69 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 utils::write_config("tor", &input).await;
             } else if st == Action::SetBuffer {
                 utils::write_config("buffer", &input).await;
+            } else if st == Action::CreateCampaign {
+                let v: Eng = serde_json::from_str(&input).unwrap_or_default();
+
+                let n = v.name;
+
+                if n.is_empty() == false {
+                    let db_dir = string_concat!(ENTRY_PROGRAM.0, &n);
+                    let pt = v.paths;
+                    let pat = v.patterns;
+                    let source = v.source;
+                    let target = v.target;
+
+                    // todo: remove handle
+                    let join = tokio::task::spawn(async move {
+                        let ptt = pt.split(','); // paths
+                        let ott = pat.split(','); // patterns
+
+                        create_dir(&db_dir).await.unwrap();
+
+                        create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
+                        create_dir(&string_concat!(db_dir, "/errors"))
+                            .await
+                            .unwrap();
+                        create_dir(&string_concat!(db_dir, "/invalid"))
+                            .await
+                            .unwrap();
+
+                        let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
+                            .await
+                            .unwrap();
+
+                        for x in ptt {
+                            let base = if !x.starts_with("/") { "/" } else { "" };
+                            let x = string_concat!(base, x, "\n");
+                            file.write_all(&x.as_bytes()).await.unwrap();
+                        }
+
+                        let mut file = File::create(string_concat!(db_dir, "/patterns.txt"))
+                            .await
+                            .unwrap();
+
+                        for x in ott {
+                            let x = string_concat!(x, "\n");
+                            file.write_all(&x.as_bytes()).await.unwrap();
+                        }
+
+                        // configuration file
+                        let mut file = File::create(string_concat!(db_dir, "/config.txt"))
+                            .await
+                            .unwrap();
+
+                        let x = string_concat!("source ", source.to_string(), "\n");
+                        file.write_all(&x.as_bytes()).await.unwrap();
+                        if !target.is_empty() {
+                            let x = string_concat!("target ", target.to_string(), "\n");
+                            file.write_all(&x.as_bytes()).await.unwrap();
+                        }
+                    });
+
+                    join.await.unwrap();
+
+                    outgoing = controls::list::list_file_count(outgoing).await;
+                }
             } else if st == Action::SetList {
                 if !input.is_empty() {
                     utils::write_config("target", &string_concat!(&ENTRY_PROGRAM.1, &input)).await;
@@ -343,54 +410,11 @@ async fn handle_connection(_peer_map: PeerMap, raw_stream: TcpStream, addr: Sock
                 }
             });
         } else if c == "create-engine" {
-            let v: Eng = serde_json::from_str(&cc).unwrap_or_default();
-
-            let n = v.name;
-
-            if n.is_empty() == false {
-                let db_dir = string_concat!(ENTRY_PROGRAM.0, &n);
-                let pt = v.paths;
-                let pat = v.patterns;
-
-                tokio::task::spawn(async move {
-                    let ptt = pt.split(','); // paths
-                    let ott = pat.split(','); // patterns
-
-                    create_dir(&db_dir).await.unwrap();
-                    create_dir(&string_concat!(db_dir, "/valid")).await.unwrap();
-                    create_dir(&string_concat!(db_dir, "/errors"))
-                        .await
-                        .unwrap();
-                    create_dir(&string_concat!(db_dir, "/invalid"))
-                        .await
-                        .unwrap();
-
-                    let mut file = File::create(string_concat!(db_dir, "/paths.txt"))
-                        .await
-                        .unwrap();
-
-                    for x in ptt {
-                        let base = if !x.starts_with("/") { "/" } else { "" };
-                        let x = string_concat!(base, x, "\n");
-                        file.write_all(&x.as_bytes()).await.unwrap();
-                    }
-
-                    let mut file = File::create(string_concat!(db_dir, "/patterns.txt"))
-                        .await
-                        .unwrap();
-
-                    for x in ott {
-                        let x = string_concat!(x, "\n");
-                        file.write_all(&x.as_bytes()).await.unwrap();
-                    }
-                });
-
-                if let Err(_) = sender.send((Action::CreateEngine, "".to_string())) {
-                    logd("the receiver dropped");
-                }
+            if let Err(_) = sender.send((Action::CreateCampaign, cc)) {
+                logd("the receiver dropped");
             }
         } else if c == "delete-engine" {
-            if let Err(_) = sender.send((Action::RemoveEngine, cc)) {
+            if let Err(_) = sender.send((Action::RemoveCampaign, cc)) {
                 logd("receiver dropped");
             }
         } else if c == "list-totals" {
@@ -449,7 +473,9 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
     tokio::spawn(scheduler.start());
 
     let handle = tokio::spawn(async move {
-        let mut interval = tokio::time::interval(Duration::from_millis(1000));
+        let mut interval = tokio::time::interval(Duration::from_millis(500));
+
+        // todo: add fs watcher and update data while loop exist in spawn
 
         while let Some(_) = receiver.recv().await {
             let mut list_ticket = 0;
@@ -457,15 +483,19 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
 
             // todo: handle fs tick count skip between
             loop {
-                outgoing = ticker(outgoing).await;
+                if list_config % 2 == 0 {
+                    // send stats per iteration
+                    outgoing = ticker(outgoing).await;
+                }
 
+                // todo: remove list config loop for file watcher
                 if list_config == 0 {
                     outgoing = controls::list::config(outgoing).await;
 
                     list_config = list_config + 1;
                 } else {
                     list_config = list_config + 1;
-                    if list_ticket == 25 {
+                    if list_config == 25 {
                         list_config = 0;
                     }
                 }
@@ -473,9 +503,9 @@ async fn handle_connection_loop(peer_map: PeerMap, raw_stream: TcpStream, addr: 
                 // list on this tick
                 if list_ticket == 0 {
                     outgoing = controls::list::list_valid(outgoing).await;
-                    outgoing = controls::list::list_engines(outgoing).await;
-                    outgoing = controls::list::list_file_count(outgoing).await;
-                    outgoing = controls::list::list_files(outgoing).await;
+                    // outgoing = controls::list::list_engines(outgoing).await;
+                    // outgoing = controls::list::list_file_count(outgoing).await;
+                    // outgoing = controls::list::list_files(outgoing).await;
                     list_ticket = list_ticket + 1;
                 } else {
                     list_ticket = list_ticket + 1;

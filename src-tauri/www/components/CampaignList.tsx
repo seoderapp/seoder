@@ -4,13 +4,13 @@ import { CampaignCell } from "./CampaignCell";
 
 export const CampaignList = ({ children }) => {
   const $list = useStore(enginesList);
-  const engineItems = engines.get();
+  const $engines = useStore(engines);
 
   return (
     <>
       <ul className={"list"}>
         {$list.map((item) => (
-          <CampaignCell item={engineItems[item]} key={item} path={item} />
+          <CampaignCell item={$engines[item]} key={item} path={item} />
         ))}
       </ul>
       <div className={$list.length ? "hidden" : "full-center"}>{children}</div>

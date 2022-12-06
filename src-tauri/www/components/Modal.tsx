@@ -1,0 +1,64 @@
+import "../styles/forms.css";
+
+import Modal from "react-modal";
+
+import { modalStore, ModalType } from "../stores/app";
+import { useStore } from "@nanostores/react";
+import { SettingsBar } from "./SettingsBar";
+import { CampaignCreate } from "./CampaignCreate";
+import { Settings } from "./Settings";
+import { Analytics } from "./Analytics";
+import { EditFile } from "./EditFile";
+import { Contacts } from "./Contacts";
+import { IntegrationsView } from "./Integrations/IntegrationsView";
+import { EmailCreate } from "./EmailCreate";
+
+Modal.setAppElement("#appProgram");
+
+const customStyles = {
+  content: {
+    overflow:"hidden",
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
+    padding: 0,
+  }
+};
+
+
+// todo: refactor modal outside for central components
+export const AppModal = () => {
+  const modalState = useStore(modalStore);
+
+  const closeModal = () => {
+    modalStore.set(ModalType.CLOSED);
+  };
+
+  const modalTitle = ModalType[modalState];
+
+  const title = modalTitle === "CAMPAIGN" ? `New ${modalTitle}` : modalTitle;
+
+  return (
+    <Modal
+      isOpen={modalState !== ModalType.CLOSED}
+      onRequestClose={closeModal}
+      shouldCloseOnOverlayClick
+      style={customStyles}
+      overlayClassName="Overlay"
+    >
+      <div style={{ position: "relative", overflow: "hidden", background: "#fff" }}>
+        <SettingsBar title={title} />
+        {modalState === ModalType.CAMPAIGN ? <CampaignCreate /> : null}
+        {modalState === ModalType.SETTINGS ? <Settings /> : null}
+        {modalState === ModalType.ANALYTICS ? <Analytics /> : null}
+        {modalState === ModalType.EDIT ? <EditFile /> : null}
+        {modalState === ModalType.CONTACTS ? <Contacts /> : null}
+        {modalState === ModalType.INTEGRATIONS ? <IntegrationsView /> : null}
+        {modalState === ModalType.EMAIL ? <EmailCreate /> : null}
+      </div>
+    </Modal>
+  );
+};

@@ -1,45 +1,121 @@
 ---
+import { appTitle, getCompanyTitle } from "../statics/title";
+
 export interface Props {
   title: string;
   description?: string;
+  bodyScripts?: any[];
+  headScripts?: any[];
+  links?: any[];
+  metas?: any[];
+  stylesheets?: any[];
+  companyTitle?: boolean;
+  faq?: boolean;
 }
 
-const { title, description } = Astro.props;
+const {
+  bodyScripts = [],
+  headScripts = [],
+  title,
+  description,
+  links,
+  metas,
+  stylesheets,
+  companyTitle,
+  faq,
+} = Astro.props;
+
+const ogImage = new URL("/og/OG_Image.png", Astro.site);
+const domain = ogImage.hostname;
+
+const domainCom = domain.replace(".io", ".com");
+
+const faqProps = faq
+  ? { itemscope: true, itemtype: "https://schema.org/FAQPage" }
+  : {};
 ---
 
-<!DOCTYPE html>
-<html lang="en">
+<html lang="en" {...faqProps}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/x-icon" href="/icon.ico" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
-    {description ? <meta name="description" content={description} /> : null}
+    <title>
+      {
+        companyTitle
+          ? getCompanyTitle(title)
+          : `${getCompanyTitle(title)} | ${appTitle}`
+      }
+    </title>
+    {
+      !links ? (
+        <>
+          {description ? (
+            <meta name="description" content={description} />
+          ) : null}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:site" content={"seoderio"} />
+          <meta name="twitter:creator" content={"seoderio"} />
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={title} />
+          <meta property="og:image" content={`${ogImage}?title=${title}`} />
+          <meta property="og:image:width" content="940" />
+          <meta property="og:image:height" content="700" />
+          <meta property="og:site_name" content={"Seoder"} />
+        </>
+      ) : null
+    }
+    <meta
+      property="keywords"
+      content="Outbound Leads, Seo Tool, Target Email Campaign Tool, Marketing Campaigns, Marketing, Target Links, Links"
+    />
+    <link rel="alternate" hreflang="en" />
+    {links?.map((node) => <link {...node} />)}
+    {metas?.map((node) => <meta {...node} />)}
+    {
+      stylesheets?.map(({ children, ...node }) => (
+        <style {...node} set:html={children}>
+          {}
+        </style>
+      ))
+    }
+    {
+      headScripts?.map(({ children, ...node }) => (
+        <script {...node} set:html={children} />
+      ))
+    }
   </head>
   <body>
     <slot />
-    <script src="https://metrics.seoder.io/script.js" data-site="JAYJESFT" defer
+    <script
+      src={`https://metrics.${domainCom}/script.js`}
+      data-site="JAYJESFT"
+      defer
     ></script>
+    {
+      bodyScripts?.map(({ children, ...node }) => (
+        <script {...node} set:html={children} />
+      ))
+    }
     <style is:global>
       :root {
         --max-width: 142.884ch;
-        --accent: 124, 58, 237;
+        --accent: #463a9c;
         --accent-gradient: linear-gradient(
-          45deg,
-          rgb(var(--accent)),
-          #da62c4 30%,
-          white 60%
+          92.87deg,
+          var(--accent) -3.43%,
+          #be63c7 87.13%
         );
-      }
-      body {
-        margin: 0;
-        padding: 0;
       }
       html {
         font-family: system-ui, sans-serif;
         font-size: 16px;
         background-color: #f5f5f5;
+      }
+      body {
+        margin: 0;
+        padding: 0;
       }
       main {
         margin: auto;
@@ -50,16 +126,14 @@ const { title, description } = Astro.props;
         margin: 0;
         padding: 0.5rem 0;
       }
-      .highlight {
-        color: #e8c01a;
-        text-transform: uppercase;
-        font-weight: 700;
-        font-size: 0.8rem;
-        margin: 0;
-      }
       .prog {
         padding: 1.5rem;
         padding-top: 4rem;
+      }
+      @media (any-pointer: coarse) {
+        a {
+          padding: 0.8em;
+        }
       }
     </style>
   </body>

@@ -13,6 +13,13 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "shell": {
+        "all": false,
+        "execute": false,
+        "open": true,
+        "scope": [],
+        "sidecar": false
+      },
       "fs": {
         "writeFile": true,
         "readFile": true
@@ -64,19 +71,19 @@
       "active": true,
       "dialog": true,
       "endpoints": [
-        "https:/seoder.io/api/update/{{target}}/{{current_version}}"
+        "https:/seoder.com/api/update/{{target}}/{{current_version}}"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU0RjMzNUNEMkRBREQ4NzQKUldSMDJLMHR6VFh6NU40aXVqZmxXbDJ0VkYzRExJekcxVHVsQWxNRXJvU0d6M3A4OElaYWJCeXYK"
     },
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 635,
         "resizable": true,
         "title": "Seoder",
-        "width": 920,
-        "minWidth": 920,
-        "minHeight": 600
+        "width": 945,
+        "minWidth": 800,
+        "minHeight": 635
       }
     ]
   }

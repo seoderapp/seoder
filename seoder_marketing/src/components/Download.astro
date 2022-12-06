@@ -5,6 +5,7 @@ import Linux from "./Logos/Linux.astro";
 import Windows from "./Logos/Windows.astro";
 // @ts-ignore
 import pkg from "../../package.json";
+import Highlight from "./Highlight.astro";
 
 export type Props = {
   sub?: boolean;
@@ -17,7 +18,7 @@ const version = pkg.version ?? "0.0.2";
 ---
 
 <section>
-  <p class="highlight center">Downloads</p>
+  <Highlight className="center">Downloads</Highlight>
   {
     sub ? (
       <h3 class="text-primary center heading">{platText}</h3>
@@ -30,7 +31,7 @@ const version = pkg.version ?? "0.0.2";
     <Card
       href={`/releases/Seoder_${version}_aarch64.dmg`}
       title="Desktop Mac Silicon"
-      body="Pre-release arch64 M1 chip"
+      body="Pre-release arch64 Ventura (13.0.0)"
     >
       <Apple />
     </Card>
@@ -42,14 +43,14 @@ const version = pkg.version ?? "0.0.2";
       <Apple />
     </Card>
     <Card
-      href={`/releases/seoder_${version}_amd64.AppImage.tar.gz`}
+      href={`/releases/Seoder_${version}_amd64.AppImage.tar.gz`}
       title="Desktop Linux"
       body="Pre-release linux"
     >
       <Linux />
     </Card>
     <Card
-      href={`/releases/seoder_${version}_x64_en-US.msi`}
+      href={`/releases/Seoder_${version}_x64_en-US.msi`}
       title="Desktop Windows"
       body="Pre-release windows"
     >
@@ -65,8 +66,9 @@ const version = pkg.version ?? "0.0.2";
 
   .heading {
     font-size: 2.25rem;
+    line-height: 2.75rem;
     font-weight: 600;
-    padding: 0.3rem 0;
+    padding: 0.35rem 0;
     margin: 0;
   }
 
@@ -92,7 +94,8 @@ const version = pkg.version ?? "0.0.2";
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
     gap: 1rem;
-    padding: 0;
+    padding: 2.5rem 0;
+    margin: 0;
   }
 
   .link-card-grid-feat {

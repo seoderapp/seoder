@@ -1,0 +1,51 @@
+---
+import Feature from "./Feature.astro";
+---
+
+<ul role="list" class="link-card-grid link-card-grid-feat">
+  <Feature
+    title={"Bulk upload urls"}
+    body={`Custom import as many urls as you’d like to scan against`}
+    img={"/icons/bulk.svg"}
+  />
+  <Feature
+    title={"Export data"}
+    body={`Easily export your data for campaigns on top keywords`}
+    img={"/icons/feature.svg"}
+  />
+  <Feature
+    title={"Use Tor and Proxy"}
+    body={`Prevent tracking and anonymously crawl domains using Tor or rotating proxy servers`}
+    img={"/icons/eye.svg"}
+  />
+  <Feature
+    title={"Find contact emails"}
+    body={`Reach out to prospective leads automatically with our automatic email finder`}
+    img={"/icons/contact.svg"}
+  />
+  <Feature
+    title={"Install on any System"}
+    body={`Take the application home on any OS without any hard usage limits`}
+    img={"/icons/computer.svg"}
+  />
+  <Feature
+    title={"Search over 200+ million domains"}
+    body={`Scan over 200+ million active domains or choose specific top level domains`}
+    img={"/icons/world.svg"}
+    soon
+  />
+</ul>
+
+<style>
+  .link-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
+    gap: 1rem;
+    padding: 0;
+  }
+  .link-card-grid-feat {
+    flex: 1;
+    grid-template-columns: repeat(auto-fit, minmax(31ch, 1fr));
+    gap: 2rem;
+  }
+</style>

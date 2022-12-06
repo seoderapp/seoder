@@ -4,8 +4,6 @@ const token = import.meta.env.KEYGEN_API_TOKEN;
 export async function post({ request }) {
   const jsonData = await request.json();
 
-  let statusCode = 200;
-
   const response = await fetch(
     `https://api.keygen.sh/v1/accounts/${id}/users`,
     {
@@ -24,7 +22,7 @@ export async function post({ request }) {
   const res = await response.json();
 
   return new Response(JSON.stringify(res), {
-    status: statusCode,
+    status: 200,
     headers: {
       "Content-Type": "application/json",
     },

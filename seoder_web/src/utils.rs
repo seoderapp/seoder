@@ -14,6 +14,7 @@ use seoder_lib::tokio::io::AsyncWriteExt;
 use seoder_lib::ENTRY_PROGRAM;
 use tokio::fs::File;
 use tokio::fs::OpenOptions;
+use warp::reply::Response;
 
 /// read a file line by line to a vector
 pub async fn lines_to_vec(pt: String) -> Vec<String> {
@@ -119,7 +120,7 @@ pub async fn validate_program(key: &str) -> bool {
                 "http://127.0.0.1:3000/api/keygen-validate"
             }
             Err(_) => {
-                "https://seoder.io/api/keygen-validate"
+                "https://seoder.com/api/keygen-validate"
             }
         };
     }
@@ -225,4 +226,69 @@ pub fn build_query(hh: &Vec<&str>) -> String {
     }
 
     h1
+}
+
+/// validate program license key external
+pub async fn get_prospects(key: &str, title: &str) -> Response {
+    lazy_static! {
+        /// url endpoint
+        pub static ref ENDPOINT: &'static str =  match std::env::var("DEV") {
+            Ok(_) => {
+                "http://127.0.0.1:3000/api/prospect"
+            }
+            Err(_) => {
+                "https://seoder.com/api/prospect"
+            }
+        };
+    }
+
+    // hardware uid
+    let id: String = machine_uid::get().unwrap();
+
+    let json = json!({
+        "key": key,
+        "fingerprint": id.to_string(),
+        "platform": std::env::consts::OS,
+        "title": title.to_string()
+    });
+
+    let req = Request::builder()
+        .method(Method::POST)
+        .uri(*ENDPOINT)
+        .header("content-type", "application/json")
+        .body(Body::from(json.to_string()))
+        .unwrap_or_default();
+
+    let resp = if *ENDPOINT == "http://127.0.0.1:3000/api/prospect" {
+        let client = Client::new();
+
+        client.request(req).await.unwrap_or_default()
+    } else {
+        use hyper_tls::HttpsConnector;
+        let https = HttpsConnector::new();
+        let client = Client::builder().build::<_, hyper::Body>(https);
+
+        client.request(req).await.unwrap_or_default()
+    };
+
+    resp
+}
+
+lazy_static! {
+    /// units of memory
+    static ref UNITS: [&'static str; 9] = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+}
+
+/// convert to bytes
+pub fn convert_to_bytes(bytes: u64) -> String {
+    let mut l = 0;
+    let mut n = bytes;
+
+    // // each iteration capture the bytes todo: unroll
+    while n >= 1024 {
+        n = n / 1024;
+        l += 1;
+    }
+
+    string_concat!(n.to_string(), " ", UNITS[l])
 }

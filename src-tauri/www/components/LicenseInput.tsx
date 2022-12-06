@@ -1,8 +1,9 @@
-import { useState } from "react";
 import "../styles/license.css";
 
-export default function LicenseInput() {
-  const [license, setLicense] = useState<string>("");
+import { useState } from "react";
+
+export default function LicenseInput({ className, value }: { className?: string, value?:string }) {
+  const [license, setLicense] = useState<string>(value ?? "");
 
   const onChangeTextEvent = (e) => {
     setLicense(e.target.value);
@@ -10,22 +11,16 @@ export default function LicenseInput() {
 
   const disabled = license.length < 30;
 
-  const clear = () => {
-    const ele = document.getElementById("settings-container");
-    if (ele && ele.className !== "hidden") {
-      ele.className = "hidden";
-    }
-  };
-
   return (
     <>
-      <div className="license-form">
+      <div className={`license-form${className ? ` ${className}` : ""}`}>
         <label htmlFor="license">License Key</label>
         <input
           name="license"
           placeholder="XXXX-XXXX-XXXXX-XXXXX-XXXXXX"
           type="text"
-          className="license-input"
+          value={license}
+          className={`license-input`}
           onChange={onChangeTextEvent}
         />
         <div className="gutter-t">
@@ -34,7 +29,6 @@ export default function LicenseInput() {
             style={{ opacity: disabled ? 0.6 : 1 }}
             className={"submit"}
             disabled={disabled}
-            onClick={clear}
           >
             Verify License Key
           </button>

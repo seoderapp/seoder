@@ -1,21 +1,37 @@
-const id = import.meta.env.KEYGEN_ACCOUNT_ID;
-const productToken = import.meta.env.KEYGEN_PRODUCT_TOKEN;
-const token = import.meta.env.KEYGEN_API_TOKEN;
-
-const headers = {
-  "Content-Type": "application/vnd.api+json",
-  Accept: "application/vnd.api+json",
-  Authorization: `Bearer ${token}`,
-};
+import { headers, id, productToken } from "../../utils/config";
 
 export async function post({ request }) {
-  const jsonData = await request.json();
+  let jsonData = {
+    key: "",
+    fingerprint: "",
+    platform: "",
+  };
+
+  // todo: fix
+  try {
+    jsonData = await request.json();
+  } catch (e) {
+    console.error(e);
+  }
+
   const { key, fingerprint, platform } = jsonData ?? {};
 
   // todo rate limit
   if (!key) {
     return new Response(
       JSON.stringify({ valid: false, message: "Missing license key" }),
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+
+  if (!fingerprint) {
+    return new Response(
+      JSON.stringify({ valid: false, message: "Missing fingerprint body" }),
       {
         status: 400,
         headers: {
@@ -46,6 +62,7 @@ export async function post({ request }) {
 
   const data = await response.json();
   const { meta } = data;
+
   let valid = meta?.valid;
 
   // assign finger print to machine

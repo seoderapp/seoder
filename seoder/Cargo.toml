@@ -2,7 +2,7 @@
 name = "seoder"
 version = "0.1.0"
 edition = "2021"
-description = "fast seo engine crawler with storage abilities"
+description = "fast seo engine crawker"
 publish = false
 
 [dependencies]

@@ -1,0 +1,62 @@
+---
+import Footer from "../components/Footer.astro";
+import Navbar from "../components/Navbar.astro";
+import Section from "../components/Section.astro";
+import SubTitle from "../components/Typo/SubTitle.astro";
+import Title from "../components/Typo/Title.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="SEO's can be dangerous"
+  description={"Learn how to take advantage of good SEO techniques for targetting outbound leads."}
+>
+  <main>
+    <Navbar target={"SEO Can Be Dangerous"} />
+    <div class="prog">
+      <Section center>
+        <Title center>Prevent dangerous SEO</Title>
+        <p>
+          Using certain SEO techniques can impact your scores across search,
+          mail, and other engines that can block you from engaging in ideal
+          leads. Here are some helpful tips that can give you the most out of
+          SEO principles.
+        </p>
+
+        <SubTitle>Understand the Audience</SubTitle>
+
+        <p>
+          Take the time to see interact and understand your audience before you
+          send a cold email. Use solutions that can prevent cold emails and turn
+          them into guided pin pointed conversions.
+        </p>
+      </Section>
+    </div>
+  </main>
+  <div class={"space"}></div>
+  <Footer />
+</Layout>
+
+<style>
+  .space {
+    height: 11rem;
+  }
+  .button-container {
+    padding-top: 0.8rem;
+    padding-bottom: 5rem;
+  }
+  .button-container button {
+    text-transform: uppercase;
+    color: #2f2768;
+    border: none;
+    padding: 0.85rem 0.8rem;
+    border-radius: 0.3rem;
+    min-width: 16.8rem;
+    margin: 0;
+    background-color: #e8c01a;
+    font-weight: 700;
+  }
+  .button-container button:hover {
+    background-color: #e9c73e;
+  }
+</style>

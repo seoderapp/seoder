@@ -11,10 +11,18 @@ h6 {
   margin: 0;
 }
 
+h3 {
+  text-transform: capitalize;
+}
+
 button {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.flex-1 {
+  flex: 1;
 }
 
 .container {
@@ -32,8 +40,24 @@ button {
   overflow: hidden;
 }
 
+.flex {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
 .gutter {
   padding-bottom: 0.25rem;
+}
+
+.gutter-xl {
+  padding-bottom: 0.75rem;
 }
 
 .gutter-t {
@@ -47,6 +71,10 @@ button {
   gap: 0.4rem;
   flex-direction: column;
   display: flex;
+}
+
+.cell {
+  height: 1rem;
 }
 
 .cell-btn {
@@ -83,8 +111,14 @@ button {
   font-size: 0.67rem;
 }
 
-.engine-paths {
+.campaign-paths {
   font-size: 0.63rem;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.gap {
+  gap: 0.25rem;
 }
 
 #elicense {
@@ -130,15 +164,19 @@ button {
   border: 3px solid transparent;
 }
 
+.text-left {
+  text-align: left;
+}
+
 .button {
-  --bs-btn-padding-x: 0.85rem;
-  --bs-btn-padding-y: 0.3rem;
+  --bs-btn-padding-x: 0.7rem;
+  --bs-btn-padding-y: 0.7rem;
   --bs-btn-font-family: ;
   --bs-btn-font-size: 0.875rem;
   --bs-btn-font-weight: 400;
   --bs-btn-line-height: 1.5;
   --bs-btn-color: #bdc0c5;
-  --bs-btn-bg: transparent;
+  --bs-btn-bg: #dfe6ec;
   --bs-btn-border-width: 1px;
   --bs-btn-border-color: #fff;
   --bs-btn-border-radius: 0.2rem;
@@ -167,7 +205,7 @@ button {
 
 .btn-primary {
   --bs-btn-color: #222e3c;
-  --bs-btn-bg: #3b7ddd;
+  --bs-btn-bg: #2f2768;
   --bs-btn-border-color: #2f64b1;
   --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: #326abc;
@@ -181,6 +219,14 @@ button {
   --bs-btn-disabled-bg: #3b7ddd;
   --bs-btn-disabled-border-color: #3b7ddd;
   color: #fff;
+}
+
+.preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 3;
+  color: #2f2768;
+  /* white-space: nowrap; */
 }
 
 .form-control {
@@ -199,7 +245,6 @@ button {
 
 .stats-box {
   padding: 0.5rem;
-  width: 100%;
   font-size: 0.87rem;
   place-content: center;
   display: flex;
@@ -227,28 +272,16 @@ button {
   flex-wrap: wrap-reverse;
 }
 
-.row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
 .spaceless {
   padding: 0;
   margin: 0;
   gap: 4px;
 }
 
-.flex {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.flex-row {
-  flex: 1;
+.row {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .center {
@@ -264,7 +297,6 @@ button {
 }
 
 .expand-width {
-  width: 145%;
   gap: 0.3rem;
 }
 
@@ -304,7 +336,7 @@ button {
 .frame {
   padding-top: 0.35rem;
   padding-bottom: 0.35rem;
-  min-height: 3rem;
+  min-height: 2rem;
   place-items: center;
   display: flex;
 }
@@ -314,10 +346,16 @@ button {
   flex-direction: column;
 }
 
-#uploadform button {
+#uploadform .button:not(.disabled) {
   background-color: transparent;
   border: 1px solid #0e1116;
   color: #0e1116;
+}
+
+.disabled {
+  background-color: #dfe6ec;
+  color: rgba(17, 17, 17, 0.32);
+  border-color: #dfe6ec;
 }
 
 .wrap {
@@ -338,9 +376,8 @@ button {
 
 .modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 20%;
+  left: 35%;
   background: #fff;
   border-radius: 8px;
 }
@@ -452,8 +489,69 @@ button {
   font-size: 1rem;
 }
 
-#campaign-create-form,
-#settings-container {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+.settings-bar {
+  display: flex;
+  place-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid rgba(47, 39, 104, 0.1);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #2f2768;
+}
+
+.settings-bar button {
+  background-color: transparent;
+}
+
+.delete {
+  background-color: rgb(183, 87, 106);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.edit {
+  background-color: rgb(87, 183, 125);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.editor-container {
+  width: 50vw;
+  height: 50vh;
+  overflow: auto;
+}
+
+.editor-input {
+  min-height: 150px;
+  resize: none;
+  font-size: 1rem;
+  caret-color: rgb(5, 5, 5);
+  position: relative;
+  tab-size: 1;
+  outline: 0;
+  padding: 15px 10px;
+  caret-color: #444;
+}
+
+.editor-input > p {
+  margin: 0;
+}
+
+.editor-placeholder {
+  color: #999;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 5rem;
+  left: 10px;
+  font-size: 1rem;
+  user-select: none;
+  display: inline-block;
+  pointer-events: none;
+}
+
+.button-sm {
+  padding: 0.2rem 0.7rem;
 }

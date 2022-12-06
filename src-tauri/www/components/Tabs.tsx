@@ -8,6 +8,13 @@ enum TabType {
   "errors",
 }
 
+// active tab styles
+const tabStyles = (valid: boolean) => `tab${valid ? " tab-active" : ""}`;
+
+const tauriDragRegion = {
+  "data-tauri-drag-region": 1,
+};
+
 export const Tabs = ({ macOs }: { macOs?: boolean }) => {
   const [focused, setFocused] = useState<TabType>(TabType.valid);
 
@@ -18,18 +25,13 @@ export const Tabs = ({ macOs }: { macOs?: boolean }) => {
   const validFocused = focused === TabType.valid;
   const invalidFocused = focused === TabType.invalid;
   const errorFocused = focused === TabType.errors;
-
-  const baseProps = macOs
-    ? {
-        "data-tauri-drag-region": 1,
-      }
-    : {};
+  const baseProps = macOs ? tauriDragRegion : {};
 
   return (
     <div className={"feed"}>
       <div className={"flex-row"} role="tablist">
         <button
-          className={`tab${validFocused ? " tab-active" : ""}`}
+          className={tabStyles(validFocused)}
           onClick={onClickValid}
           id={"tab-console"}
           aria-selected={validFocused}
@@ -40,7 +42,7 @@ export const Tabs = ({ macOs }: { macOs?: boolean }) => {
           Valids
         </button>
         <button
-          className={`tab${invalidFocused ? " tab-active" : ""}`}
+          className={tabStyles(invalidFocused)}
           onClick={onClickInvalid}
           type="button"
           role="tab"
@@ -51,7 +53,7 @@ export const Tabs = ({ macOs }: { macOs?: boolean }) => {
           Invalids
         </button>
         <button
-          className={`tab${errorFocused ? " tab-active" : ""}`}
+          className={tabStyles(errorFocused)}
           onClick={onClickErrors}
           type="button"
           role="tab"
@@ -63,29 +65,9 @@ export const Tabs = ({ macOs }: { macOs?: boolean }) => {
         </button>
       </div>
 
-      <div
-        className={validFocused ? "" : "hidden"}
-        role="tabpanel"
-        aria-labelledby="tab-console"
-      >
-        <LogValid scrolling={validFocused} />
-      </div>
-
-      <div
-        className={invalidFocused ? "" : "hidden"}
-        role="tabpanel"
-        aria-labelledby="tab-console"
-      >
-        <LogInvalid scrolling={invalidFocused} />
-      </div>
-
-      <div
-        className={errorFocused ? "" : "hidden"}
-        role="tabpanel"
-        aria-labelledby="tab-console"
-      >
-        <LogErrors scrolling={errorFocused} />
-      </div>
+      <LogValid focused={validFocused} id={"valid-logs"} />
+      <LogInvalid focused={invalidFocused} />
+      <LogErrors focused={errorFocused} />
     </div>
   );
 };

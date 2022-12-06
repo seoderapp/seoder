@@ -4,24 +4,25 @@ import LogoLight from "./LogoLight.astro";
 
 export interface Props {
   target?: string;
+  hiddenBuy?: boolean;
 }
 
-const { target } = Astro.props;
+const { target, hiddenBuy } = Astro.props;
 ---
 
-<nav>
+<nav class="nav">
   <a href={"/"}>
     <LogoLight />
   </a>
   {
-    target !== "payments" ? (
-      <AnchorButton href="/payments" title={"BUY NOW"} />
+    target !== "payments" && !hiddenBuy ? (
+      <AnchorButton href="/payments" title={"7 Day Trial"} />
     ) : null
   }
 </nav>
 
 <style>
-  nav {
+  .nav {
     padding: 1.5rem 0.7rem;
     display: flex;
     flex-direction: row;

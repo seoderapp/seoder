@@ -2,7 +2,7 @@ use crate::json;
 use crate::string_concat::string_concat;
 use crate::string_concat::string_concat_impl;
 use crate::tokio;
-use crate::utils::get_file_value;
+use crate::utils::{build_query, get_file_value};
 use crate::BufReader;
 use crate::OpenOptions;
 use crate::OutGoing;
@@ -35,18 +35,16 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                 .open(string_concat!(dpt, "/errors/links.txt"))
                 .await;
 
+            let contacts_file = OpenOptions::new()
+                .read(true)
+                .open(string_concat!(dpt, "/contacts.txt"))
+                .await;
+
             let mut d = dpt.replacen(&ENTRY_PROGRAM.0, "", 1);
 
             if d.starts_with("/") {
                 d.remove(0);
             }
-
-            // valid lines
-            let mut lns = 0;
-            // invalid lines
-            let mut ilns = 0;
-            // errors lines
-            let mut elns = 0;
 
             match file {
                 Ok(file) => {
@@ -60,8 +58,6 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                             .send(Message::Text(v.to_string()))
                             .await
                             .unwrap_or_default();
-
-                        lns += 1;
                     }
                 }
                 _ => {}
@@ -79,8 +75,6 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                             .send(Message::Text(v.to_string()))
                             .await
                             .unwrap_or_default();
-
-                        ilns += 1;
                     }
                 }
                 _ => {}
@@ -98,19 +92,35 @@ pub async fn list_valid(mut outgoing: OutGoing) -> OutGoing {
                             .send(Message::Text(v.to_string()))
                             .await
                             .unwrap_or_default();
-
-                        elns += 1;
                     }
                 }
                 _ => {}
             };
 
-            let v = json!({ "count": lns, "ecount": ilns, "error_count": elns,  "path": d });
+            match contacts_file {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let mut lines = reader.lines();
 
-            outgoing
-                .send(Message::Text(v.to_string()))
-                .await
-                .unwrap_or_default();
+                    while let Some(line) = lines.next_line().await.unwrap() {
+                        let hh = line.split(" ").collect::<Vec<&str>>();
+
+                        let (h1, h2) = if hh.len() >= 2 {
+                            (hh[0], hh[1])
+                        } else {
+                            (hh[0], "")
+                        };
+
+                        let v = json!({ "contacts": h2, "domain": h1, "path": d });
+
+                        outgoing
+                            .send(Message::Text(v.to_string()))
+                            .await
+                            .unwrap_or_default();
+                    }
+                }
+                _ => {}
+            };
         }
     }
 
@@ -153,8 +163,6 @@ pub async fn list_engines(mut outgoing: OutGoing) -> OutGoing {
         if child.metadata().await.unwrap().is_dir() {
             let dpt = child.path().to_str().unwrap().to_owned();
 
-            // engine paths
-            // engine patterns
             let file = OpenOptions::new()
                 .read(true)
                 .open(string_concat!(dpt, "/paths.txt"))
@@ -198,10 +206,38 @@ pub async fn list_engines(mut outgoing: OutGoing) -> OutGoing {
                 d.remove(0);
             }
 
+            let mut source_match = true;
+
+            let file = OpenOptions::new()
+                .read(true)
+                .open(string_concat!(dpt, "/config.txt"))
+                .await;
+
+            match file {
+                Ok(file) => {
+                    let reader = BufReader::new(file);
+                    let mut lines = reader.lines();
+
+                    while let Some(line) = lines.next_line().await.unwrap() {
+                        let hh = line.split(" ").collect::<Vec<&str>>();
+                        let h0 = hh[0];
+                        let h1 = build_query(&hh);
+
+                        if hh.len() >= 2 {
+                            if h0 == "source" {
+                                source_match = h1.parse::<bool>().unwrap_or_default();
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            };
+
             let v = json!({
                   "epath": d,
                   "paths": paths,
-                  "patterns": patterns
+                  "patterns": patterns,
+                  "source_match": source_match
             });
 
             outgoing
@@ -220,11 +256,11 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
     while let Some(child) = dir.next_entry().await.unwrap_or_default() {
         if child.metadata().await.unwrap().is_dir() {
             let dpt = child.path().to_str().unwrap().to_owned();
+            let c_config = String::from(string_concat!(dpt, "/config.txt"));
 
             if !dpt.ends_with("/valid") {
                 let mut target = get_file_value(&ENTRY_PROGRAM.2, "target").await;
-
-                let mut engine = dpt;
+                let mut engine = dpt.clone();
 
                 if target.is_empty() {
                     target = String::from(string_concat!(ENTRY_PROGRAM.1, "urls-input.txt"));
@@ -233,6 +269,34 @@ pub async fn list_file_count(mut outgoing: OutGoing) -> OutGoing {
                 if engine.is_empty() {
                     engine = String::from("default");
                 }
+
+                // target file length
+                match OpenOptions::new().read(true).open(c_config).await {
+                    Ok(file) => {
+                        let reader = BufReader::new(file);
+                        let mut lines = reader.lines();
+
+                        while let Some(line) = lines.next_line().await.unwrap() {
+                            let hh = line.split(" ").collect::<Vec<&str>>();
+
+                            if hh.len() >= 2 {
+                                let h0 = hh[0];
+                                let h1 = hh[1].to_string();
+
+                                if h0 == "target" {
+                                    let path = std::path::Path::new(&h1);
+                                    let filename = path.file_name().unwrap();
+                                    let f = filename.to_str().unwrap_or_default().to_string();
+
+                                    if !f.is_empty() {
+                                        target = String::from(string_concat!(ENTRY_PROGRAM.1, f));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                };
 
                 let mut nml = 0;
 

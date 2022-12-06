@@ -2,14 +2,13 @@
 import Layout from "../layouts/Layout.astro";
 import MainJS from "../components/MainJS.astro";
 import License from "../components/License.astro";
-import CampaignCreate from "../components/CampaignCreate.astro";
-import Settings from "../components/Settings.astro";
 import Stats from "../components/Stats.astro";
 import Campaign from "../components/Campaign.astro";
 import Menu from "../components/Menu.astro";
 import Intro from "../components/Intro.astro";
 import Program from "../components/Program.astro";
 import { Tabs } from "../components/Tabs";
+import { AppModal } from "../components/Modal";
 
 declare global {
   var __TAURI__: any;
@@ -18,7 +17,7 @@ declare global {
 const mac = import.meta.env.MAC_OS || "";
 ---
 
-<Layout title="Seoder - The marketing lead generation tool">
+<Layout title="Seoder - The marketing outbound lead generation tool">
   <main class="container full">
     <Intro />
     <Program>
@@ -31,8 +30,7 @@ const mac = import.meta.env.MAC_OS || "";
         <Stats />
       </Fragment>
     </Program>
-    <Settings />
-    <CampaignCreate />
+    <AppModal client:load />
     <License />
   </main>
   <MainJS />

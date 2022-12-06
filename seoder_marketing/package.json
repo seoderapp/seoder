@@ -11,16 +11,21 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/image": "^0.10.0",
-    "@astrojs/react": "^1.2.1",
+    "@astrojs/image": "^0.12.0",
+    "@astrojs/react": "^1.2.2",
     "@astrojs/sitemap": "^1.0.0",
-    "@astrojs/vercel": "^2.3.1",
-    "astro": "^1.5.2",
+    "@astrojs/vercel": "^2.3.4",
+    "astro": "^1.6.12",
     "astro-robots-txt": "^0.3.10",
+    "node-html-parser": "^6.1.4",
     "nodemailer": "^6.8.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "sharp": ">=0.31.0",
-    "stripe": "^10.14.0"
+    "sharp": "^0.31.2",
+    "stripe": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.24",
+    "@types/react-dom": "^18.0.8"
   }
 }

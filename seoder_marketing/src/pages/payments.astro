@@ -1,6 +1,7 @@
 ---
 import Download from "../components/Download.astro";
 import Footer from "../components/Footer.astro";
+import MoneyBack from "../components/Money/MoneyBack.astro";
 import Navbar from "../components/Navbar.astro";
 import Section from "../components/Section.astro";
 import SubTitle from "../components/Typo/SubTitle.astro";
@@ -11,15 +12,25 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
 ---
 
 <Layout
-  title="Seoder - Purchase License"
-  description={"Purchase a license to use Seoder the all new marketing lead generation tool. Affordable price for the every marketer or agency."}
+  companyTitle
+  title="Purchase License"
+  description={"Purchase a license to use Seoder the all new keyword finding tool. Affordable price to get insightful qualified leads."}
 >
   <main>
     <Navbar target={"payments"} />
     <div class="prog">
       <Section center>
-        <Title>Purchase License</Title>
-        <SubTitle>The license is active for 1 year on one machine</SubTitle>
+        <Title>Fare pricing for all</Title>
+        <strong class="xl">$4/month</strong>
+        <p>
+          Our pricing plan is really simple and only costs 4$ a month per
+          machine. Get started with a free 7 day trial.
+        </p>
+        <p class="gray">
+          During the duration of the plan you will receive updates as we release
+          new features included in the single price.
+        </p>
+        <SubTitle>Organic keyword finder ready</SubTitle>
         <form id="register">
           <div>
             <label for="first-name">First name</label>
@@ -65,6 +76,7 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
             <button type="submit">Buy Now</button>
           </div>
         </form>
+        <MoneyBack />
       </Section>
       <Section>
         <Download sub />
@@ -111,7 +123,7 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
         throw new Error(message);
       }
 
-      register.parentNode.innerHTML = `Thanks for your purchase, ${data.attributes.firstName}! 🚀`;
+      register.parentNode.innerHTML = `Thanks for your purchase, ${data.attributes.firstName}! 🚀 Download the app below and enter the license key that was emailed to you.`;
     },
   });
 
@@ -121,13 +133,18 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
     handler.open({
       panelLabel: "Buy License",
       name: "Seoder",
-      image: "/logo.svg",
-      amount: 20000,
+      image: "/icon.png",
+      amount: 400,
     });
   });
 </script>
 
 <style>
+  .xl {
+    font-size: 3.4rem;
+    font-weight: 900;
+    padding: 1rem 0;
+  }
   form {
     padding: 0.6rem 0;
     text-align: left;
@@ -164,5 +181,12 @@ const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
   }
   .button-container button:hover {
     background-color: #e9c73e;
+  }
+  p {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+  .gray {
+    color: rgb(23, 23, 23);
   }
 </style>

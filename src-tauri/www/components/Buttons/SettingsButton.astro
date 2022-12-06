@@ -1,7 +1,4 @@
-<button
-  id="settings-button"
-  class="panel-btn full-w center right-align transparent"
->
+<button id="settings-button" class="panel-btn center right-align transparent">
   <img src="/assets/settings.svg" alt="" />
   <div>Settings</div>
 </button>
@@ -11,3 +8,15 @@
     z-index: 1;
   }
 </style>
+
+<script>
+  import { modalStore, ModalType } from "../../stores/app";
+
+  const settingsButton = document.getElementById("settings-button");
+
+  const toggleForm = () => {
+    modalStore.set(ModalType.SETTINGS);
+  };
+
+  settingsButton.addEventListener("click", toggleForm);
+</script>

@@ -17,13 +17,15 @@ use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::task;
 
+const MEDIA_IGNORE_SELECTOR: &str = r#":not([href$=".ico"]):not([href$=".png"]):not([href$=".jpg"]):not([href$=".jpeg"]):not([href$=".svg"]):not([href$=".webp"]):not([href$=".gif"]):not([href$=".pdf"]):not([href$=".tiff"]):not([href$=".wav"]):not([href$=".mp3"]):not([href$=".mp4"]):not([href$=".ogg"]):not([href$=".webm"]):not([href$=".sql"]):not([href$=".zip"]):not([href$=".docx"]):not([href$=".git"]):not([href$=".json"]):not([href$=".xml"]):not([href$=".css"]):not([href$=".md"]):not([href$=".txt"]):not([href$=".js"]):not([href$=".jsx"]):not([href$=".csv"])"#;
+
 /// create a new file at path
 pub async fn create_file(path: &str) -> File {
     File::create(&path).await.unwrap()
 }
 
 /// build file target directorys
-pub async fn create_run_files(e: &str) -> (File, File, File) {
+pub async fn create_run_files(e: &str) -> (File, File, File, File) {
     match tokio::fs::metadata(&e).await {
         Ok(_) => (),
         _ => {
@@ -47,9 +49,36 @@ pub async fn create_run_files(e: &str) -> (File, File, File) {
     let o = create_file(&string_concat!(&cmp_base, "/links.txt")).await;
     let oo = create_file(&string_concat!(&cmp_invalid, "/links.txt")).await;
     let oe = create_file(&string_concat!(&cmp_errors, "/links.txt")).await;
+    let oc = create_file(&string_concat!(&e, "/contacts.txt")).await;
 
-    (o, oo, oe)
+    (o, oo, oe, oc)
 }
+
+/// get contact information for followups
+pub async fn store_fs_io_contacts(html: &String) -> Vec<String> {
+    // todo: conditional lazy static
+    lazy_static! {
+        static ref SELECTOR: Selector =
+            Selector::parse(&string_concat!("a[href^=mailto]", MEDIA_IGNORE_SELECTOR)).unwrap();
+    }
+
+    let res = html.clone();
+
+    let handles = task::spawn(async move {
+        let doc = Html::parse_document(&res);
+        let items = doc.select(&SELECTOR);
+        let mut senders: Vec<String> = Vec::with_capacity(items.size_hint().0);
+
+        for element in items {
+            senders.push(element.value().attr("href").unwrap_or_default().to_string());
+        }
+
+        senders
+    });
+
+    handles.await.unwrap()
+}
+
 /// store the content to file system
 pub async fn store_fs_io_matching(
     campaign: &Campaign,
@@ -91,7 +120,7 @@ pub async fn store_fs_io_matching(
             if entry.metadata().await.unwrap().is_dir() {
                 let e = entry.path().to_str().unwrap().to_owned();
 
-                let (mut o, mut oo, mut oe) = create_run_files(&e).await;
+                let (mut o, mut oo, mut oe, mut oc) = create_run_files(&e).await;
 
                 while let Some(i) = rx.recv().await {
                     while chandle.load(Ordering::Relaxed) == 1 {
@@ -101,7 +130,7 @@ pub async fn store_fs_io_matching(
                         break;
                     }
 
-                    let (link, jor, spawned) = i;
+                    let (original_link, jor, spawned) = i;
                     let (response, _) = jor;
 
                     if spawned && *global_thread_count.lock().unwrap() > 0 {
@@ -109,7 +138,7 @@ pub async fn store_fs_io_matching(
                     }
 
                     let error = response.starts_with("- error ");
-                    let link = string_concat!(link, "\n");
+                    let link = string_concat!(&original_link, "\n");
                     task::yield_now().await;
 
                     // errors
@@ -118,45 +147,57 @@ pub async fn store_fs_io_matching(
                         continue;
                     }
 
-                    let response = response.clone();
                     let rgx = rgx.clone();
 
                     if source_match {
                         let result = rgx.is_match(&response);
+
                         if result {
                             o.write(&link.as_bytes()).await.unwrap();
+                            let h = store_fs_io_contacts(&response).await;
+                            for l in h {
+                                let l = string_concat!(&original_link, " ", &l, "\n");
+                                oc.write(&l.as_bytes()).await.unwrap();
+                            }
                         } else {
                             oo.write(&link.as_bytes()).await.unwrap();
                         }
-                        continue;
-                    }
+                    } else {
+                        // match only html rendered
+                        let (tx, rxx) = tokio::sync::oneshot::channel();
 
-                    let (tx, rxx) = tokio::sync::oneshot::channel();
+                        let res = response.clone();
 
-                    task::spawn(async move {
-                        let doc = Html::parse_document(&response);
-                        let items = doc.select(&SELECTOR);
-                        let mut senders: Vec<String> = Vec::with_capacity(items.size_hint().0);
+                        task::spawn(async move {
+                            let doc = Html::parse_document(&res);
+                            let items = doc.select(&SELECTOR);
+                            let mut senders: Vec<String> = Vec::with_capacity(items.size_hint().0);
 
-                        for element in items {
-                            senders.push(element.text().map(|s| s.chars()).flatten().collect());
-                        }
-
-                        if let Err(_) = tx.send(senders) {
-                            logd("the receiver dropped");
-                        }
-                    });
-
-                    match rxx.await {
-                        Ok(v) => {
-                            let result = rgx.is_match(&v.join(""));
-                            if result {
-                                o.write(&link.as_bytes()).await.unwrap();
-                            } else {
-                                oo.write(&link.as_bytes()).await.unwrap();
+                            for element in items {
+                                senders.push(element.text().map(|s| s.chars()).flatten().collect());
                             }
+
+                            if let Err(_) = tx.send(senders) {
+                                logd("the receiver dropped");
+                            }
+                        });
+
+                        match rxx.await {
+                            Ok(v) => {
+                                let result = rgx.is_match(&v.join(""));
+                                if result {
+                                    o.write(&link.as_bytes()).await.unwrap();
+                                    let h = store_fs_io_contacts(&response).await;
+                                    for l in h {
+                                        let l = string_concat!(&original_link, " ", &l, "\n");
+                                        oc.write(&l.as_bytes()).await.unwrap();
+                                    }
+                                } else {
+                                    oo.write(&link.as_bytes()).await.unwrap();
+                                }
+                            }
+                            Err(_) => logd("the sender dropped"),
                         }
-                        Err(_) => logd("the sender dropped"),
                     }
                 }
             }
@@ -164,7 +205,7 @@ pub async fn store_fs_io_matching(
     } else {
         // pass in the entry program path
         let cmp = string_concat!(ENTRY_PROGRAM.0, &path);
-        let (mut o, mut oo, mut oe) = create_run_files(&cmp).await;
+        let (mut o, mut oo, mut oe, mut oc) = create_run_files(&cmp).await;
 
         while let Some(i) = rx.recv().await {
             while chandle.load(Ordering::Relaxed) == 1 {
@@ -174,7 +215,7 @@ pub async fn store_fs_io_matching(
                 break;
             }
 
-            let (link, jor, spawned) = i;
+            let (original_link, jor, spawned) = i;
             let (response, _) = jor;
 
             if spawned && *global_thread_count.lock().unwrap() > 0 {
@@ -182,7 +223,9 @@ pub async fn store_fs_io_matching(
             }
 
             let error = response.starts_with("- error ");
-            let link = string_concat!(&link, "\n");
+
+            let link = string_concat!(&original_link, "\n");
+
             task::yield_now().await;
 
             if response == "" || error {
@@ -194,16 +237,21 @@ pub async fn store_fs_io_matching(
                 let result = rgx.is_match(&response);
                 if result {
                     o.write(&link.as_bytes()).await.unwrap();
+                    let h = store_fs_io_contacts(&response).await;
+                    for l in h {
+                        let l = string_concat!(&original_link, " ", &l, "\n");
+                        oc.write(&l.as_bytes()).await.unwrap();
+                    }
                 } else {
                     oo.write(&link.as_bytes()).await.unwrap();
                 }
             } else {
                 let (tx, rxx) = tokio::sync::oneshot::channel();
 
-                let ssource = response.clone();
+                let res = response.clone();
 
                 task::spawn(async move {
-                    let doc = Html::parse_document(&ssource);
+                    let doc = Html::parse_document(&res);
                     let items = doc.select(&SELECTOR);
 
                     let mut senders: Vec<String> = Vec::with_capacity(items.size_hint().0);
@@ -222,6 +270,11 @@ pub async fn store_fs_io_matching(
                         let result = rgx.is_match(&v.join(""));
                         if result {
                             o.write(&link.as_bytes()).await.unwrap();
+                            let h = store_fs_io_contacts(&response).await;
+                            for l in h {
+                                let l = string_concat!(&original_link, " ", &l, "\n");
+                                oc.write(&l.as_bytes()).await.unwrap();
+                            }
                         } else {
                             oo.write(&link.as_bytes()).await.unwrap();
                         }

@@ -1,6 +1,5 @@
 .DS_Store
 target
-output.jsonl
 
 _db/files/*
 _db/campaigns/*
@@ -8,10 +7,6 @@ _db/engines/*
 
 !_db/**/README.md
 
-all-others.txt
-connection_error.txt
-ok-not_valid_json.txt
-ok-valid_json.txt
 
 # app config
 config.txt

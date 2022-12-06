@@ -1,0 +1,16 @@
+---
+import Footer from "../../components/Footer.astro";
+import Navbar from "../../components/Navbar.astro";
+import Layout from "../../layouts/Layout.astro";
+import { getDynamicPage } from "../../utils/get-dynamic-page";
+
+const props = await getDynamicPage("/");
+---
+
+<Layout title={props.title} {...props}>
+    <main>
+        <Navbar />
+        <Fragment set:html={props.html} />
+    </main>
+    <Footer />
+</Layout>

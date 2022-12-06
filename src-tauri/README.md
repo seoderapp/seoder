@@ -1,4 +1,4 @@
-# Welcome to [Seoder](https://seoder.io)
+# Welcome to [Seoder](https://seoder.com)
 
 ## 🧞 Commands
 
