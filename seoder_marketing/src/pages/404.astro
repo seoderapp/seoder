@@ -1,0 +1,50 @@
+---
+import Footer from "../components/Footer.astro";
+import Navbar from "../components/Navbar.astro";
+import Section from "../components/Section.astro";
+import SubTitle from "../components/Typo/SubTitle.astro";
+import Title from "../components/Typo/Title.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+    title="404"
+    description={"About the project and some more on who we are and what we are trying to do."}
+>
+    <main>
+        <Navbar target={"404"} />
+        <div class="prog">
+            <Section center>
+                <Title center>404 Page Not Found</Title>
+                <p>
+                    Sorry, this page is not valid. Try checking your url or
+                    contacting support.
+                </p>
+            </Section>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    .space {
+        height: 11rem;
+    }
+    .button-container {
+        padding-top: 0.8rem;
+        padding-bottom: 5rem;
+    }
+    .button-container button {
+        text-transform: uppercase;
+        color: #2f2768;
+        border: none;
+        padding: 0.85rem 0.8rem;
+        border-radius: 0.3rem;
+        min-width: 16.8rem;
+        margin: 0;
+        background-color: #e8c01a;
+        font-weight: 700;
+    }
+    .button-container button:hover {
+        background-color: #e9c73e;
+    }
+</style>
