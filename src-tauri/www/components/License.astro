@@ -1,0 +1,123 @@
+---
+import SettingsButton from "./Buttons/SettingsButton.astro";
+import LicenseInput from "./LicenseInput";
+import Logo from "./Logos/Logo.astro";
+import AppDetails from "./Svgs/AppDetails.astro";
+---
+
+<form id="elicense" class="row hidden">
+  <div class="left-panel">
+    <Logo />
+    <AppDetails />
+  </div>
+  <div class="right-panel">
+    <SettingsButton />
+    <div class="right-panel-bottom">
+      <h2 class="panel-title">Enter License Key</h2>
+      <p class="panel-subtitle">
+        Please enter the license key that was emailed to you
+      </p>
+      <LicenseInput client:visible />
+    </div>
+  </div>
+</form>
+
+<script>
+  import { socket } from "../events/sockets";
+
+  const elicense = document.getElementById("elicense");
+
+  elicense?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const slicense: HTMLInputElement = elicense.querySelector(
+      'input[name="license"]'
+    );
+
+    if (slicense && slicense.value) {
+      socket.send("set-license " + slicense.value);
+    } else {
+      window.alert("Please enter a license.");
+    }
+  });
+</script>
+
+<style>
+  .left-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #2f2768;
+    flex: 1;
+    padding: 4rem 2rem;
+  }
+  .right-panel {
+    padding: 0.5rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    background: #ebecf2;
+    text-align: left;
+  }
+
+  .right-panel-bottom {
+    padding: 2.2rem 0;
+  }
+
+  .panel-title {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 29px;
+    color: #2f2768;
+  }
+  .panel-subtitle {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #2f2768;
+  }
+  .license-form {
+    padding: 1.5rem 1.3rem;
+    background: #ffffff;
+    border-radius: 4px;
+    color: #2f2768;
+    place-content: center;
+    order: 3;
+    gap: 7px;
+    display: flex;
+    flex-direction: column;
+  }
+  .license-input {
+    box-sizing: border-box;
+    width: 319px;
+    height: 44px;
+    background: #ffffff;
+    border: 2px solid #e8c01a;
+    border-radius: 4px;
+    padding: 0.5rem 0.7rem;
+  }
+  .submit {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 24px;
+    gap: 6px;
+    height: 44px;
+    background: #ebecf2;
+    border-radius: 4px;
+    border: 0;
+    color: #2f2768;
+    opacity: 0.6;
+    font-size: 1rem;
+  }
+  label {
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+import { CampaignList } from "./CampaignList";
+import EmptyCampaign from "./Empty/Create.astro";
+---
+
+<div class="card-body cell-list">
+  <CampaignList client:visible>
+    <EmptyCampaign />
+  </CampaignList>
+</div>
+
+<style>
+  .card-body {
+    overflow: auto;
+  }
+  .cell-list {
+    height: calc(100vh - 11.375rem);
+  }
+</style>

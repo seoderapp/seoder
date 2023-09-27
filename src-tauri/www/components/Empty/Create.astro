@@ -1,0 +1,47 @@
+---
+import NewCampaignButton from "../Buttons/NewCampaignButton.astro";
+---
+
+<div class="empty-container">
+  <div class="p">
+    <div class="title">No Campaigns yet</div>
+    <div class="sub">To get started start a new campaign</div>
+
+    <NewCampaignButton title={"Add Campaign"} />
+  </div>
+</div>
+
+<style>
+  .empty-container {
+    background: rgba(217, 217, 217, 0.4);
+    border-radius: 0.4rem;
+    color: #111111;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    place-content: center;
+  }
+  .p {
+    padding: 0.6rem;
+    color: #2f2768;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    place-content: center;
+    align-items: center;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #2f2768;
+    padding-bottom: 0.5rem;
+  }
+  .sub {
+    max-width: 9rem;
+    display: inline;
+    opacity: 0.45;
+    padding-bottom: 2rem;
+    line-height: 1.25rem;
+  }
+</style>

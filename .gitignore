@@ -1,0 +1,14 @@
+.DS_Store
+target
+
+_db/files/*
+_db/campaigns/*
+_db/engines/*
+
+!_db/**/README.md
+
+
+# app config
+config.txt
+out
+.env

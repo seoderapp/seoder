@@ -1,0 +1,135 @@
+---
+import { appTitle, getCompanyTitle } from "../statics/title";
+import { Analytics } from '@vercel/analytics/react';
+
+export interface Props {
+  title: string;
+  description?: string;
+  bodyScripts?: any[];
+  headScripts?: any[];
+  links?: any[];
+  metas?: any[];
+  stylesheets?: any[];
+  companyTitle?: boolean;
+  faq?: boolean;
+}
+
+const {
+  bodyScripts = [],
+  headScripts = [],
+  title,
+  description,
+  links,
+  metas,
+  stylesheets,
+  companyTitle,
+  faq,
+} = Astro.props;
+
+const ogImage = new URL("/og/OG_Image.png", Astro.site);
+
+const faqProps = faq
+  ? { itemscope: true, itemtype: "https://schema.org/FAQPage" }
+  : {};
+
+const pageTitle = companyTitle
+  ? getCompanyTitle(title)
+  : `${getCompanyTitle(title)} | ${appTitle}`;
+---
+
+<html lang="en" {...faqProps}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/x-icon" href="/icon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <title>
+      {pageTitle}
+    </title>
+    <Fragment>
+      {description ? (
+        <meta name="description" content={description} />
+      ) : null}
+      <meta property="twitter:title" content={pageTitle} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content={"seoderio"} />
+      <meta name="twitter:creator" content={"seoderio"} />
+      <meta
+        name="twitter:image"
+        content={`${ogImage}?title=${pageTitle}`}
+      />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={pageTitle} />
+      <meta property="og:image" content={`${ogImage}?title=${pageTitle}`} />
+      <meta property="og:image:width" content="940" />
+      <meta property="og:image:height" content="700" />
+      <meta property="og:site_name" content={"Seoder"} />
+    </Fragment>
+    <meta
+      property="keywords"
+      content="Outbound Leads, Seo Tool, Target Email Campaign Tool, Marketing Campaigns, Marketing, Target Links, Links"
+    />
+    <link rel="alternate" hreflang="en" />
+    {links?.map((node) => <link {...node} />)}
+    {metas?.map((node) => <meta {...node} />)}
+    {
+      stylesheets?.map(({ children, ...node }) => (
+        <style {...node} set:html={children}>
+          <Fragment />
+        </style>
+      ))
+    }
+    {
+      headScripts?.map(({ children, ...node }) => (
+        <script {...node} set:html={children} />
+      ))
+    }
+  </head>
+  <body>
+    <slot />
+    <Analytics client:only="react" />
+    {
+      bodyScripts?.map(({ children, ...node }) => (
+        <script {...node} set:html={children} />
+      ))
+    }
+    <style is:global>
+      :root {
+        --max-width: 142.884ch;
+        --accent: #463a9c;
+        --accent-gradient: linear-gradient(
+          92.87deg,
+          var(--accent) -3.43%,
+          #be63c7 87.13%
+        );
+      }
+      html {
+        font-family: system-ui, sans-serif;
+        font-size: 16px;
+        background-color: #f5f5f5;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      main {
+        margin: auto;
+        position: relative;
+        max-width: var(--max-width);
+      }
+      h2 {
+        margin: 0;
+        padding: 0.5rem 0;
+      }
+      .prog {
+        padding: 1.5rem;
+        padding-top: 4rem;
+      }
+      @media (any-pointer: coarse) {
+        a {
+          padding: 0.8em;
+        }
+      }
+    </style>
+  </body>
+</html>

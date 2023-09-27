@@ -1,0 +1,392 @@
+<script>
+  import {
+    addErrorLogs,
+    addInvalidLogs,
+    addValidLogs,
+    createEngine,
+    EngineProps,
+    engines,
+    selectedEngine,
+    setStatus,
+  } from "../stores/engine";
+  import { socket, socketRuntime, initSockets } from "../events/sockets";
+  import { CellStatus } from "./CampaignCell";
+
+  import {
+    authenticated,
+    fileMap,
+    licenseKey,
+    lowPowerSet,
+    proxySet,
+    selectedFile,
+    torSet,
+  } from "../stores/app";
+  import { selectedFileOptionMutate } from "../utils/file-set";
+
+  initSockets();
+
+  const loopEvent = () => {
+    socketRuntime.send("loop");
+    socketRuntime.removeEventListener("open", loopEvent);
+  };
+
+  socketRuntime.addEventListener("open", loopEvent, true);
+
+  // license control [determine screens] quickly
+  const program = document.getElementById("appProgram");
+  const elicense = document.getElementById("elicense");
+
+  if (program && localStorage.getItem("authed")) {
+    authenticated.set(true);
+    program.className = "row block";
+  } else if (elicense) {
+    authenticated.set(false);
+    elicense.className = "row block";
+  }
+
+  const cpuCanvas = document.getElementById("cpu-stats") as HTMLCanvasElement;
+  const memCanvas = document.getElementById(
+    "memory-stats"
+  ) as HTMLCanvasElement;
+
+  const ctx = cpuCanvas?.getContext("2d");
+  const ctx2 = memCanvas?.getContext("2d");
+
+  function createCanv(r) {
+    r.font = "2rem SF Mono";
+    r.lineWidth = 17;
+    r.fontWeight = 700;
+    r.fillStyle = "#2f2768";
+    r.strokeStyle = "#E8C01A";
+    r.textAlign = "center";
+  }
+
+  if (ctx) {
+    createCanv(ctx);
+  }
+  if (ctx2) {
+    createCanv(ctx2);
+  }
+
+  let cw = ctx.canvas.width;
+  let ch = ctx.canvas.height;
+
+  function setProgress(ele, diff) {
+    ele.clearRect(0, 0, cw, ch);
+    ele.fillText(diff.toFixed(0) + "%", cw * 0.52, ch * 0.5 + 12, cw + 12);
+    ele.beginPath();
+    ele.arc(100, 100, 75, 0, (Math.PI * diff) / 50);
+    ele.stroke();
+  }
+
+  socket.addEventListener("open", () => {
+    socket.send("config");
+    socket.send("feed");
+    socket.send("list-files");
+    socket.send("list-engines");
+    socket.send("list-campaign-stats");
+    socket.send("list-totals");
+  });
+
+  const netstats = document.getElementById("network-stats");
+  const netstatsUp = document.getElementById("network-stats-up");
+  const netstatsTotal = document.getElementById("network-stats-total");
+
+  /*
+   * List of web socket matchers * special for high performance
+   */
+  const estats = "{" + '"' + "stats"; // os stats
+  const bftc = "{" + '"' + "buffer" + '"'; // buffer
+  const ptp = "{" + '"' + "pengine" + '"' + ":" + '"'; // engine
+  const selectFile = "{" + '"' + "fpath" + '"' + ":" + '"'; // selected file
+  const ptpe = "{" + '"' + "epath" + '"' + ":" + '"'; // engine created
+  const dfpath = "{" + '"' + "dfpath" + '"'; // deleted file
+  const deptc = "{" + '"' + "depath" + '"'; // deleted campaign
+  const cfin = "{" + '"' + "finished" + '"'; // crawl finished
+  const vpaths = "{" + '"' + "path" + '"' + ":" + '"'; // valid paths
+  const ipaths = "{" + '"' + "invalid_path" + '"' + ":" + '"'; // invalid paths
+  const epaths = "{" + '"' + "error_path" + '"' + ":" + '"'; // errors paths
+  const vlicense = "{" + '"' + "license"; // valid license;
+  const cstarted = "{" + '"' + "started"; // started campaigns from pause
+  const cpaused = "{" + '"' + "paused"; // paused campaigns from pause
+  const ctact = "{" + '"' + "contacts"; // paused campaigns from pause
+
+  // defaults for program entry
+  let defaultOptionSet = false;
+  let firstCheck = false;
+
+  function determineFinished(item: EngineProps) {
+    return (
+      item.total &&
+      item.errorUrls.size + item.invalidUrls.size + item.urls.size ===
+        item.total
+    );
+  }
+
+  function eventSub(event) {
+    const raw = event.data;
+
+    // license handling
+    if (raw.startsWith(vlicense)) {
+      const data = JSON.parse(raw);
+      const { license, key } = data || {};
+
+      licenseKey.set(key);
+      // set local storage of license enabled and display view
+      if (license) {
+        if (program) {
+          program.className = "row";
+        }
+        if (elicense) {
+          elicense.className = "row hidden";
+        }
+        localStorage.setItem("authed", "true");
+        authenticated.set(true);
+      } else {
+        localStorage.removeItem("authed");
+
+        if (firstCheck) {
+          window.alert("License is invalid");
+        }
+
+        if (program) {
+          program.className = "row hidden";
+        }
+
+        if (elicense) {
+          elicense.className = "row";
+        }
+      }
+
+      if (!firstCheck) {
+        firstCheck = true;
+      }
+    }
+
+    if (raw.startsWith(selectFile)) {
+      const np = JSON.parse(raw);
+
+      return selectedFileOptionMutate({
+        path: np.fpath,
+      });
+    }
+
+    if (raw.startsWith(estats)) {
+      const { stats } = JSON.parse(raw);
+      const {
+        cpu_usage,
+        // load_avg_min,
+        network_received,
+        network_transmited,
+        network_total_transmitted,
+        memory_free,
+        // memory_used,
+        memory_total,
+      } = stats;
+
+      if (ctx) {
+        setProgress(ctx, cpu_usage);
+      }
+
+      if (ctx2) {
+        setProgress(ctx2, (memory_free / memory_total) * 100);
+      }
+
+      if (netstats) {
+        netstats.innerHTML = network_received;
+      }
+
+      if (netstatsUp) {
+        netstatsUp.innerHTML = network_transmited;
+      }
+
+      if (netstatsTotal) {
+        netstatsTotal.innerHTML = network_total_transmitted;
+      }
+
+      return;
+    }
+
+    if (raw.startsWith(cfin)) {
+      const data = JSON.parse(raw);
+      const { finished, time } = data || {};
+
+      setStatus(finished, CellStatus.FINISHED);
+      console.log(time);
+      return;
+    }
+
+    if (raw.startsWith(ptp)) {
+      const np = JSON.parse(raw);
+      const { pengine, ploc } = np || {};
+      const eitem = engines.get()[pengine];
+
+      if (eitem) {
+        eitem.total = ploc ?? eitem.total ?? 0;
+
+        engines.notify(pengine);
+
+        if (determineFinished(eitem)) {
+          setStatus(pengine, CellStatus.FINISHED);
+        }
+      } else {
+        createEngine(pengine, np);
+      }
+      return;
+    }
+
+    if (raw.startsWith(ctact)) {
+      const data = JSON.parse(raw);
+      const { contacts, domain, path } = data || {};
+      const item = engines.get()[path];
+
+      if (item) {
+        if (item.contacts.has(domain)) {
+          const contact = item.contacts.get(domain)?.contacts ?? [];
+
+          if (!contact.includes(contacts)) {
+            item.contacts.set(domain, { contacts: [...contact, contacts] });
+          }
+        } else {
+          item.contacts.set(domain, { contacts: [contacts] });
+        }
+      }
+
+      return;
+    }
+
+    if (raw.startsWith(epaths)) {
+      const np = JSON.parse(raw);
+      const { error_path, error_url } = np || {};
+      const item = engines.get()[error_path];
+
+      if (
+        item &&
+        error_url &&
+        item.errorUrls &&
+        !item.errorUrls.has(error_url)
+      ) {
+        item.errorUrls.add(error_url);
+
+        if (selectedEngine.get() === error_path) {
+          addErrorLogs(error_url);
+        }
+
+        if (determineFinished(item)) {
+          setStatus(error_path, CellStatus.FINISHED);
+        }
+
+        engines.notify(error_path);
+      }
+
+      return;
+    }
+
+    if (raw.startsWith(ipaths)) {
+      const np = JSON.parse(raw);
+      const { invalid_url: url, invalid_path: path } = np || {};
+
+      const item = engines.get()[path];
+
+      if (item && item.invalidUrls && !item.invalidUrls.has(url)) {
+        item.invalidUrls.add(url);
+
+        if (selectedEngine.get() === path) {
+          addInvalidLogs(url);
+        }
+        if (determineFinished(item)) {
+          setStatus(path, CellStatus.FINISHED);
+        }
+      }
+
+      return;
+    }
+
+    if (raw.startsWith(vpaths)) {
+      const np = JSON.parse(raw);
+      const { url, path } = np || {};
+      const item = engines.get()[path];
+
+      if (item && url && item.urls && !item.urls.has(url)) {
+        item.urls.add(url);
+        if (selectedEngine.get() === path) {
+          addValidLogs(url);
+        }
+        if (determineFinished(item)) {
+          setStatus(path, CellStatus.FINISHED);
+        }
+      }
+
+      return;
+    }
+
+    if (raw.startsWith(ptpe)) {
+      const np = JSON.parse(raw);
+      const path = np && (np.epath as string);
+
+      createEngine(path, np);
+
+      return;
+    }
+
+    if (raw.startsWith(cstarted)) {
+      const np = JSON.parse(raw);
+      const path = np && np.path;
+      const item = engines.get()[path];
+
+      if (item) {
+        setStatus(path, CellStatus.RUNNING);
+      }
+      return;
+    }
+
+    if (raw.startsWith(cpaused)) {
+      const np = JSON.parse(raw);
+      const path = np && np.path;
+      const item = engines.get()[path];
+
+      if (item) {
+        setStatus(path, CellStatus.PAUSED);
+      }
+      return;
+    }
+
+    if (raw.startsWith(dfpath)) {
+      const np = JSON.parse(raw);
+      const path = np && np.dfpath;
+
+      if (fileMap.get()[path]) {
+        fileMap.setKey(path, undefined);
+      }
+      return;
+    }
+
+    // settings
+    if (raw.startsWith(bftc)) {
+      const np = JSON.parse(raw);
+
+      if (!defaultOptionSet) {
+        defaultOptionSet = true;
+        proxySet.set(np.proxy);
+        lowPowerSet.set(np.buffer);
+        torSet.set(np.tor);
+        selectedFile.set(np.target);
+      }
+      return;
+    }
+
+    // delete engine
+    if (raw.startsWith(deptc)) {
+      const np = JSON.parse(raw);
+      const path = np && np.depath;
+
+      if (engines.get()[path]) {
+        engines.setKey(path, undefined);
+      }
+      return;
+    }
+  }
+
+  socket.addEventListener("message", eventSub);
+  socketRuntime.addEventListener("message", eventSub);
+</script>

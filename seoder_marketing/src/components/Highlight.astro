@@ -1,0 +1,21 @@
+---
+export interface Props {
+  className?: string;
+}
+
+const { className } = Astro.props;
+---
+
+<p class={`highlight${className ? ` ${className}` : ""}`}>
+  <slot />
+</p>
+
+<style>
+  .highlight {
+    color: #886d00;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0;
+  }
+</style>

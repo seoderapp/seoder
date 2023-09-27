@@ -1,0 +1,135 @@
+---
+import Analytics from "./Svgs/Analytics.astro";
+import ArrowDown from "./Svgs/ArrowDown.astro";
+import ArrowUp from "./Svgs/ArrowUp.astro";
+---
+
+<div class="flex-row spaceless stats">
+  <div class="text-center ph cpu-box relative">
+    <div class="gutter stats-head absolute">CPU</div>
+    <canvas id="cpu-stats" width="200" height="200"></canvas>
+  </div>
+  <div class="text-center ph cpu-box relative">
+    <div class="gutter stats-head absolute">Memory</div>
+    <canvas id="memory-stats" width="200" height="200"></canvas>
+  </div>
+  <div class="stats-box ph">
+    <div class="gutter stats-head">Network</div>
+    <div class="stats-bar gutter net-row space">
+      <div class="net-row space-s net-cell">
+        <ArrowDown />
+        <div id="network-stats"></div>
+      </div>
+      <div class="net-row space-s net-cell">
+        <ArrowUp />
+        <div id="network-stats-up"></div>
+      </div>
+    </div>
+    <div class="stats-bar gutter net-row">
+      <div>Total</div>
+      <div class="net-cell">
+        <div id="network-stats-total"></div>
+      </div>
+    </div>
+  </div>
+  <div class="stats-bar gutter net-row" style="place-content: end;">
+    <button id="analytics-toggle" class="btn btn-primary row space-s center">
+      <Analytics />
+    </button>
+  </div>
+</div>
+
+<style>
+  .stats {
+    gap: 1rem;
+    border: 1px solid #ebecf2;
+    align-items: center;
+    display: flex;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .stats-bar {
+    font-size: 0.7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    color: #2f2768;
+  }
+  .net-row {
+    display: flex;
+    flex-direction: row;
+    place-items: center;
+    overflow: hidden;
+    gap: 0.35rem;
+  }
+  .net-cell div {
+    width: 3.5rem;
+    text-overflow: ellipsis;
+    text-align: left;
+    overflow: hidden;
+  }
+  #cpu-stats,
+  #memory-stats {
+    width: 80px;
+    height: 80px;
+    background: rgba(30, 30, 30, 0.1);
+    border-radius: 50%;
+  }
+  .stats-head {
+    font-weight: bold;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-family: "SF Mono";
+  }
+  .absolute {
+    position: absolute;
+    top: 1.345rem;
+    margin: auto;
+    text-align: center;
+    display: inline;
+  }
+  .space {
+    gap: 1rem;
+  }
+  .space-s {
+    gap: 0.35rem;
+  }
+  .cpu-box {
+    position: relative;
+    place-content: center;
+    justify-content: center;
+    display: flex;
+    padding: 0.5rem;
+    color: #2f2768;
+  }
+  #analytics-toggle {
+    padding: 1rem;
+    border: 2px solid #2f2768;
+    background-color: #fff;
+    color: #2f2768;
+    font-size: 1rem;
+    border-radius: 3rem;
+  }
+  #analytics-toggle:hover {
+    background-color: #ebecf2;
+  }
+  @media only screen and (max-width: 800px) {
+    .space,
+    .stats {
+      gap: 0.3rem;
+    }
+  }
+</style>
+
+<script>
+  import { modalStore, ModalType } from "../stores/app";
+
+  const ele = document.getElementById("analytics-toggle");
+
+  const toggleEvent = (e) => {
+    e.preventDefault();
+    modalStore.set(ModalType.ANALYTICS);
+  };
+  ele.addEventListener("click", toggleEvent);
+</script>

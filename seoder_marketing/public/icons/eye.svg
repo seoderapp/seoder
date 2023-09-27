@@ -1,0 +1,14 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+<title>Eye Icon</title>
+<circle cx="30" cy="30" r="30" fill="#2F2768"/>
+<g clip-path="url(#clip0_166_1276)">
+<path d="M19.373 31.183C19.1305 30.8362 19.0004 30.4232 19.0004 30C19.0004 29.5768 19.1305 29.1638 19.373 28.817C20.946 26.59 24.819 22 30 22C35.181 22 39.054 26.59 40.627 28.817C40.8696 29.1638 40.9997 29.5768 40.9997 30C40.9997 30.4232 40.8696 30.8362 40.627 31.183C39.054 33.41 35.181 38 30 38C24.819 38 20.946 33.41 19.373 31.183Z" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="square"/>
+<path d="M30 34C32.2091 34 34 32.2091 34 30C34 27.7909 32.2091 26 30 26C27.7909 26 26 27.7909 26 30C26 32.2091 27.7909 34 30 34Z" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="square"/>
+<path d="M20 40L40 20" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="square"/>
+</g>
+<defs>
+<clipPath id="clip0_166_1276">
+<rect width="24" height="24" fill="white" transform="translate(18 18)"/>
+</clipPath>
+</defs>
+</svg>

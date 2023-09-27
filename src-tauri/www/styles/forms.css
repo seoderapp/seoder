@@ -1,0 +1,149 @@
+.modal {
+  min-width: 20rem;
+  text-align: left;
+}
+
+.Overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(30, 30, 30, 0.8);
+}
+
+.truncate {
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.borderless {
+  border: 0;
+}
+
+.form-container {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+label {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #2f2768;
+  text-align: left;
+  display: block;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.form-control {
+  width: 90%;
+}
+
+.seperator {
+  border-bottom: 1px solid #000;
+  width: 100%;
+  opacity: 0.12;
+}
+
+.seperator-sm {
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
+.optional {
+  font-size: 0.8rem;
+  color: #b3b3b3;
+  line-height: 1rem;
+  padding-bottom: 0.4rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.form-container p {
+  font-size: 0.75rem;
+  color: #2f2768;
+  margin: 0;
+  padding: 0.35rem 0;
+}
+
+.form-container label:not(.switch) {
+  min-width: 7rem;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 45px;
+  height: 2px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  background-color: #ccc;
+  border-radius: 34px;
+}
+
+.slider:after {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 0px;
+  bottom: 0px;
+  background-color: #ccc;
+  transition: transform 0.3s;
+  border-radius: 50%;
+
+  @media (--motionOK) {
+    & {
+      transition: transform var(--thumb-transition-duration) ease,
+        box-shadow 0.25s ease;
+    }
+  }
+}
+
+input:checked + .slider {
+  background-color: rgba(47, 39, 104, 0.6);
+}
+
+input:checked + .slider:after {
+  background-color: #2f2768;
+}
+
+input + .slider {
+  background-color: #fff;
+  border: 1px solid #ccc;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2f2768;
+}
+
+input:checked + .slider:after {
+  -webkit-transform: translateX(24px);
+  -ms-transform: translateX(24px);
+  transform: translateX(24px);
+}
+
+.pless {
+  padding: 0.5rem 0;
+}
+
+.btn-defaults {
+  color: #2F2768;
+}

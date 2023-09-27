@@ -1,0 +1,112 @@
+---
+import Card from "./Card.astro";
+import Apple from "./Logos/Apple.astro";
+import Linux from "./Logos/Linux.astro";
+import Windows from "./Logos/Windows.astro";
+// @ts-ignore
+import pkg from "../../package.json";
+import Highlight from "./Highlight.astro";
+
+export type Props = {
+  sub?: boolean;
+};
+
+const { sub } = Astro.props;
+
+const platText = "Available for all major platforms";
+const version = pkg.version ?? "0.0.2";
+
+const canonicalURL = new URL(Astro.site);
+---
+
+<section>
+  <Highlight className="center">Downloads</Highlight>
+  {
+    sub ? (
+      <h3 class="text-primary center heading">{platText}</h3>
+    ) : (
+      <h4 class="text-primary center heading">{platText}</h4>
+    )
+  }
+
+  <ul role="list" class="link-card-grid">
+    <Card
+      href={`${canonicalURL}releases/Seoder_${version}_aarch64.dmg`}
+      title="Desktop Mac Silicon"
+      body="Pre-release arch64 Ventura (13.0.0)"
+    >
+      <Apple />
+    </Card>
+    <Card
+      href={`${canonicalURL}releases/Seoder_${version}_universal.dmg`}
+      title="Desktop Mac Universal"
+      body="Pre-release mac universal"
+    >
+      <Apple />
+    </Card>
+    <Card
+      href={`${canonicalURL}releases/seoder_${version}_amd64.AppImage.tar.gz`}
+      title="Desktop Linux"
+      body="Pre-release linux"
+    >
+      <Linux />
+    </Card>
+    <Card
+      href={`${canonicalURL}releases/Seoder_${version}_x64_en-US.msi`}
+      title="Desktop Windows"
+      body="Pre-release windows"
+    >
+      <Windows />
+    </Card>
+  </ul>
+</section>
+
+<style>
+  section {
+    padding-bottom: 4rem;
+  }
+
+  .heading {
+    font-size: 2.25rem;
+    line-height: 2.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0;
+    margin: 0;
+  }
+
+  .sub-heading {
+    font-size: 1.7rem;
+    max-width: 14rem;
+  }
+  .trial {
+    font-size: 0.7rem;
+    color: #2f2768;
+    padding: 0.5rem 0;
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  .text-primary {
+    color: #2f2768;
+  }
+
+  .link-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(22ch, 1fr));
+    gap: 1rem;
+    padding: 2.5rem 0;
+    margin: 0;
+  }
+
+  .link-card-grid-feat {
+    flex: 1;
+    grid-template-columns: repeat(auto-fit, minmax(31ch, 1fr));
+  }
+
+  p {
+    padding: 0;
+    margin: 0;
+  }
+</style>

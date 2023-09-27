@@ -1,0 +1,35 @@
+---
+import Footer from "../../components/Footer.astro";
+import Navbar from "../../components/Navbar.astro";
+import Layout from "../../layouts/Layout.astro";
+import { getDynamicPage } from "../../utils/get-dynamic-page";
+
+export function getStaticPaths() {
+    return [
+        { params: { id: "prevent-stale-leads" } },
+        { params: { id: "how-can-ux-impact-seo-part-1" } },
+        { params: { id: "how-can-ux-impact-seo-part-2" } },
+        { params: { id: "4-ways-to-improve-seo-on-your-website" } },
+    ];
+}
+
+const { id } = Astro.params;
+
+const props = await getDynamicPage("/" + id ?? "");
+
+// remove template website until config found
+const title = props.title
+    ? props.title.replace(
+          "- Writeology X - Webflow Memberships Website template",
+          ""
+      )
+    : props.title;
+---
+
+<Layout title={title} {...props}>
+    <main>
+        <Navbar />
+        <Fragment set:html={props.html} />
+    </main>
+    <Footer />
+</Layout>

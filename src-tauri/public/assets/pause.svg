@@ -1,0 +1,12 @@
+<svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+<title>Pause Icon</title>
+<g clip-path="url(#clip0_197_1318)">
+<path d="M11.5 0.5H8.5C8.22386 0.5 8 0.723858 8 1V12C8 12.2761 8.22386 12.5 8.5 12.5H11.5C11.7761 12.5 12 12.2761 12 12V1C12 0.723858 11.7761 0.5 11.5 0.5Z" fill="#2F2768"/>
+<path d="M3.5 0.5H0.5C0.223858 0.5 0 0.723858 0 1V12C0 12.2761 0.223858 12.5 0.5 12.5H3.5C3.77614 12.5 4 12.2761 4 12V1C4 0.723858 3.77614 0.5 3.5 0.5Z" fill="#2F2768"/>
+</g>
+<defs>
+<clipPath id="clip0_197_1318">
+<rect width="12" height="12" fill="white" transform="translate(0 0.5)"/>
+</clipPath>
+</defs>
+</svg>

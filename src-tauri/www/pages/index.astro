@@ -1,0 +1,56 @@
+---
+import Layout from "../layouts/Layout.astro";
+import MainJS from "../components/MainJS.astro";
+import License from "../components/License.astro";
+import Stats from "../components/Stats.astro";
+import Campaign from "../components/Campaign.astro";
+import Menu from "../components/Menu.astro";
+import Intro from "../components/Intro.astro";
+import Program from "../components/Program.astro";
+import { Tabs } from "../components/Tabs";
+import { AppModal } from "../components/Modal";
+
+declare global {
+  var __TAURI__: any;
+}
+
+const mac = import.meta.env.MAC_OS || "";
+---
+
+<Layout title="Seoder - The marketing outbound lead generation tool">
+  <main class="container full">
+    <Intro />
+    <Program>
+      <Fragment slot="left">
+        <Menu />
+        <Campaign />
+      </Fragment>
+      <Fragment slot="right">
+        <Tabs client:visible macOs={mac} />
+        <Stats />
+      </Fragment>
+    </Program>
+    <AppModal client:load />
+    <License />
+  </main>
+  <MainJS />
+</Layout>
+
+<style>
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color: #f6f6f6;
+      background-color: #2f2f2f;
+    }
+
+    a:hover {
+      color: #24c8db;
+    }
+
+    input,
+    button {
+      color: #ffffff;
+      background-color: #0f0f0f98;
+    }
+  }
+</style>

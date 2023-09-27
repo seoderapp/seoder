@@ -1,0 +1,191 @@
+---
+import { App } from "astro/app";
+import Download from "../components/Download.astro";
+import Footer from "../components/Footer.astro";
+import MoneyBack from "../components/Money/MoneyBack.astro";
+import Navbar from "../components/Navbar.astro";
+import Section from "../components/Section.astro";
+import SubTitle from "../components/Typo/SubTitle.astro";
+import Title from "../components/Typo/Title.astro";
+import Layout from "../layouts/Layout.astro";
+import AppSVG from "../components/Svgs/App.astro";
+
+const STRIPE_PUBLISHABLE_KEY = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
+---
+
+<Layout
+  title="Purchase License"
+  description={"Purchase a license to use Seoder the all new keyword finding tool. Affordable price to get insightful qualified leads."}
+>
+  <main>
+    <Navbar target={"payments"} />
+    <div class="prog">
+      <Section center>
+        <Title>Fare pricing for all</Title>
+        <strong class="xl">$4/month</strong>
+        <p>
+          Our pricing plan is really simple and priced per machine. Get started with a free 7 day trial.
+        </p>
+        <SubTitle>Organic keyword finder ready</SubTitle>
+        <form id="register">
+          <div>
+            <label for="first-name">First name</label>
+            <input
+              type="text"
+              name="first-name"
+              id="first-name"
+              placeholder="Elliot"
+              required
+            />
+          </div>
+          <div>
+            <label for="last-name">Last name</label>
+            <input
+              type="text"
+              name="last-name"
+              id="last-name"
+              placeholder="Alderson"
+              required
+            />
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="elliot@example.com"
+              required
+            />
+          </div>
+          <div>
+            <label for="password">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="license password"
+              required
+            />
+          </div>
+          <div class="button-container">
+            <button type="submit">Buy Now</button>
+          </div>
+        </form>
+        <MoneyBack />
+      </Section>
+      <Section>
+        <Download sub />
+      </Section>
+      <Section>
+        <AppSVG />
+      </Section>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<script src="https://checkout.stripe.com/checkout.js" is:inline></script>
+
+<script defer is:inline define:vars={{ STRIPE_PUBLISHABLE_KEY }}>
+  const register = document.getElementById("register");
+
+  const handler = StripeCheckout.configure({
+    key: STRIPE_PUBLISHABLE_KEY,
+    token: async ({ id: stripeToken }) => {
+      const attributes = {
+        firstName: document.getElementById("first-name").value,
+        lastName: document.getElementById("last-name").value,
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+        metadata: { stripeToken },
+      };
+
+      const response = await fetch(`/api/keygen-account`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/vnd.api+json",
+          Accept: "application/vnd.api+json",
+        },
+        body: JSON.stringify({
+          data: attributes,
+        }),
+      });
+
+      const { data, errors } = await response.json();
+
+      if (errors) {
+        const message = errors.map((e) => e.detail).toString();
+
+        register.parentNode.innerHTML = `An error occurred during user creation: ${message} (double check your ENV vars)`;
+
+        throw new Error(message);
+      }
+
+      register.parentNode.innerHTML = `Thanks for your purchase, ${data.attributes.firstName}! 🚀 Download the app below and enter the license key that was emailed to you.`;
+    },
+  });
+
+  register.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    handler.open({
+      panelLabel: "Buy License",
+      name: "Seoder",
+      image: "/icon.png",
+      amount: 400,
+    });
+  });
+</script>
+
+<style>
+  .xl {
+    font-size: 3.4rem;
+    font-weight: 900;
+    padding: 1rem 0;
+  }
+  form {
+    padding: 0.6rem 0;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  form label {
+    display: block;
+    color: #2f2768;
+    font-weight: 700;
+    padding: 0.5rem 0px;
+  }
+  form input {
+    border-radius: 0.3rem;
+    padding: 0.5rem 0.8rem;
+    border: 2px solid #2f2768;
+    min-width: 15rem;
+  }
+  .button-container {
+    padding-top: 0.8rem;
+    padding-bottom: 5rem;
+  }
+  .button-container button {
+    text-transform: uppercase;
+    color: #2f2768;
+    border: none;
+    padding: 0.85rem 0.8rem;
+    border-radius: 0.3rem;
+    min-width: 16.8rem;
+    margin: 0;
+    background-color: #e8c01a;
+    font-weight: 700;
+  }
+  .button-container button:hover {
+    background-color: #e9c73e;
+  }
+  p {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+  .gray {
+    color: rgb(23, 23, 23);
+  }
+</style>

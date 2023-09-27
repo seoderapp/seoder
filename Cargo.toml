@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "seoder",
+    "seoder_lib",
+    "seoder_web",
+    "src-tauri",
+    # internal
+    "benches"
+]
+default-members = [ "seoder", "seoder_web", "seoder_lib", "benches" ]
+

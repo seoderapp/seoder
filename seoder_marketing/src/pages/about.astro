@@ -1,0 +1,82 @@
+---
+import Footer from "../components/Footer.astro";
+import Navbar from "../components/Navbar.astro";
+import Section from "../components/Section.astro";
+import SubTitle from "../components/Typo/SubTitle.astro";
+import Title from "../components/Typo/Title.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="About Us"
+  description={"About the project and some more on who we are and what we are trying to do at each stage of development."}
+>
+  <main>
+    <Navbar target={"About"} />
+    <div class="prog">
+      <Section center>
+        <Title center>About the project</Title>
+        <p>
+          Seoder is a native application that can run on any system. We provide
+          a desktop client to use the system via interface.
+        </p>
+
+        <SubTitle>Get to learn a little more about Seoder</SubTitle>
+
+        <p>
+          The primary focus around the project is to make marketing outbound
+          lead generation painless and fast.
+        </p>
+
+        <h3>Team</h3>
+        <p>
+          We are a small team of experienced engineers, designers, and product
+          managers that have shipped successful applications in the past.
+        </p>
+
+        <h4>Released</h4>
+
+        <p>
+          We released the tool in 2022 after several months of development for
+          the system.
+        </p>
+
+        <h5>Articles and more</h5>
+
+        <p>
+          If you want to learn more about our blogs or content related to SEO,
+          keyword matching, and other topics below.
+        </p>
+        <ul>
+          <li><a href={"/seos-can-be-dangerous"}>Seos can be dangerous</a></li>
+        </ul>
+      </Section>
+    </div>
+  </main>
+  <div class={"space"}></div>
+  <Footer />
+</Layout>
+
+<style>
+  .space {
+    height: 11rem;
+  }
+  .button-container {
+    padding-top: 0.8rem;
+    padding-bottom: 5rem;
+  }
+  .button-container button {
+    text-transform: uppercase;
+    color: #2f2768;
+    border: none;
+    padding: 0.85rem 0.8rem;
+    border-radius: 0.3rem;
+    min-width: 16.8rem;
+    margin: 0;
+    background-color: #e8c01a;
+    font-weight: 700;
+  }
+  .button-container button:hover {
+    background-color: #e9c73e;
+  }
+</style>

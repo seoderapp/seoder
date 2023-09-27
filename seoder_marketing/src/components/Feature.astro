@@ -1,0 +1,59 @@
+---
+import { Image } from "@astrojs/image/components";
+
+export interface Props {
+  title: string;
+  body: string;
+  img: string;
+  soon?: boolean;
+  alt?: string;
+}
+
+const { img, title, body, soon, alt = "" } = Astro.props;
+---
+
+<li>
+  <div class="row">
+    <div>
+      <Image src={img} alt={alt} width={60} height={60} />
+    </div>
+    <div>
+      <h3>{title}</h3>
+      <p>{body}</p>
+      {soon ? <span class="soon">Coming Soon</span> : null}
+    </div>
+  </div>
+</li>
+
+<style>
+  h3 {
+    margin: 0;
+    padding: 0;
+    font-size: 1.25rem;
+    color: #2f2768;
+  }
+  li {
+    list-style-type: none;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    gap: 1.6rem;
+  }
+  .soon {
+    background: rgba(47, 39, 104, 0.2);
+    border-radius: 30px;
+    padding: 0.3rem 0.7rem;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  p {
+    margin: 0;
+    padding: 0.6rem 0;
+    font-size: 1rem;
+    color: #2f2768;
+    line-height: 140%;
+  }
+</style>

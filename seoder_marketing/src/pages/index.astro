@@ -1,0 +1,19 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Footer from "../components/Footer.astro";
+import Navbar from "../components/Navbar.astro";
+import Landing from "../components/Landing.astro";
+import { appTitle } from "../statics/title";
+---
+
+<Layout
+  companyTitle
+  title={appTitle}
+  description={"Find keywords on websites fast with marketing insights. Declarative marketing campaigns delivering real leads."}
+>
+  <main>
+    <Navbar />
+    <Landing />
+  </main>
+  <Footer />
+</Layout>

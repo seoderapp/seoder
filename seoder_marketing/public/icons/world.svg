@@ -1,0 +1,15 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+<title>World icon</title>
+<circle cx="30" cy="30" r="30" fill="#2F2768"/>
+<g clip-path="url(#clip0_166_1332)">
+<path d="M30 19V41" stroke="white" stroke-width="2" stroke-miterlimit="10"/>
+<path d="M19 30H41" stroke="white" stroke-width="2" stroke-miterlimit="10"/>
+<path d="M30 41C33.0376 41 35.5 36.0751 35.5 30C35.5 23.9249 33.0376 19 30 19C26.9624 19 24.5 23.9249 24.5 30C24.5 36.0751 26.9624 41 30 41Z" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="square"/>
+<path d="M30 41C36.0751 41 41 36.0751 41 30C41 23.9249 36.0751 19 30 19C23.9249 19 19 23.9249 19 30C19 36.0751 23.9249 41 30 41Z" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="square"/>
+</g>
+<defs>
+<clipPath id="clip0_166_1332">
+<rect width="24" height="24" fill="white" transform="translate(18 18)"/>
+</clipPath>
+</defs>
+</svg>

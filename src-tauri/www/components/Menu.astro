@@ -1,0 +1,39 @@
+---
+import NewCampaignButton from "./Buttons/NewCampaignButton.astro";
+import RunAllButton from "./Buttons/RunAllButton.astro";
+import { RunSelectedButton } from "./Buttons/RunSelectedButton";
+import SettingsButton from "./Buttons/SettingsButton.astro";
+import LogoLight from "./Logos/LogoLight.astro";
+
+const mac = import.meta.env.MAC_OS || "";
+---
+
+<div class="space">
+  <div class={`flex-row spaceless full-w center${mac ? " top-space" : ""}`}>
+    <div class="panel-btn-ctn flex-1 text-left">
+      <LogoLight />
+    </div>
+    <div class="panel-btn-ctn">
+      <SettingsButton />
+    </div>
+  </div>
+  <div class="flex-row spaceless full-w">
+    <div class="panel-btn-ctn full-w gutter">
+      <NewCampaignButton title={"New Campaign"} icon />
+    </div>
+  </div>
+
+  <div class="flex-row spaceless">
+    <RunSelectedButton client:visible />
+    <RunAllButton />
+  </div>
+</div>
+
+<style>
+  .space {
+    padding-bottom: 0.8rem;
+  }
+  .top-space {
+    padding-top: 1.3rem;
+  }
+</style>

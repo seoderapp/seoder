@@ -1,0 +1,48 @@
+---
+import AnchorButton from "./AnchorButton.astro";
+import LogoLight from "./LogoLight.astro";
+
+export interface Props {
+  target?: string;
+  hiddenBuy?: boolean;
+}
+
+const { target, hiddenBuy } = Astro.props;
+const canonicalURL = new URL(Astro.site);
+---
+
+<nav class="nav">
+  <a href={"/"}>
+    <LogoLight />
+  </a>
+
+  <div class="flex">
+    <div class={"space"}>
+      <AnchorButton href={`${canonicalURL}blog`} title={"Blog"} normal={true} />
+    </div>
+    {
+      target !== "payments" && !hiddenBuy ? (
+        <div class={"space"}>
+          <AnchorButton href={`${canonicalURL}payments`} title={"Free Start"} />
+        </div>
+      ) : null
+    }
+  </div>
+</nav>
+
+<style>
+  .nav {
+    padding: 1.5rem 0.7rem;
+    display: flex;
+    flex-direction: row;
+    place-content: space-between;
+    align-items: center;
+  }
+  .space {
+    margin-left: 0.35rem;
+  }
+  .flex {
+    display: flex;
+    place-items: center;
+  }
+</style>

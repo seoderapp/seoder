@@ -1,0 +1,73 @@
+---
+import Footer from "../components/Footer.astro";
+import Navbar from "../components/Navbar.astro";
+import Section from "../components/Section.astro";
+import SubTitle from "../components/Typo/SubTitle.astro";
+import Title from "../components/Typo/Title.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="Terms of Service"
+  description={"Terms and conditions for using the Seoder marketing system."}
+>
+  <main>
+    <Navbar target={"tos"} />
+    <div class="prog">
+      <Section center>
+        <Title center>Terms of Service</Title>
+        <SubTitle>Terms and Conditions to the product</SubTitle>
+        <p>
+          Please read these Terms of Service ("Terms", "Terms of
+          Service")carefully before using the Seoder website (the "Service")
+          operated by Seoder ("us", "we", or "our").
+        </p>
+        <p>
+          Your access to and use of the Service is conditioned on your
+          acceptance of and compliance with these Terms. These Terms apply to
+          all visitors, users and others who access or use the Service. By
+          accessing or using the Service you agree to be bound by these Terms.
+          If you disagree with any part of the terms then you may not access the
+          Service.
+        </p>
+        <p>
+          If you start to breach the refund policy as in multiple retrials we
+          will terminate access to using the system permanant until further
+          notice.
+        </p>
+        <h3>Rules</h3>
+        <p>It is important to understand the rules to keep your account in good standing with the service.</p>
+        <h4>Contact Us</h4>
+        If you have any questions about these Terms, please contact us at
+        <a href={"mailto:support@seoder.com"}>support@seoder.com</a>
+        .
+      </Section>
+    </div>
+  </main>
+  <div class={"space"}></div>
+  <Footer />
+</Layout>
+
+<style>
+  .space {
+    height: 11rem;
+  }
+  .button-container {
+    padding-top: 0.8rem;
+    padding-bottom: 5rem;
+  }
+  .button-container button {
+    text-transform: uppercase;
+    color: #2f2768;
+    border: none;
+    padding: 0.85rem 0.8rem;
+    border-radius: 0.3rem;
+    min-width: 16.8rem;
+    margin: 0;
+    background-color: #e8c01a;
+    font-weight: 700;
+  }
+  .button-container button:hover {
+    background-color: #e9c73e;
+  }
+</style>

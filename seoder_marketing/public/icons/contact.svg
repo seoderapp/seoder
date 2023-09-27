@@ -1,0 +1,19 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+<title>Contact icon</title>
+<circle cx="30" cy="30" r="30" fill="#2F2768"/>
+<g clip-path="url(#clip0_166_1314)">
+<path d="M19 29L23 26.1V31.182L19 29Z" fill="white"/>
+<path d="M41 29L37 26.1V31.182L41 29Z" fill="white"/>
+<path d="M23 26.1L19 29V41H41V29L37 26.1" stroke="white" stroke-width="2" stroke-miterlimit="10"/>
+<path d="M23 31.2V19H37V31.2" stroke="white" stroke-width="2" stroke-miterlimit="10"/>
+<path d="M19 29L41 41" stroke="white" stroke-width="2" stroke-miterlimit="10"/>
+<path d="M41 29L30 35" stroke="white" stroke-width="2" stroke-miterlimit="10"/>
+<path d="M27 24H33" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="square"/>
+<path d="M27 28H33" stroke="white" stroke-width="2" stroke-miterlimit="10" stroke-linecap="square"/>
+</g>
+<defs>
+<clipPath id="clip0_166_1314">
+<rect width="24" height="24" fill="white" transform="translate(18 18)"/>
+</clipPath>
+</defs>
+</svg>

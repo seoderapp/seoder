@@ -1,0 +1,43 @@
+---
+export interface Props {
+  title?: string;
+  href?: string;
+  normal?: boolean;
+}
+
+const { title, href, normal } = Astro.props;
+---
+
+<a href={href ?? "/"} class={normal ? "btn-normal" : "buy-btn"}
+  >{title ?? "BUY NOW"}</a
+>
+
+<style>
+  .buy-btn {
+    background-color: #e8c01a;
+    border-radius: 4px;
+    padding: 0.87rem 1rem;
+    color: #2f2768;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.3rem;
+    display: inline-block;
+    text-align: center;
+  }
+  .btn-normal {
+    border-radius: 4px;
+    padding: 0.87rem 1rem;
+    color: #2f2768;
+    text-decoration: none;
+    font-weight: 400;
+    font-size: 1.3rem;
+    display: inline-block;
+    text-align: center;
+  }
+  @media (any-pointer: coarse) {
+    .btn-normal,
+    .buy-btn {
+      font-size: 1rem;
+    }
+  }
+</style>

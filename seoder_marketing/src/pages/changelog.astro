@@ -1,0 +1,99 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Footer from "../components/Footer.astro";
+import Navbar from "../components/Navbar.astro";
+import Section from "../components/Section.astro";
+import Title from "../components/Typo/Title.astro";
+
+interface ListLog {
+  date: string;
+  updates: string[];
+}
+
+const list: ListLog[] = [
+  {
+    date: "February 2023",
+    updates: ["Performance improvements and bug fixes", "Improved data exporting"]
+  },
+  {
+    date: "November 2022",
+    updates: [
+      "Email template creation for campaign followups!",
+      "Create file targets per campaign.",
+      "Hunter.IO outbound lead generation integration",
+    ],
+  },
+  {
+    date: "October 2022",
+    updates: ["Campaign analytics tracking.", "Add stats control plane."],
+  },
+  {
+    date: "September 2022",
+    updates: [
+      "Enable settings for proxies and tor.",
+      "Improve speed for results",
+    ],
+  },
+  {
+    date: "August 2022",
+    updates: ["Outbound lead generation targeting", "Campaign data exporting"],
+  },
+];
+---
+
+<Layout
+  title="Changelog and recent updates"
+  description={"Latest changes going into the system. Learn more about each release in one location."}
+>
+  <main>
+    <Navbar target={"changelog"} />
+    <div class="prog">
+      <Section center>
+        <Title>Changelog</Title>
+        <h2>Get the latest changes here</h2>
+        {
+          list.map((item) => {
+            return (
+              <div class="center">
+                <h3>{item.date}</h3>
+                <ul>
+                  {item.updates.map((li, i) => {
+                    return <li class={"text-lg text-gray-800"}>{li}</li>;
+                  })}
+                </ul>
+              </div>
+            );
+          })
+        }
+      </Section>
+    </div>
+  </main>
+  <div class={"space"}></div>
+  <Footer />
+</Layout>
+
+<style>
+  .space {
+    height: 11rem;
+  }
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    padding-bottom: 0.2rem;
+    padding-top: 0.2rem;
+    margin: 0;
+  }
+  li {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  ul {
+    width: 100%;
+  }
+  .center {
+    place-content: center;
+    display: flex;
+    flex-direction: column;
+    width: 50vw;
+  }
+</style>

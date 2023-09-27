@@ -1,0 +1,90 @@
+{
+  "build": {
+    "beforeBuildCommand": "yarn && yarn build",
+    "beforeDevCommand": "yarn dev",
+    "devPath": "http://localhost:3001",
+    "distDir": "../out",
+    "withGlobalTauri": true
+  },
+  "package": {
+    "productName": "Seoder",
+    "version": "0.0.2"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "execute": false,
+        "open": true,
+        "scope": [],
+        "sidecar": false
+      },
+      "fs": {
+        "writeFile": true,
+        "readFile": true
+      },
+      "dialog": {
+        "all": true
+      },
+      "window": {
+        "all": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "category": "Productivity",
+      "copyright": "seoder",
+      "deb": {
+        "depends": []
+      },
+      "externalBin": [],
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "identifier": "com.seoder.dev",
+      "longDescription": "",
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
+      },
+      "resources": [],
+      "shortDescription": "",
+      "targets": "all",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "updater": {
+      "active": true,
+      "dialog": true,
+      "endpoints": [
+        "https:/seoder.com/api/update/{{target}}/{{current_version}}"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU0RjMzNUNEMkRBREQ4NzQKUldSMDJLMHR6VFh6NU40aXVqZmxXbDJ0VkYzRExJekcxVHVsQWxNRXJvU0d6M3A4OElaYWJCeXYK"
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 635,
+        "resizable": true,
+        "title": "Seoder",
+        "width": 945,
+        "minWidth": 800,
+        "minHeight": 635
+      }
+    ]
+  }
+}
